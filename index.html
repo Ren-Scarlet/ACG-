@@ -9,57 +9,217 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      min-height: 100vh;
       background: #171923;
       color: #f5f5f5;
       font-family: Arial, "Microsoft YaHei", sans-serif;
     }
     header {
-      padding: 22px;
+      padding: 20px 24px;
       background: #222536;
       border-bottom: 1px solid #383d50;
     }
     header h1 { margin: 0; font-size: 22px; }
-    main {
-      max-width: 850px;
-      margin: 70px auto;
-      padding: 24px;
-      text-align: center;
+    main { max-width: 1250px; margin: 0 auto; padding: 24px; }
+    .intro { margin: 8px 0 22px; color: #a6abc0; }
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) 150px 150px;
+      gap: 10px;
+      margin-bottom: 18px;
     }
-    .panel {
-      padding: 35px 20px;
+    input, select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #41475d;
+      border-radius: 9px;
+      background: #222536;
+      color: #f5f5f5;
+      font-size: 14px;
+    }
+    .summary { margin: 0 0 14px; color: #a6abc0; font-size: 14px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      overflow: hidden;
       background: #222536;
       border: 1px solid #383d50;
-      border-radius: 14px;
+      border-radius: 12px;
     }
-    .panel h2 { margin-top: 0; }
-    .muted { color: #a6abc0; line-height: 1.8; }
-    .status {
-      display: inline-block;
-      padding: 7px 13px;
-      border-radius: 20px;
-      background: #174b39;
-      color: #7de0ae;
+    .card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 5 / 7;
+      object-fit: contain;
+      background: #11131b;
+    }
+    .card-info { padding: 12px; }
+    .card-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .card-title h3 { margin: 0; font-size: 16px; line-height: 1.45; }
+    .star {
+      flex: 0 0 auto;
+      color: #f3cc72;
       font-size: 13px;
+      white-space: nowrap;
+    }
+    .type { color: #a6abc0; font-size: 12px; margin-bottom: 9px; }
+    .effect { color: #e0e2eb; font-size: 13px; line-height: 1.65; white-space: pre-wrap; }
+    .empty, .loading, .error {
+      padding: 35px 16px;
+      text-align: center;
+      color: #a6abc0;
+      background: #222536;
+      border: 1px solid #383d50;
+      border-radius: 12px;
+    }
+    .error { color: #ff9b9b; }
+    @media (max-width: 650px) {
+      main { padding: 16px; }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .toolbar input { grid-column: 1 / -1; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .card-info { padding: 9px; }
+      .card-title h3 { font-size: 14px; }
+      .effect { font-size: 12px; }
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>ACG 卡牌构筑器</h1>
-  </header>
-
+  <header><h1>ACG 卡牌构筑器</h1></header>
   <main>
-    <div class="panel">
-      <span class="status">网页已建立</span>
-      <h2>欢迎来到卡牌构筑器</h2>
-      <p class="muted">
-        这里将成为你的 ACG 桌游卡牌数据库与构筑平台。
-      </p>
-      <p class="muted">
-        卡牌资料库、卡包浏览、玩家收藏、卡组构筑与 TTS 导入功能正在搭建中。
-      </p>
-    </div>
+    <h2 id="pack-name">概念礼装图鉴</h2>
+    <p class="intro">浏览卡包中的概念礼装，查看卡牌图片与效果。</p>
+
+    <section class="toolbar" aria-label="卡牌筛选">
+      <input id="search" type="search" placeholder="搜索卡牌名称或效果……">
+      <select id="star-filter">
+        <option value="">全部星级</option>
+        <option value="3">3星</option>
+        <option value="4">4星</option>
+        <option value="5">5星</option>
+      </select>
+      <select id="type-filter">
+        <option value="">全部类型</option>
+      </select>
+    </section>
+
+    <p class="summary" id="summary">正在读取卡牌资料……</p>
+    <section class="grid" id="card-list">
+      <div class="loading">正在加载卡牌……</div>
+    </section>
   </main>
+
+  <script>
+    const cardList = document.getElementById("card-list");
+    const searchInput = document.getElementById("search");
+    const starFilter = document.getElementById("star-filter");
+    const typeFilter = document.getElementById("type-filter");
+    const summary = document.getElementById("summary");
+    const packName = document.getElementById("pack-name");
+    let allCards = [];
+
+    function renderCards() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      const star = starFilter.value;
+      const type = typeFilter.value;
+      const filtered = allCards.filter(card => {
+        const matchesKeyword = !keyword ||
+          card.name.toLowerCase().includes(keyword) ||
+          card.effect.toLowerCase().includes(keyword);
+        const matchesStar = !star || String(card.star) === star;
+        const matchesType = !type || card.type === type;
+        return matchesKeyword && matchesStar && matchesType;
+      });
+
+      summary.textContent = `显示 ${filtered.length} / ${allCards.length} 张卡牌`;
+      cardList.replaceChildren();
+
+      if (filtered.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "没有找到符合条件的卡牌。";
+        cardList.appendChild(empty);
+        return;
+      }
+
+      filtered.forEach(card => {
+        const article = document.createElement("article");
+        article.className = "card";
+
+        const img = document.createElement("img");
+        img.src = card.image;
+        img.alt = card.name;
+        img.loading = "lazy";
+        img.onerror = () => {
+          img.alt = "图片暂时无法显示";
+          img.style.display = "none";
+        };
+
+        const info = document.createElement("div");
+        info.className = "card-info";
+
+        const title = document.createElement("div");
+        title.className = "card-title";
+        const name = document.createElement("h3");
+        name.textContent = card.name;
+        const starLabel = document.createElement("span");
+        starLabel.className = "star";
+        starLabel.textContent = `${card.star}星`;
+        title.append(name, starLabel);
+
+        const typeLabel = document.createElement("div");
+        typeLabel.className = "type";
+        typeLabel.textContent = card.type + (card.tags && card.tags.length ? " · " + card.tags.join(" · ") : "");
+
+        const effect = document.createElement("div");
+        effect.className = "effect";
+        effect.textContent = card.effect;
+
+        info.append(title, typeLabel, effect);
+        article.append(img, info);
+        cardList.appendChild(article);
+      });
+    }
+
+    async function loadCards() {
+      try {
+        const [cardsResponse, packsResponse] = await Promise.all([
+          fetch("./data/cards.json"),
+          fetch("./data/packs.json")
+        ]);
+        if (!cardsResponse.ok || !packsResponse.ok) throw new Error("无法读取数据文件");
+        allCards = await cardsResponse.json();
+        const packs = await packsResponse.json();
+        const currentPack = packs.find(pack => pack.id === "pack_001");
+        if (currentPack) packName.textContent = currentPack.name + " · 概念礼装图鉴";
+
+        const types = [...new Set(allCards.map(card => card.type))].sort();
+        types.forEach(type => {
+          const option = document.createElement("option");
+          option.value = type;
+          option.textContent = type;
+          typeFilter.appendChild(option);
+        });
+
+        renderCards();
+      } catch (error) {
+        summary.textContent = "卡牌资料读取失败";
+        cardList.innerHTML = '<div class="error">读取失败。请稍后刷新网页，或检查 data 文件是否存在。</div>';
+      }
+    }
+
+    searchInput.addEventListener("input", renderCards);
+    starFilter.addEventListener("change", renderCards);
+    typeFilter.addEventListener("change", renderCards);
+    loadCards();
+  </script>
 </body>
 </html>
