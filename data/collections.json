@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "player_id": "P001",
+    "card_id": "card_019",
+    "quantity": 2
+  },
+  {
+    "player_id": "P001",
+    "card_id": "card_010",
+    "quantity": 2
+  }
+]
