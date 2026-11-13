@@ -159,6 +159,11 @@
             <div class="builder-stat">对战道具<strong id="battle-item-count">0</strong><small>不扣除收藏数量</small></div>
             <div class="builder-stat">构筑状态<strong id="builder-validity">未完成</strong><small id="builder-copy-status">同名最多 3 张</small></div>
           </div>
+          <div class="builder-section panel" style="margin:14px 0">
+            <h3>当前卡组清单</h3>
+            <p class="hint" id="deck-list-summary">尚未加入卡牌。</p>
+            <section id="current-deck-list" class="grid"></section>
+          </div>
           <input id="builder-card-search" type="search" placeholder="搜索你拥有的卡牌……">
           <div class="save-row">
             <button id="clear-builder" type="button">清空当前构筑</button>
@@ -504,6 +509,41 @@
       }
       return issues;
     }
+    function renderCurrentDeckList() {
+      const list = document.getElementById("current-deck-list");
+      const summary = document.getElementById("deck-list-summary");
+      list.replaceChildren();
+      const selected = allCards.filter(card => deckCardCount(card.id) > 0);
+      const counts = deckCounts();
+      const total = counts.relic + counts.special + counts.battleItems;
+      summary.textContent = "共 " + total + " 张：礼装卡 " + counts.relic + " 张 · 特殊攻击卡 " + counts.special + " 张 · 对战道具 " + counts.battleItems + " 张";
+      if (!selected.length) {
+        list.innerHTML = '<div class="empty">当前卡组还没有加入卡牌。</div>';
+        return;
+      }
+      selected.forEach(card => {
+        const row = document.createElement("article"); row.className = "builder-card";
+        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const info = document.createElement("div"); info.className = "builder-card-main";
+        const name = document.createElement("strong"); name.textContent = card.name;
+        const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
+        const meta = document.createElement("small");
+        meta.textContent = packName + " · " + card.type + " · × " + deckCardCount(card.id);
+        info.append(name, meta);
+        const controls = document.createElement("div"); controls.className = "builder-count";
+        const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "−";
+        remove.setAttribute("aria-label", "从当前卡组移除一张" + card.name);
+        remove.addEventListener("click", () => {
+          const next = deckCardCount(card.id) - 1;
+          if (next > 0) deckDraft[card.id] = next; else delete deckDraft[card.id];
+          renderBuilder();
+        });
+        const quantity = document.createElement("span"); quantity.textContent = deckCardCount(card.id);
+        controls.append(remove, quantity);
+        row.append(img, info, controls);
+        list.appendChild(row);
+      });
+    }
     function renderBuilder() {
       if (!builderPlayer) return;
       const keyword = document.getElementById("builder-card-search").value.trim().toLowerCase();
@@ -553,6 +593,7 @@
       document.getElementById("builder-validity").textContent = issues.length ? "未通过" : "符合规则";
       document.getElementById("builder-validity").className = issues.length ? "rule-warning" : "";
       setStatus(document.getElementById("builder-validation"), issues.length ? issues.join("；") : "当前构筑符合数量限制。", issues.length ? "bad" : "good");
+      renderCurrentDeckList();
     }
     function getLocalSavedDecks() {
       try {
