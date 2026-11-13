@@ -310,6 +310,22 @@
 
         <section id="admin-cards-panel" class="hidden">
           <div class="panel">
+            <h3>批量上传卡图</h3>
+            <p class="hint">图片文件请命名为对应卡牌 ID，例如 card_021.jpg、card_022.png。支持 JPG、PNG、WEBP、GIF，单张不超过 8 MB。上传后会自动关联卡牌。</p>
+            <div class="field" style="margin-top:12px">
+              <label for="card-image-files">选择多张卡图</label>
+              <input id="card-image-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif,.jpg,.jpeg,.png,.webp,.gif" multiple>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label style="display:flex;align-items:center;gap:8px"><input id="overwrite-card-images" type="checkbox" style="width:auto">允许覆盖 GitHub 中同名图片</label>
+              <p class="hint">默认不覆盖已有图片，避免误替换。</p>
+            </div>
+            <div class="save-row">
+              <button id="upload-card-images" class="primary" type="button">上传并自动关联卡牌</button>
+              <span id="card-image-upload-status" class="status">尚未选择图片。</span>
+            </div>
+          </div>
+          <div class="panel">
             <h3 id="card-editor-title">新增卡牌</h3>
             <p class="hint">卡牌 ID 由系统自动生成；编辑已有卡牌时 ID 不可修改。图片填写仓库中的相对路径，例如 ./images/卡牌.jpg。</p>
             <div class="admin-form-grid">
@@ -1137,6 +1153,79 @@
         setStatus(status, "已重新读取 GitHub 最新资料。", "good");
       } catch (error) { setStatus(status, "读取失败：" + error.message, "bad"); }
     }
+    function fileToBase64(file) {
+      return file.arrayBuffer().then(buffer => {
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        const chunkSize = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunkSize) binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+        return btoa(binary);
+      });
+    }
+    async function uploadCardImages() {
+      if (!authorized || !githubToken) { setStatus(document.getElementById("card-image-upload-status"), "请先完成 GitHub 管理员授权。", "bad"); return; }
+      const input = document.getElementById("card-image-files");
+      const files = Array.from(input.files || []);
+      const status = document.getElementById("card-image-upload-status");
+      const button = document.getElementById("upload-card-images");
+      if (!files.length) { setStatus(status, "请先选择图片。", "bad"); return; }
+      const prepared = [], errors = [], seen = new Set();
+      for (const file of files) {
+        const match = file.name.match(/^(card_\d+)\.(jpg|jpeg|png|webp|gif)$/i);
+        if (!match) { errors.push(file.name + "：请按 card_021.jpg 格式命名"); continue; }
+        const cardId = match[1].toLowerCase();
+        const card = allCards.find(item => String(item.id).toLowerCase() === cardId);
+        if (!card) { errors.push(file.name + "：找不到卡牌 " + cardId); continue; }
+        if (seen.has(cardId)) { errors.push(file.name + "：同一批次重复选择了 " + cardId); continue; }
+        seen.add(cardId);
+        if (file.size > 8 * 1024 * 1024) { errors.push(file.name + "：超过 8 MB"); continue; }
+        prepared.push({ file, card });
+      }
+      if (!prepared.length) { setStatus(status, "没有可上传的图片。" + errors.join("；"), "bad"); return; }
+      const overwrite = document.getElementById("overwrite-card-images").checked;
+      if (!confirm("将上传 " + prepared.length + " 张图片到 images/ 并自动关联卡牌。之后还要保存 cards.json。继续吗？")) return;
+      button.disabled = true;
+      let success = 0;
+      const failed = [];
+      try {
+        for (let i = 0; i < prepared.length; i++) {
+          const { file, card } = prepared[i];
+          setStatus(status, "正在上传 " + (i + 1) + "/" + prepared.length + "：" + file.name);
+          const path = "images/" + file.name;
+          const apiUrl = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/contents/" + path.split("/").map(encodeURIComponent).join("/");
+          let existingSha = null;
+          const check = await fetch(apiUrl, { headers: apiHeaders(), cache: "no-store" });
+          if (check.ok) {
+            const existing = await check.json();
+            existingSha = existing.sha;
+            if (!overwrite) { failed.push(file.name + "：同名文件已存在，未覆盖"); continue; }
+          } else if (check.status !== 404) {
+            const body = await check.json().catch(() => ({}));
+            throw new Error(body.message || "检查图片失败（HTTP " + check.status + "）");
+          }
+          const buffer = await file.arrayBuffer();
+          const bytes = new Uint8Array(buffer);
+          let binary = "";
+          for (let j = 0; j < bytes.length; j += 0x8000) binary += String.fromCharCode(...bytes.subarray(j, j + 0x8000));
+          const payload = { message: "Upload card image " + file.name, content: btoa(binary) };
+          if (existingSha) payload.sha = existingSha;
+          const response = await fetch(apiUrl, { method: "PUT", headers: { ...apiHeaders(), "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+          const result = await response.json();
+          if (!response.ok) { failed.push(file.name + "：" + (result.message || "上传失败")); continue; }
+          card.image = "./images/" + file.name;
+          success++;
+          markCardDataDirty();
+          renderCatalogCards();
+          renderCards();
+        }
+        if (success) { rebuildCatalogFilters(); renderCatalogCards(); renderCards(); input.value = ""; }
+        const detail = failed.concat(errors);
+        setStatus(status, "成功上传并关联 " + success + "/" + prepared.length + " 张。" + (detail.length ? " 未完成：" + detail.join("；") : "") + (success ? " 请再保存卡牌资料到 GitHub。" : ""), success ? "good" : "bad");
+      } catch (error) {
+        setStatus(status, "上传中断：" + error.message + "。已成功上传的图片不会回滚。", "bad");
+      } finally { button.disabled = false; }
+    }
+
     function submitCardForm() {
       const name = document.getElementById("edit-card-name").value.trim();
       const star = Number(document.getElementById("edit-card-star").value);
@@ -1303,6 +1392,7 @@
     document.getElementById("admin-tab-collections").addEventListener("click", () => switchAdminPanel("collections"));
     document.getElementById("admin-tab-cards").addEventListener("click", () => switchAdminPanel("cards"));
     document.getElementById("admin-tab-packs").addEventListener("click", () => switchAdminPanel("packs"));
+    document.getElementById("upload-card-images").addEventListener("click", uploadCardImages);
     document.getElementById("save-card").addEventListener("click", submitCardForm);
     document.getElementById("cancel-card-edit").addEventListener("click", resetCardForm);
     document.getElementById("save-pack").addEventListener("click", submitPackForm);
