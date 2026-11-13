@@ -312,7 +312,7 @@
     const adminSearch = document.getElementById("admin-search");
     const authStatus = document.getElementById("auth-status");
     const saveStatus = document.getElementById("save-status");
-    let allCards = [], allPlayers = [], collections = [];
+    let allCards = [], allPacks = [], allPlayers = [], collections = [];
     let draftCollections = [];
     let githubToken = "";
     let authorized = false;
@@ -363,7 +363,8 @@
         const starLabel = document.createElement("span"); starLabel.className = "star"; starLabel.textContent = card.star + "星";
         title.append(name, starLabel);
         const typeLabel = document.createElement("div"); typeLabel.className = "type";
-        typeLabel.textContent = card.type + (card.tags && card.tags.length ? " · " + card.tags.join(" · ") : "");
+        const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
+        typeLabel.textContent = packName + " · " + card.type + (card.tags && card.tags.length ? " · " + card.tags.join(" · ") : "");
         const effect = document.createElement("div"); effect.className = "effect"; effect.textContent = card.effect;
         info.append(title, typeLabel, effect); article.append(img, info); cardList.appendChild(article);
       });
@@ -508,14 +509,20 @@
       const battleItemList = document.getElementById("battle-item-builder-list");
       relicList.replaceChildren(); specialList.replaceChildren(); battleItemList.replaceChildren();
       const ownedCards = allCards.filter(card => getCount(builderCollections, builderPlayer.id, card.id) > 0)
-        .filter(card => !keyword || card.name.toLowerCase().includes(keyword));
+        .filter(card => {
+          if (!keyword) return true;
+          const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "";
+          return [card.name, card.effect, card.type, packName, ...(card.tags || [])]
+            .some(value => String(value).toLowerCase().includes(keyword));
+        });
       const makeCard = card => {
         const row = document.createElement("article"); row.className = "builder-card";
         const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "builder-card-main";
         const name = document.createElement("strong"); name.textContent = card.name;
         const meta = document.createElement("small");
-        meta.textContent = card.star + "星 · " + card.type + " · 拥有 " + getCount(builderCollections, builderPlayer.id, card.id);
+        const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
+        meta.textContent = packName + " · " + card.star + "星 · " + card.type + " · 拥有 " + getCount(builderCollections, builderPlayer.id, card.id);
         info.append(name, meta);
         const counter = document.createElement("div"); counter.className = "builder-count";
         const minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−"; minus.setAttribute("aria-label", "从构筑移除" + card.name);
@@ -741,7 +748,8 @@
       const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
       const info = document.createElement("div"); info.className = "shared-card-main";
       const name = document.createElement("strong"); name.textContent = card.name;
-      const meta = document.createElement("small"); meta.textContent = card.star + "星 · " + card.type + " · × " + quantity;
+      const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
+      const meta = document.createElement("small"); meta.textContent = packName + " · " + card.star + "星 · " + card.type + " · × " + quantity;
       info.append(name, meta); row.append(img, info); return row;
     }
     async function openSharedDeckFromUrl() {
@@ -963,12 +971,14 @@
         ]);
         if (!cardsResponse.ok || !packsResponse.ok || !playersResponse.ok) throw new Error("无法读取数据文件");
         allCards = await cardsResponse.json();
-        const packs = await packsResponse.json();
+        allPacks = await packsResponse.json();
         allPlayers = await playersResponse.json();
         const packFilter = document.getElementById("pack-filter");
-        packs.forEach(pack => {
+        allPacks.forEach(pack => {
           const option = document.createElement("option");
-          option.value = pack.id; option.textContent = pack.name;
+          option.value = pack.id;
+          const count = allCards.filter(card => card.pack_id === pack.id).length;
+          option.textContent = pack.name + "（" + count + " 张）";
           packFilter.appendChild(option);
         });
         [...new Set(allCards.map(card => card.type))].sort().forEach(type => {
