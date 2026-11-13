@@ -380,6 +380,12 @@
     function isSpecialAttack(card) {
       return !!deckRules && deckRules.specialAttackDeck.types.includes(card.type);
     }
+    function isRelicCard(card) {
+      return !!deckRules && !isSpecialAttack(card) && card.type !== deckRules.battleItemType;
+    }
+    function copyLimitFor(card) {
+      return isSpecialAttack(card) ? deckRules.specialAttackDeck.maxCopiesPerName : deckRules.relicDeck.maxCopiesPerName;
+    }
     function deckCardCount(cardId) { return Number(deckDraft[cardId] || 0); }
     function deckCountForName(name) {
       return allCards.filter(card => card.name === name).reduce((sum, card) => sum + deckCardCount(card.id), 0);
@@ -388,7 +394,7 @@
       let relic = 0, special = 0;
       allCards.forEach(card => {
         if (isSpecialAttack(card)) special += deckCardCount(card.id);
-        else relic += deckCardCount(card.id);
+        else if (isRelicCard(card)) relic += deckCardCount(card.id);
       });
       return { relic, special };
     }
@@ -400,8 +406,8 @@
       if (counts.special > deckRules.specialAttackDeck.maxTotal)
         issues.push("特殊攻击卡合计不得超过 " + deckRules.specialAttackDeck.maxTotal + " 张");
       for (const card of allCards) {
-        if (deckCountForName(card.name) > deckRules.relicDeck.maxCopiesPerName) {
-          issues.push("「" + card.name + "」同名卡超过 " + deckRules.relicDeck.maxCopiesPerName + " 张");
+        if ((isRelicCard(card) || isSpecialAttack(card)) && deckCountForName(card.name) > copyLimitFor(card)) {
+          issues.push("「" + card.name + "」同名卡超过 " + copyLimitFor(card) + " 张");
           break;
         }
       }
@@ -434,12 +440,12 @@
         const number = document.createElement("span"); number.textContent = deckCardCount(card.id);
         const plus = document.createElement("button"); plus.type = "button"; plus.textContent = "+"; plus.setAttribute("aria-label", "加入构筑" + card.name);
         minus.disabled = deckCardCount(card.id) <= 0;
-        plus.disabled = deckCardCount(card.id) >= getCount(builderCollections, builderPlayer.id, card.id) || deckCountForName(card.name) >= deckRules.relicDeck.maxCopiesPerName;
+        plus.disabled = deckCardCount(card.id) >= getCount(builderCollections, builderPlayer.id, card.id) || deckCountForName(card.name) >= copyLimitFor(card);
         minus.addEventListener("click", () => { deckDraft[card.id] = Math.max(0, deckCardCount(card.id)-1); if (!deckDraft[card.id]) delete deckDraft[card.id]; renderBuilder(); });
         plus.addEventListener("click", () => { deckDraft[card.id] = deckCardCount(card.id)+1; renderBuilder(); });
         counter.append(minus, number, plus); row.append(img, info, counter); return row;
       };
-      ownedCards.filter(card => !isSpecialAttack(card)).forEach(card => relicList.appendChild(makeCard(card)));
+      ownedCards.filter(isRelicCard).forEach(card => relicList.appendChild(makeCard(card)));
       ownedCards.filter(isSpecialAttack).forEach(card => specialList.appendChild(makeCard(card)));
       if (!relicList.children.length) relicList.innerHTML = '<div class="empty">你目前没有可构筑的礼装卡，或搜索无匹配结果。</div>';
       if (!specialList.children.length) specialList.innerHTML = '<div class="empty">你目前没有超越、调律或共鸣攻击卡。</div>';
@@ -457,7 +463,7 @@
       const id = document.getElementById("builder-player-id").value.trim().toUpperCase();
       const status = document.getElementById("builder-status");
       const button = document.getElementById("load-builder-player");
-      if (!/^P\\d{3}$/.test(id)) { setStatus(status, "请输入正确的玩家编号，例如 P001。", "bad"); return; }
+      if (!/^P\d{3}$/.test(id)) { setStatus(status, "请输入正确的玩家编号，例如 P001。", "bad"); return; }
       const player = allPlayers.find(item => item.id === id);
       if (!player) { setStatus(status, "没有找到这个玩家编号。", "bad"); return; }
       button.disabled = true; setStatus(status, "正在读取收藏和构筑规则……");
