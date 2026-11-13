@@ -1,0 +1,19 @@
+{
+  "version": "test-1",
+  "relicDeck": {
+    "min": 10,
+    "max": 15,
+    "maxCopiesPerName": 3
+  },
+  "specialAttackDeck": {
+    "types": [
+      "超越攻击卡",
+      "调律攻击卡",
+      "共鸣攻击卡"
+    ],
+    "maxTotal": 5,
+    "maxCopiesPerName": 3
+  },
+  "battleItemType": "对战道具",
+  "note": "测试阶段规则。修改本文件中的数字即可调整构筑数量限制。"
+}
