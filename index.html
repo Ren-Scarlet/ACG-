@@ -214,8 +214,8 @@
           <section id="special-builder-list" class="grid"></section>
         </div>
         <div class="builder-section">
-          <h3>对战道具（消耗品）</h3>
-          <p class="hint">对战道具不计入礼装卡或特殊攻击卡数量限制。当前仅加入构筑草稿；全体共用收藏的实际扣除尚未启用。</p>
+          <h3>对战道具（独立构筑区）</h3>
+          <p class="hint">对战道具独立放置，不计入礼装卡或特殊攻击卡数量限制。加入卡组不会消耗道具，也不会扣除收藏数量。</p>
           <section id="battle-item-builder-list" class="grid"></section>
         </div>
       </div>
@@ -374,7 +374,7 @@
         const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "admin-card-main";
         const name = document.createElement("strong"); name.textContent = card.name;
-        const meta = document.createElement("small"); meta.textContent = card.star + "星 · " + card.type + (card.type === "对战道具" ? " · 消耗品" : "");
+        const meta = document.createElement("small"); meta.textContent = card.star + "星 · " + card.type;
         info.append(name, meta);
         const counter = document.createElement("div"); counter.className = "counter";
         const minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−"; minus.setAttribute("aria-label", "减少" + card.name);
@@ -590,8 +590,8 @@
         renderLocalSavedDecks();
         document.getElementById("saved-deck-select").value = deck.id;
         setStatus(document.getElementById("local-deck-status"), issues.length
-          ? "「" + name + "」已保存为构筑草稿（目前未通过规则检查：" + issues.join("；") + "）。没有修改玩家收藏，也没有消耗对战道具。"
-          : "「" + name + "」已保存在当前浏览器。没有修改玩家收藏，也没有消耗对战道具。", "good");
+          ? "「" + name + "」已保存为构筑草稿（目前未通过规则检查：" + issues.join("；") + "）。没有修改玩家收藏。"
+          : "「" + name + "」已保存在当前浏览器。没有修改玩家收藏。", "good");
       } catch (error) {
         setStatus(document.getElementById("local-deck-status"), "保存失败：" + (error.message || "浏览器存储空间不可用。"), "bad");
       }
@@ -641,7 +641,7 @@
         const issues = builderIssues();
         setStatus(document.getElementById("local-deck-status"), issues.length
           ? "已覆盖保存为构筑草稿（目前未通过规则检查：" + issues.join("；") + "）。"
-          : "已覆盖更新「" + name + "」。没有修改玩家收藏，也没有消耗对战道具。", "good");
+          : "已覆盖更新「" + name + "」。没有修改玩家收藏。", "good");
       } catch (error) {
         setStatus(document.getElementById("local-deck-status"), "覆盖保存失败：" + error.message, "bad");
       }
@@ -861,7 +861,7 @@
         collections = cloneData(draftCollections);
         setStatus(saveStatus, "保存成功！其他玩家刷新网页后即可看到最新收藏。", "good");
       } catch (error) {
-        setStatus(saveStatus, "保存失败：" + error.message + "。未确认保存成功，请勿重复扣除道具。", "bad");
+        setStatus(saveStatus, "保存失败：" + error.message + "。请检查网络后再确认保存状态。", "bad");
       } finally { saveButton.disabled = false; renderAdminCards(); }
     }
 
