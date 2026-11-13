@@ -47,6 +47,15 @@
     .counter button { width:36px; height:36px; padding:0; font-size:20px; }
     .count { min-width:22px; text-align:center; font-weight:bold; font-variant-numeric:tabular-nums; }
     .save-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:16px; }
+    .player-search { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:end; }
+    .player-result { margin:14px 0; padding:14px; background:#222536; border:1px solid #383d50; border-radius:12px; }
+    .player-card { display:flex; gap:12px; align-items:center; padding:10px; background:#222536; border:1px solid #383d50; border-radius:12px; min-width:0; }
+    .player-card img { width:66px; aspect-ratio:5/7; object-fit:contain; background:#11131b; border-radius:6px; flex:0 0 auto; }
+    .player-card-main { flex:1; min-width:0; }
+    .player-card-main strong { display:block; margin-bottom:5px; overflow-wrap:anywhere; }
+    .player-card-main small { color:#a6abc0; line-height:1.5; }
+    .player-quantity { color:#f3cc72; font-size:18px; font-weight:bold; white-space:nowrap; }
+    @media(max-width:700px) { .player-search { grid-template-columns:1fr; } .player-card { gap:8px; padding:8px; } .player-card img { width:54px; } }
     .status { color:#a6abc0; font-size:13px; }
     .status.good { color:#8bd5a7; } .status.bad { color:#ff9b9b; }
     .hidden { display:none !important; }
@@ -66,6 +75,7 @@
     <p class="intro">浏览卡包中的卡牌，或进入管理员模式管理玩家收藏。</p>
     <nav class="tabs">
       <button id="tab-library" class="active" type="button">卡牌图鉴</button>
+      <button id="tab-player" type="button">我的收藏</button>
       <button id="tab-admin" type="button">管理员收藏管理</button>
     </nav>
 
@@ -77,6 +87,29 @@
       </section>
       <p class="summary" id="summary">正在读取卡牌资料……</p>
       <section class="grid" id="card-list"><div class="loading">正在加载卡牌……</div></section>
+    </section>
+
+    <section id="player-view" class="hidden">
+      <div class="panel">
+        <h3>查询我的收藏</h3>
+        <p class="hint">输入管理员分配给你的玩家编号，例如 P001。这里只能查看收藏，不能修改数量。</p>
+        <div class="player-search" style="margin-top:14px">
+          <div class="field">
+            <label for="player-id-input">玩家编号</label>
+            <input id="player-id-input" type="text" maxlength="4" autocomplete="off" placeholder="例如 P001">
+          </div>
+          <button id="lookup-player" class="primary" type="button">查询收藏</button>
+        </div>
+        <p id="player-status" class="status" style="margin-top:12px">等待输入玩家编号。</p>
+      </div>
+      <div id="player-collection-workspace" class="hidden">
+        <div class="player-result">
+          <strong id="player-name"></strong>
+          <p id="player-summary" class="hint"></p>
+          <input id="player-card-search" type="search" placeholder="搜索已拥有的卡牌……" style="margin-top:12px">
+        </div>
+        <section id="player-card-list" class="grid"></section>
+      </div>
     </section>
 
     <section id="admin-view" class="hidden">
@@ -133,6 +166,11 @@
     const summary = document.getElementById("summary");
     const packName = document.getElementById("page-title");
     const adminCardList = document.getElementById("admin-card-list");
+    const playerIdInput = document.getElementById("player-id-input");
+    const playerStatus = document.getElementById("player-status");
+    const playerCardList = document.getElementById("player-card-list");
+    let publicCollections = [];
+    let currentPublicPlayer = null;
     const playerSelect = document.getElementById("player-select");
     const adminSearch = document.getElementById("admin-search");
     const authStatus = document.getElementById("auth-status");
@@ -217,6 +255,67 @@
         counter.append(minus, count, plus); row.append(img, info, counter); adminCardList.appendChild(row);
       });
     }
+    function renderPlayerCollection() {
+      if (!currentPublicPlayer) return;
+      const keyword = document.getElementById("player-card-search").value.trim().toLowerCase();
+      const owned = allCards.filter(card => getCount(publicCollections, currentPublicPlayer.id, card.id) > 0)
+        .filter(card => !keyword || card.name.toLowerCase().includes(keyword));
+      const total = allCards.reduce((sum, card) => sum + getCount(publicCollections, currentPublicPlayer.id, card.id), 0);
+      document.getElementById("player-name").textContent = currentPublicPlayer.id + " · " + currentPublicPlayer.name;
+      document.getElementById("player-summary").textContent = "拥有 " + owned.length + " 种卡牌 · 收藏总数 " + total + " 张";
+      playerCardList.replaceChildren();
+      if (!owned.length) {
+        playerCardList.innerHTML = '<div class="empty">目前没有符合条件的已拥有卡牌。</div>';
+        return;
+      }
+      owned.forEach(card => {
+        const row = document.createElement("article"); row.className = "player-card";
+        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const info = document.createElement("div"); info.className = "player-card-main";
+        const name = document.createElement("strong"); name.textContent = card.name;
+        const meta = document.createElement("small"); meta.textContent = card.star + "星 · " + card.type;
+        info.append(name, meta);
+        const quantity = document.createElement("span"); quantity.className = "player-quantity";
+        quantity.textContent = "× " + getCount(publicCollections, currentPublicPlayer.id, card.id);
+        row.append(img, info, quantity); playerCardList.appendChild(row);
+      });
+    }
+    async function lookupPlayerCollection() {
+      const playerId = playerIdInput.value.trim().toUpperCase();
+      if (!/^P\\d{3}$/.test(playerId)) {
+        currentPublicPlayer = null;
+        document.getElementById("player-collection-workspace").classList.add("hidden");
+        setStatus(playerStatus, "请输入正确的玩家编号，例如 P001。", "bad");
+        return;
+      }
+      const player = allPlayers.find(item => item.id === playerId);
+      if (!player) {
+        currentPublicPlayer = null;
+        document.getElementById("player-collection-workspace").classList.add("hidden");
+        setStatus(playerStatus, "没有找到这个玩家编号，请向管理员确认。", "bad");
+        return;
+      }
+      setStatus(playerStatus, "正在读取最新收藏……");
+      const lookupButton = document.getElementById("lookup-player");
+      lookupButton.disabled = true;
+      try {
+        const response = await fetch("./data/collections.json?refresh=" + Date.now(), { cache: "no-store" });
+        if (!response.ok) throw new Error("无法读取收藏数据（HTTP " + response.status + "）");
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("收藏数据格式不正确。");
+        publicCollections = data;
+        currentPublicPlayer = player;
+        document.getElementById("player-collection-workspace").classList.remove("hidden");
+        document.getElementById("player-card-search").value = "";
+        renderPlayerCollection();
+        setStatus(playerStatus, "查询成功，已读取最新收藏。", "good");
+      } catch (error) {
+        currentPublicPlayer = null;
+        document.getElementById("player-collection-workspace").classList.add("hidden");
+        setStatus(playerStatus, "查询失败：" + error.message, "bad");
+      } finally { lookupButton.disabled = false; }
+    }
+
     function updateDirtyStatus() {
       setStatus(saveStatus, isDirty() ? "有未保存的修改。" : "尚无未保存修改。", isDirty() ? "bad" : "");
     }
@@ -270,18 +369,34 @@
 
     document.getElementById("tab-library").addEventListener("click", () => {
       document.getElementById("library-view").classList.remove("hidden");
+      document.getElementById("player-view").classList.add("hidden");
       document.getElementById("admin-view").classList.add("hidden");
       document.getElementById("tab-library").classList.add("active");
+      document.getElementById("tab-player").classList.remove("active");
       document.getElementById("tab-admin").classList.remove("active");
       packName.textContent = "概念礼装图鉴";
     });
+    document.getElementById("tab-player").addEventListener("click", () => {
+      document.getElementById("library-view").classList.add("hidden");
+      document.getElementById("player-view").classList.remove("hidden");
+      document.getElementById("admin-view").classList.add("hidden");
+      document.getElementById("tab-player").classList.add("active");
+      document.getElementById("tab-library").classList.remove("active");
+      document.getElementById("tab-admin").classList.remove("active");
+      packName.textContent = "我的收藏";
+    });
     document.getElementById("tab-admin").addEventListener("click", () => {
       document.getElementById("library-view").classList.add("hidden");
+      document.getElementById("player-view").classList.add("hidden");
       document.getElementById("admin-view").classList.remove("hidden");
       document.getElementById("tab-admin").classList.add("active");
       document.getElementById("tab-library").classList.remove("active");
+      document.getElementById("tab-player").classList.remove("active");
       packName.textContent = "管理员收藏管理";
     });
+    document.getElementById("lookup-player").addEventListener("click", lookupPlayerCollection);
+    playerIdInput.addEventListener("keydown", event => { if (event.key === "Enter") lookupPlayerCollection(); });
+    document.getElementById("player-card-search").addEventListener("input", renderPlayerCollection);
     document.getElementById("verify-token").addEventListener("click", verifyToken);
     document.getElementById("save-collections").addEventListener("click", saveCollections);
     document.getElementById("discard-changes").addEventListener("click", () => {
