@@ -583,6 +583,9 @@
       document.getElementById("tab-builder").classList.remove("active");
       packName.textContent = "管理员收藏管理";
     });
+    // 玩家编号统一自动转为大写，避免输入 p001 时造成识别困扰。
+    playerIdInput.addEventListener("input", () => { playerIdInput.value = playerIdInput.value.toUpperCase(); });
+    document.getElementById("builder-player-id").addEventListener("input", event => { event.target.value = event.target.value.toUpperCase(); });
     document.getElementById("lookup-player").addEventListener("click", lookupPlayerCollection);
     document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
     document.getElementById("builder-player-id").addEventListener("keydown", event => { if (event.key === "Enter") loadBuilderPlayer(); });
