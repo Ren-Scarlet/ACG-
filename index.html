@@ -282,7 +282,7 @@
     }
     async function lookupPlayerCollection() {
       const playerId = playerIdInput.value.trim().toUpperCase();
-      if (!/^P\\d{3}$/.test(playerId)) {
+      if (!/^P\d{3}$/.test(playerId)) {
         currentPublicPlayer = null;
         document.getElementById("player-collection-workspace").classList.add("hidden");
         setStatus(playerStatus, "请输入正确的玩家编号，例如 P001。", "bad");
