@@ -55,6 +55,21 @@
     .player-card-main strong { display:block; margin-bottom:5px; overflow-wrap:anywhere; }
     .player-card-main small { color:#a6abc0; line-height:1.5; }
     .player-quantity { color:#f3cc72; font-size:18px; font-weight:bold; white-space:nowrap; }
+    .builder-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:14px 0; }
+    .builder-stat { padding:13px; border:1px solid #383d50; border-radius:10px; background:#222536; }
+    .builder-stat strong { display:block; font-size:20px; margin-top:4px; }
+    .builder-section { margin:18px 0; }
+    .builder-section h3 { margin:0 0 10px; font-size:17px; }
+    .builder-card { display:flex; gap:10px; align-items:center; padding:9px; background:#222536; border:1px solid #383d50; border-radius:11px; min-width:0; }
+    .builder-card img { width:56px; aspect-ratio:5/7; object-fit:contain; background:#11131b; border-radius:6px; flex:0 0 auto; }
+    .builder-card-main { flex:1; min-width:0; }
+    .builder-card-main strong { display:block; overflow-wrap:anywhere; margin-bottom:4px; }
+    .builder-card-main small { color:#a6abc0; line-height:1.45; }
+    .builder-count { display:flex; align-items:center; gap:7px; flex:0 0 auto; }
+    .builder-count button { width:32px; height:32px; padding:0; font-size:19px; }
+    .builder-count span { min-width:18px; text-align:center; font-weight:bold; }
+    .rule-warning { color:#ffb2a8; }
+    @media(max-width:700px) { .builder-stats { grid-template-columns:1fr 1fr 1fr; gap:6px; } .builder-stat { padding:9px; font-size:12px; } .builder-stat strong { font-size:17px; } .builder-card { gap:7px; padding:7px; } .builder-card img { width:46px; } .builder-count { gap:4px; } .builder-count button { width:29px; height:29px; } }
     @media(max-width:700px) { .player-search { grid-template-columns:1fr; } .player-card { gap:8px; padding:8px; } .player-card img { width:54px; } }
     .status { color:#a6abc0; font-size:13px; }
     .status.good { color:#8bd5a7; } .status.bad { color:#ff9b9b; }
@@ -76,6 +91,7 @@
     <nav class="tabs">
       <button id="tab-library" class="active" type="button">卡牌图鉴</button>
       <button id="tab-player" type="button">我的收藏</button>
+      <button id="tab-builder" type="button">卡组构筑</button>
       <button id="tab-admin" type="button">管理员收藏管理</button>
     </nav>
 
@@ -109,6 +125,47 @@
           <input id="player-card-search" type="search" placeholder="搜索已拥有的卡牌……" style="margin-top:12px">
         </div>
         <section id="player-card-list" class="grid"></section>
+      </div>
+    </section>
+
+    <section id="builder-view" class="hidden">
+      <div class="panel">
+        <h3>开始构筑</h3>
+        <p class="hint">输入玩家编号读取你的收藏。当前为测试版构筑草稿，修改只保存在当前页面，不会扣除收藏或消耗对战道具。</p>
+        <div class="player-search" style="margin-top:14px">
+          <div class="field">
+            <label for="builder-player-id">玩家编号</label>
+            <input id="builder-player-id" type="text" maxlength="4" autocomplete="off" placeholder="例如 P001">
+          </div>
+          <button id="load-builder-player" class="primary" type="button">读取收藏并构筑</button>
+        </div>
+        <p id="builder-status" class="status" style="margin-top:12px">等待读取玩家收藏。</p>
+      </div>
+      <div id="builder-workspace" class="hidden">
+        <div class="panel">
+          <strong id="builder-player-name"></strong>
+          <p class="hint" id="builder-rules-text"></p>
+          <div class="builder-stats">
+            <div class="builder-stat">礼装卡<strong id="relic-count">0</strong><small id="relic-limit">10～15 张</small></div>
+            <div class="builder-stat">特殊攻击卡<strong id="special-count">0</strong><small id="special-limit">最多 5 张</small></div>
+            <div class="builder-stat">构筑状态<strong id="builder-validity">未完成</strong><small id="builder-copy-status">同名最多 3 张</small></div>
+          </div>
+          <input id="builder-card-search" type="search" placeholder="搜索你拥有的卡牌……">
+          <div class="save-row">
+            <button id="clear-builder" type="button">清空当前构筑</button>
+            <span id="builder-validation" class="status">先选择卡牌开始构筑。</span>
+          </div>
+        </div>
+        <div class="builder-section">
+          <h3>礼装卡（主卡组）</h3>
+          <p class="hint">从已拥有的非特殊攻击卡中选择，数量必须符合当前规则。</p>
+          <section id="relic-builder-list" class="grid"></section>
+        </div>
+        <div class="builder-section">
+          <h3>超越／调律／共鸣攻击卡（单独放置）</h3>
+          <p class="hint">三种特殊攻击卡合计最多放入规定数量，不计入礼装卡数量。</p>
+          <section id="special-builder-list" class="grid"></section>
+        </div>
       </div>
     </section>
 
@@ -171,6 +228,10 @@
     const playerCardList = document.getElementById("player-card-list");
     let publicCollections = [];
     let currentPublicPlayer = null;
+    let deckRules = null;
+    let builderPlayer = null;
+    let builderCollections = [];
+    let deckDraft = {};
     const playerSelect = document.getElementById("player-select");
     const adminSearch = document.getElementById("admin-search");
     const authStatus = document.getElementById("auth-status");
@@ -316,6 +377,111 @@
       } finally { lookupButton.disabled = false; }
     }
 
+    function isSpecialAttack(card) {
+      return !!deckRules && deckRules.specialAttackDeck.types.includes(card.type);
+    }
+    function deckCardCount(cardId) { return Number(deckDraft[cardId] || 0); }
+    function deckCountForName(name) {
+      return allCards.filter(card => card.name === name).reduce((sum, card) => sum + deckCardCount(card.id), 0);
+    }
+    function deckCounts() {
+      let relic = 0, special = 0;
+      allCards.forEach(card => {
+        if (isSpecialAttack(card)) special += deckCardCount(card.id);
+        else relic += deckCardCount(card.id);
+      });
+      return { relic, special };
+    }
+    function builderIssues() {
+      const counts = deckCounts();
+      const issues = [];
+      if (counts.relic < deckRules.relicDeck.min || counts.relic > deckRules.relicDeck.max)
+        issues.push("礼装卡需为 " + deckRules.relicDeck.min + "～" + deckRules.relicDeck.max + " 张");
+      if (counts.special > deckRules.specialAttackDeck.maxTotal)
+        issues.push("特殊攻击卡合计不得超过 " + deckRules.specialAttackDeck.maxTotal + " 张");
+      for (const card of allCards) {
+        if (deckCountForName(card.name) > deckRules.relicDeck.maxCopiesPerName) {
+          issues.push("「" + card.name + "」同名卡超过 " + deckRules.relicDeck.maxCopiesPerName + " 张");
+          break;
+        }
+      }
+      for (const card of allCards) {
+        if (deckCardCount(card.id) > getCount(builderCollections, builderPlayer.id, card.id)) {
+          issues.push("构筑数量超过收藏数量：" + card.name);
+          break;
+        }
+      }
+      return issues;
+    }
+    function renderBuilder() {
+      if (!builderPlayer) return;
+      const keyword = document.getElementById("builder-card-search").value.trim().toLowerCase();
+      const relicList = document.getElementById("relic-builder-list");
+      const specialList = document.getElementById("special-builder-list");
+      relicList.replaceChildren(); specialList.replaceChildren();
+      const ownedCards = allCards.filter(card => getCount(builderCollections, builderPlayer.id, card.id) > 0)
+        .filter(card => !keyword || card.name.toLowerCase().includes(keyword));
+      const makeCard = card => {
+        const row = document.createElement("article"); row.className = "builder-card";
+        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const info = document.createElement("div"); info.className = "builder-card-main";
+        const name = document.createElement("strong"); name.textContent = card.name;
+        const meta = document.createElement("small");
+        meta.textContent = card.star + "星 · " + card.type + " · 拥有 " + getCount(builderCollections, builderPlayer.id, card.id);
+        info.append(name, meta);
+        const counter = document.createElement("div"); counter.className = "builder-count";
+        const minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−"; minus.setAttribute("aria-label", "从构筑移除" + card.name);
+        const number = document.createElement("span"); number.textContent = deckCardCount(card.id);
+        const plus = document.createElement("button"); plus.type = "button"; plus.textContent = "+"; plus.setAttribute("aria-label", "加入构筑" + card.name);
+        minus.disabled = deckCardCount(card.id) <= 0;
+        plus.disabled = deckCardCount(card.id) >= getCount(builderCollections, builderPlayer.id, card.id) || deckCountForName(card.name) >= deckRules.relicDeck.maxCopiesPerName;
+        minus.addEventListener("click", () => { deckDraft[card.id] = Math.max(0, deckCardCount(card.id)-1); if (!deckDraft[card.id]) delete deckDraft[card.id]; renderBuilder(); });
+        plus.addEventListener("click", () => { deckDraft[card.id] = deckCardCount(card.id)+1; renderBuilder(); });
+        counter.append(minus, number, plus); row.append(img, info, counter); return row;
+      };
+      ownedCards.filter(card => !isSpecialAttack(card)).forEach(card => relicList.appendChild(makeCard(card)));
+      ownedCards.filter(isSpecialAttack).forEach(card => specialList.appendChild(makeCard(card)));
+      if (!relicList.children.length) relicList.innerHTML = '<div class="empty">你目前没有可构筑的礼装卡，或搜索无匹配结果。</div>';
+      if (!specialList.children.length) specialList.innerHTML = '<div class="empty">你目前没有超越、调律或共鸣攻击卡。</div>';
+      const counts = deckCounts(), issues = builderIssues();
+      document.getElementById("relic-count").textContent = counts.relic;
+      document.getElementById("special-count").textContent = counts.special;
+      document.getElementById("relic-limit").textContent = deckRules.relicDeck.min + "～" + deckRules.relicDeck.max + " 张";
+      document.getElementById("special-limit").textContent = "最多 " + deckRules.specialAttackDeck.maxTotal + " 张";
+      document.getElementById("builder-copy-status").textContent = "同名最多 " + deckRules.relicDeck.maxCopiesPerName + " 张";
+      document.getElementById("builder-validity").textContent = issues.length ? "未通过" : "符合规则";
+      document.getElementById("builder-validity").className = issues.length ? "rule-warning" : "";
+      setStatus(document.getElementById("builder-validation"), issues.length ? issues.join("；") : "当前构筑符合数量限制。", issues.length ? "bad" : "good");
+    }
+    async function loadBuilderPlayer() {
+      const id = document.getElementById("builder-player-id").value.trim().toUpperCase();
+      const status = document.getElementById("builder-status");
+      const button = document.getElementById("load-builder-player");
+      if (!/^P\\d{3}$/.test(id)) { setStatus(status, "请输入正确的玩家编号，例如 P001。", "bad"); return; }
+      const player = allPlayers.find(item => item.id === id);
+      if (!player) { setStatus(status, "没有找到这个玩家编号。", "bad"); return; }
+      button.disabled = true; setStatus(status, "正在读取收藏和构筑规则……");
+      try {
+        const [collectionResponse, rulesResponse] = await Promise.all([
+          fetch("./data/collections.json?refresh=" + Date.now(), {cache:"no-store"}),
+          fetch("./data/deck_rules.json?refresh=" + Date.now(), {cache:"no-store"})
+        ]);
+        if (!collectionResponse.ok || !rulesResponse.ok) throw new Error("无法读取收藏或构筑规则文件。");
+        builderCollections = await collectionResponse.json();
+        deckRules = await rulesResponse.json();
+        if (!Array.isArray(builderCollections)) throw new Error("收藏数据格式不正确。");
+        builderPlayer = player; deckDraft = {};
+        document.getElementById("builder-player-name").textContent = player.id + " · " + player.name;
+        document.getElementById("builder-rules-text").textContent = "测试版规则：礼装卡 " + deckRules.relicDeck.min + "～" + deckRules.relicDeck.max + " 张；超越、调律、共鸣攻击卡合计最多 " + deckRules.specialAttackDeck.maxTotal + " 张；同名卡最多 " + deckRules.relicDeck.maxCopiesPerName + " 张。";
+        document.getElementById("builder-workspace").classList.remove("hidden");
+        document.getElementById("builder-card-search").value = "";
+        renderBuilder(); setStatus(status, "收藏读取成功，可以开始构筑草稿。", "good");
+      } catch (error) {
+        builderPlayer = null; document.getElementById("builder-workspace").classList.add("hidden");
+        setStatus(status, "读取失败：" + error.message, "bad");
+      } finally { button.disabled = false; }
+    }
+
     function updateDirtyStatus() {
       setStatus(saveStatus, isDirty() ? "有未保存的修改。" : "尚无未保存修改。", isDirty() ? "bad" : "");
     }
@@ -370,31 +536,52 @@
     document.getElementById("tab-library").addEventListener("click", () => {
       document.getElementById("library-view").classList.remove("hidden");
       document.getElementById("player-view").classList.add("hidden");
+      document.getElementById("builder-view").classList.add("hidden");
       document.getElementById("admin-view").classList.add("hidden");
       document.getElementById("tab-library").classList.add("active");
       document.getElementById("tab-player").classList.remove("active");
+      document.getElementById("tab-builder").classList.remove("active");
       document.getElementById("tab-admin").classList.remove("active");
       packName.textContent = "概念礼装图鉴";
     });
     document.getElementById("tab-player").addEventListener("click", () => {
       document.getElementById("library-view").classList.add("hidden");
       document.getElementById("player-view").classList.remove("hidden");
+      document.getElementById("builder-view").classList.add("hidden");
       document.getElementById("admin-view").classList.add("hidden");
       document.getElementById("tab-player").classList.add("active");
       document.getElementById("tab-library").classList.remove("active");
+      document.getElementById("tab-builder").classList.remove("active");
       document.getElementById("tab-admin").classList.remove("active");
       packName.textContent = "我的收藏";
+    });
+    document.getElementById("tab-builder").addEventListener("click", () => {
+      document.getElementById("library-view").classList.add("hidden");
+      document.getElementById("player-view").classList.add("hidden");
+      document.getElementById("builder-view").classList.remove("hidden");
+      document.getElementById("admin-view").classList.add("hidden");
+      document.getElementById("tab-builder").classList.add("active");
+      document.getElementById("tab-library").classList.remove("active");
+      document.getElementById("tab-player").classList.remove("active");
+      document.getElementById("tab-admin").classList.remove("active");
+      packName.textContent = "卡组构筑";
     });
     document.getElementById("tab-admin").addEventListener("click", () => {
       document.getElementById("library-view").classList.add("hidden");
       document.getElementById("player-view").classList.add("hidden");
+      document.getElementById("builder-view").classList.add("hidden");
       document.getElementById("admin-view").classList.remove("hidden");
       document.getElementById("tab-admin").classList.add("active");
       document.getElementById("tab-library").classList.remove("active");
       document.getElementById("tab-player").classList.remove("active");
+      document.getElementById("tab-builder").classList.remove("active");
       packName.textContent = "管理员收藏管理";
     });
     document.getElementById("lookup-player").addEventListener("click", lookupPlayerCollection);
+    document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
+    document.getElementById("builder-player-id").addEventListener("keydown", event => { if (event.key === "Enter") loadBuilderPlayer(); });
+    document.getElementById("builder-card-search").addEventListener("input", renderBuilder);
+    document.getElementById("clear-builder").addEventListener("click", () => { deckDraft = {}; renderBuilder(); });
     playerIdInput.addEventListener("keydown", event => { if (event.key === "Enter") lookupPlayerCollection(); });
     document.getElementById("player-card-search").addEventListener("input", renderPlayerCollection);
     document.getElementById("verify-token").addEventListener("click", verifyToken);
