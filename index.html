@@ -563,7 +563,6 @@
       const cards = Object.entries(deckDraft).filter(([, quantity]) => Number(quantity) > 0)
         .map(([id, quantity]) => ({ id, quantity: Number(quantity) }));
       if (!cards.length) { setStatus(document.getElementById("local-deck-status"), "当前卡组是空的，至少加入一张卡牌后再保存。", "bad"); return; }
-      if (issues.length) { setStatus(document.getElementById("local-deck-status"), "当前构筑未通过规则检查，暂时不能保存：" + issues.join("；"), "bad"); return; }
       const name = document.getElementById("local-deck-name").value.trim();
       if (!name) { setStatus(document.getElementById("local-deck-status"), "请先填写卡组名称。", "bad"); document.getElementById("local-deck-name").focus(); return; }
       try {
@@ -574,7 +573,9 @@
         localStorage.setItem(LOCAL_DECK_STORAGE_KEY, JSON.stringify(data));
         renderLocalSavedDecks();
         document.getElementById("saved-deck-select").value = deck.id;
-        setStatus(document.getElementById("local-deck-status"), "「" + name + "」已保存在当前浏览器。没有修改玩家收藏，也没有消耗对战道具。", "good");
+        setStatus(document.getElementById("local-deck-status"), issues.length
+          ? "「" + name + "」已保存为构筑草稿（目前未通过规则检查：" + issues.join("；") + "）。没有修改玩家收藏，也没有消耗对战道具。"
+          : "「" + name + "」已保存在当前浏览器。没有修改玩家收藏，也没有消耗对战道具。", "good");
       } catch (error) {
         setStatus(document.getElementById("local-deck-status"), "保存失败：" + (error.message || "浏览器存储空间不可用。"), "bad");
       }
