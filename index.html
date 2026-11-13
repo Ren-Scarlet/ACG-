@@ -155,6 +155,7 @@
           <div class="builder-stats">
             <div class="builder-stat">礼装卡<strong id="relic-count">0</strong><small id="relic-limit">10～15 张</small></div>
             <div class="builder-stat">特殊攻击卡<strong id="special-count">0</strong><small id="special-limit">最多 5 张</small></div>
+            <div class="builder-stat">对战道具<strong id="battle-item-count">0</strong><small>确认构筑时消耗</small></div>
             <div class="builder-stat">构筑状态<strong id="builder-validity">未完成</strong><small id="builder-copy-status">同名最多 3 张</small></div>
           </div>
           <input id="builder-card-search" type="search" placeholder="搜索你拥有的卡牌……">
@@ -211,6 +212,11 @@
           <h3>超越／调律／共鸣攻击卡（单独放置）</h3>
           <p class="hint">三种特殊攻击卡合计最多放入规定数量，不计入礼装卡数量。</p>
           <section id="special-builder-list" class="grid"></section>
+        </div>
+        <div class="builder-section">
+          <h3>对战道具（消耗品）</h3>
+          <p class="hint">对战道具不计入礼装卡或特殊攻击卡数量限制。当前仅加入构筑草稿；全体共用收藏的实际扣除尚未启用。</p>
+          <section id="battle-item-builder-list" class="grid"></section>
         </div>
       </div>
     </section>
@@ -444,8 +450,11 @@
     function isSpecialAttack(card) {
       return !!deckRules && deckRules.specialAttackDeck.types.includes(card.type);
     }
+    function isBattleItem(card) {
+      return !!deckRules && card.type === deckRules.battleItemType;
+    }
     function isRelicCard(card) {
-      return !!deckRules && !isSpecialAttack(card) && card.type !== deckRules.battleItemType;
+      return !!deckRules && !isSpecialAttack(card) && !isBattleItem(card);
     }
     function copyLimitFor(card) {
       return isSpecialAttack(card) ? deckRules.specialAttackDeck.maxCopiesPerName : deckRules.relicDeck.maxCopiesPerName;
@@ -455,12 +464,13 @@
       return allCards.filter(card => card.name === name).reduce((sum, card) => sum + deckCardCount(card.id), 0);
     }
     function deckCounts() {
-      let relic = 0, special = 0;
+      let relic = 0, special = 0, battleItems = 0;
       allCards.forEach(card => {
         if (isSpecialAttack(card)) special += deckCardCount(card.id);
+        else if (isBattleItem(card)) battleItems += deckCardCount(card.id);
         else if (isRelicCard(card)) relic += deckCardCount(card.id);
       });
-      return { relic, special };
+      return { relic, special, battleItems };
     }
     function builderIssues() {
       const counts = deckCounts();
@@ -488,7 +498,8 @@
       const keyword = document.getElementById("builder-card-search").value.trim().toLowerCase();
       const relicList = document.getElementById("relic-builder-list");
       const specialList = document.getElementById("special-builder-list");
-      relicList.replaceChildren(); specialList.replaceChildren();
+      const battleItemList = document.getElementById("battle-item-builder-list");
+      relicList.replaceChildren(); specialList.replaceChildren(); battleItemList.replaceChildren();
       const ownedCards = allCards.filter(card => getCount(builderCollections, builderPlayer.id, card.id) > 0)
         .filter(card => !keyword || card.name.toLowerCase().includes(keyword));
       const makeCard = card => {
@@ -504,18 +515,21 @@
         const number = document.createElement("span"); number.textContent = deckCardCount(card.id);
         const plus = document.createElement("button"); plus.type = "button"; plus.textContent = "+"; plus.setAttribute("aria-label", "加入构筑" + card.name);
         minus.disabled = deckCardCount(card.id) <= 0;
-        plus.disabled = deckCardCount(card.id) >= getCount(builderCollections, builderPlayer.id, card.id) || deckCountForName(card.name) >= copyLimitFor(card);
+        plus.disabled = deckCardCount(card.id) >= getCount(builderCollections, builderPlayer.id, card.id) || (!isBattleItem(card) && deckCountForName(card.name) >= copyLimitFor(card));
         minus.addEventListener("click", () => { deckDraft[card.id] = Math.max(0, deckCardCount(card.id)-1); if (!deckDraft[card.id]) delete deckDraft[card.id]; renderBuilder(); });
         plus.addEventListener("click", () => { deckDraft[card.id] = deckCardCount(card.id)+1; renderBuilder(); });
         counter.append(minus, number, plus); row.append(img, info, counter); return row;
       };
       ownedCards.filter(isRelicCard).forEach(card => relicList.appendChild(makeCard(card)));
       ownedCards.filter(isSpecialAttack).forEach(card => specialList.appendChild(makeCard(card)));
+      ownedCards.filter(isBattleItem).forEach(card => battleItemList.appendChild(makeCard(card)));
       if (!relicList.children.length) relicList.innerHTML = '<div class="empty">你目前没有可构筑的礼装卡，或搜索无匹配结果。</div>';
       if (!specialList.children.length) specialList.innerHTML = '<div class="empty">你目前没有超越、调律或共鸣攻击卡。</div>';
+      if (!battleItemList.children.length) battleItemList.innerHTML = '<div class="empty">你目前没有对战道具。</div>';
       const counts = deckCounts(), issues = builderIssues();
       document.getElementById("relic-count").textContent = counts.relic;
       document.getElementById("special-count").textContent = counts.special;
+      document.getElementById("battle-item-count").textContent = counts.battleItems;
       document.getElementById("relic-limit").textContent = deckRules.relicDeck.min + "～" + deckRules.relicDeck.max + " 张";
       document.getElementById("special-limit").textContent = "最多 " + deckRules.specialAttackDeck.maxTotal + " 张";
       document.getElementById("builder-copy-status").textContent = "同名最多 " + deckRules.relicDeck.maxCopiesPerName + " 张";
