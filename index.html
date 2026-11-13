@@ -234,6 +234,11 @@
           <h3>超越／调律／共鸣攻击卡</h3>
           <section id="shared-special-list" class="grid"></section>
         </div>
+        <div class="builder-section">
+          <h3>对战道具</h3>
+          <p class="hint">独立放置，不计入礼装卡或特殊攻击卡数量限制。</p>
+          <section id="shared-battle-item-list" class="grid"></section>
+        </div>
         <button id="back-to-builder" type="button">返回卡组构筑</button>
       </div>
     </section>
@@ -748,20 +753,24 @@
         const rules = await rulesResponse.json();
         const relicList = document.getElementById("shared-relic-list");
         const specialList = document.getElementById("shared-special-list");
-        relicList.replaceChildren(); specialList.replaceChildren();
-        let relicCount = 0, specialCount = 0;
+        const battleItemList = document.getElementById("shared-battle-item-list");
+        relicList.replaceChildren(); specialList.replaceChildren(); battleItemList.replaceChildren();
+        let relicCount = 0, specialCount = 0, battleItemCount = 0;
         for (const entry of payload.cards) {
           if (!entry || typeof entry.id !== "string" || !Number.isInteger(entry.quantity) || entry.quantity < 1) throw new Error("卡组中包含无效卡牌数据。");
           const card = allCards.find(item => item.id === entry.id);
           if (!card) throw new Error("分享卡组中存在无法识别的卡牌：" + entry.id);
           if (rules.specialAttackDeck.types.includes(card.type)) {
             specialCount += entry.quantity; specialList.appendChild(renderSharedCard(card, entry.quantity));
-          } else if (card.type !== rules.battleItemType) {
+          } else if (card.type === rules.battleItemType) {
+            battleItemCount += entry.quantity; battleItemList.appendChild(renderSharedCard(card, entry.quantity));
+          } else {
             relicCount += entry.quantity; relicList.appendChild(renderSharedCard(card, entry.quantity));
           }
         }
         if (!relicList.children.length) relicList.innerHTML = '<div class="empty">这套卡组没有礼装卡。</div>';
         if (!specialList.children.length) specialList.innerHTML = '<div class="empty">这套卡组没有特殊攻击卡。</div>';
+        if (!battleItemList.children.length) battleItemList.innerHTML = '<div class="empty">这套卡组没有对战道具。</div>';
         const ruleIssues = [];
         if (relicCount < rules.relicDeck.min || relicCount > rules.relicDeck.max) ruleIssues.push("礼装卡数量不符合规则");
         if (specialCount > rules.specialAttackDeck.maxTotal) ruleIssues.push("特殊攻击卡超过上限");
@@ -769,7 +778,7 @@
           const card = allCards.find(item => item.id === entry.id);
           if (card && entry.quantity > (rules.specialAttackDeck.types.includes(card.type) ? rules.specialAttackDeck.maxCopiesPerName : rules.relicDeck.maxCopiesPerName)) ruleIssues.push("「" + card.name + "」超过同名卡上限");
         }
-        document.getElementById("shared-deck-summary").textContent = "礼装卡 " + relicCount + " 张 · 特殊攻击卡 " + specialCount + " 张" + (ruleIssues.length ? " · 预览：未通过构筑规则（" + [...new Set(ruleIssues)].join("、") + "）" : " · 符合当前构筑规则");
+        document.getElementById("shared-deck-summary").textContent = "礼装卡 " + relicCount + " 张 · 特殊攻击卡 " + specialCount + " 张 · 对战道具 " + battleItemCount + " 张" + (ruleIssues.length ? " · 预览：未通过构筑规则（" + [...new Set(ruleIssues)].join("、") + "）" : " · 符合当前构筑规则");
         document.getElementById("library-view").classList.add("hidden");
         document.getElementById("player-view").classList.add("hidden");
         document.getElementById("builder-view").classList.add("hidden");
