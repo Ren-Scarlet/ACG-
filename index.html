@@ -18,7 +18,7 @@
     button.active, button.primary { background:#5967a5; border-color:#7181c7; }
     button:disabled { opacity:.4; cursor:not-allowed; }
     input, select { width:100%; padding:11px 12px; border:1px solid #41475d; border-radius:9px; background:#222536; color:#f5f5f5; font-size:14px; }
-    .toolbar { display:grid; grid-template-columns:minmax(180px,1fr) 150px 150px; gap:10px; margin-bottom:18px; }
+    .toolbar { display:grid; grid-template-columns:minmax(180px,1fr) repeat(3,minmax(130px,150px)); gap:10px; margin-bottom:18px; }
     .summary { margin:0 0 14px; color:#a6abc0; font-size:14px; }
     .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:16px; }
     .card { overflow:hidden; background:#222536; border:1px solid #383d50; border-radius:12px; }
@@ -105,6 +105,7 @@
     <section id="library-view">
       <section class="toolbar" aria-label="卡牌筛选">
         <input id="search" type="search" placeholder="搜索卡牌名称或效果……">
+        <select id="pack-filter"><option value="">全部卡包</option></select>
         <select id="star-filter"><option value="">全部星级</option><option value="3">3星</option><option value="4">4星</option><option value="5">5星</option></select>
         <select id="type-filter"><option value="">全部类型</option></select>
       </section>
@@ -344,9 +345,10 @@
 
     function renderCards() {
       const keyword = searchInput.value.trim().toLowerCase();
-      const star = starFilter.value, type = typeFilter.value;
+      const star = starFilter.value, type = typeFilter.value, pack = document.getElementById("pack-filter").value;
       const filtered = allCards.filter(card =>
         (!keyword || card.name.toLowerCase().includes(keyword) || card.effect.toLowerCase().includes(keyword)) &&
+        (!pack || card.pack_id === pack) &&
         (!star || String(card.star) === star) && (!type || card.type === type)
       );
       summary.textContent = `显示 ${filtered.length} / ${allCards.length} 张卡牌`;
@@ -952,6 +954,7 @@
     searchInput.addEventListener("input", renderCards);
     starFilter.addEventListener("change", renderCards);
     typeFilter.addEventListener("change", renderCards);
+    document.getElementById("pack-filter").addEventListener("change", renderCards);
 
     async function loadData() {
       try {
@@ -962,8 +965,12 @@
         allCards = await cardsResponse.json();
         const packs = await packsResponse.json();
         allPlayers = await playersResponse.json();
-        const firstPack = packs.find(pack => pack.id === "pack_001");
-        if (firstPack) packName.textContent = firstPack.name + " · 概念礼装图鉴";
+        const packFilter = document.getElementById("pack-filter");
+        packs.forEach(pack => {
+          const option = document.createElement("option");
+          option.value = pack.id; option.textContent = pack.name;
+          packFilter.appendChild(option);
+        });
         [...new Set(allCards.map(card => card.type))].sort().forEach(type => {
           const option = document.createElement("option"); option.value = type; option.textContent = type; typeFilter.appendChild(option);
         });
