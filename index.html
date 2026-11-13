@@ -507,19 +507,21 @@
     }
     function generateDeckLink() {
       const issues = builderIssues();
-      if (issues.length) {
-        setStatus(document.getElementById("builder-validation"), "当前构筑尚未通过规则检查，暂时不能生成分享链接：" + issues.join("；"), "bad");
-        return;
-      }
       const cards = Object.entries(deckDraft)
         .filter(([, quantity]) => Number(quantity) > 0)
         .map(([id, quantity]) => ({ id, quantity: Number(quantity) }));
-      if (!cards.length) return;
-      const encoded = encodeDeckPayload({ version: 1, cards });
+      if (!cards.length) {
+        setStatus(document.getElementById("deck-share-status"), "请先至少加入一张卡牌。", "bad");
+        document.getElementById("deck-share-area").classList.remove("hidden");
+        return;
+      }
+      const encoded = encodeDeckPayload({ version: 1, cards, valid: issues.length === 0 });
       const link = window.location.origin + window.location.pathname + "#deck=" + encoded;
       document.getElementById("deck-share-link").value = link;
       document.getElementById("deck-share-area").classList.remove("hidden");
-      setStatus(document.getElementById("deck-share-status"), "链接已生成。分享后，对方可以直接查看卡组。", "good");
+      setStatus(document.getElementById("deck-share-status"), issues.length
+        ? "已生成预览链接（当前构筑未通过规则检查）。正式构筑仍需先满足规则：" + issues.join("；")
+        : "链接已生成。分享后，对方可以直接查看卡组。", issues.length ? "bad" : "good");
     }
     async function copyDeckLink() {
       const field = document.getElementById("deck-share-link");
@@ -564,7 +566,14 @@
         }
         if (!relicList.children.length) relicList.innerHTML = '<div class="empty">这套卡组没有礼装卡。</div>';
         if (!specialList.children.length) specialList.innerHTML = '<div class="empty">这套卡组没有特殊攻击卡。</div>';
-        document.getElementById("shared-deck-summary").textContent = "礼装卡 " + relicCount + " 张 · 特殊攻击卡 " + specialCount + " 张";
+        const ruleIssues = [];
+        if (relicCount < rules.relicDeck.min || relicCount > rules.relicDeck.max) ruleIssues.push("礼装卡数量不符合规则");
+        if (specialCount > rules.specialAttackDeck.maxTotal) ruleIssues.push("特殊攻击卡超过上限");
+        for (const entry of payload.cards) {
+          const card = allCards.find(item => item.id === entry.id);
+          if (card && entry.quantity > (rules.specialAttackDeck.types.includes(card.type) ? rules.specialAttackDeck.maxCopiesPerName : rules.relicDeck.maxCopiesPerName)) ruleIssues.push("「" + card.name + "」超过同名卡上限");
+        }
+        document.getElementById("shared-deck-summary").textContent = "礼装卡 " + relicCount + " 张 · 特殊攻击卡 " + specialCount + " 张" + (ruleIssues.length ? " · 预览：未通过构筑规则（" + [...new Set(ruleIssues)].join("、") + "）" : " · 符合当前构筑规则");
         document.getElementById("library-view").classList.add("hidden");
         document.getElementById("player-view").classList.add("hidden");
         document.getElementById("builder-view").classList.add("hidden");
