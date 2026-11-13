@@ -346,11 +346,13 @@
     function renderCards() {
       const keyword = searchInput.value.trim().toLowerCase();
       const star = starFilter.value, type = typeFilter.value, pack = document.getElementById("pack-filter").value;
-      const filtered = allCards.filter(card =>
-        (!keyword || card.name.toLowerCase().includes(keyword) || card.effect.toLowerCase().includes(keyword)) &&
-        (!pack || card.pack_id === pack) &&
-        (!star || String(card.star) === star) && (!type || card.type === type)
-      );
+      const filtered = allCards.filter(card => {
+        const packName = allPacks.find(item => item.id === card.pack_id)?.name || "";
+        const matchesKeyword = !keyword || [card.name, card.effect, card.type, packName, ...(card.tags || [])]
+          .some(value => String(value).toLowerCase().includes(keyword));
+        return matchesKeyword && (!pack || card.pack_id === pack) &&
+          (!star || String(card.star) === star) && (!type || card.type === type);
+      });
       summary.textContent = `显示 ${filtered.length} / ${allCards.length} 张卡牌`;
       cardList.replaceChildren();
       if (!filtered.length) { cardList.innerHTML = '<div class="empty">没有找到符合条件的卡牌。</div>'; return; }
@@ -382,7 +384,8 @@
         const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "admin-card-main";
         const name = document.createElement("strong"); name.textContent = card.name;
-        const meta = document.createElement("small"); meta.textContent = card.star + "星 · " + card.type;
+        const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
+        const meta = document.createElement("small"); meta.textContent = packName + " · " + card.star + "星 · " + card.type;
         info.append(name, meta);
         const counter = document.createElement("div"); counter.className = "counter";
         const minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−"; minus.setAttribute("aria-label", "减少" + card.name);
