@@ -453,7 +453,7 @@
       if (!filtered.length) { cardList.innerHTML = '<div class="empty">没有找到符合条件的卡牌。</div>'; return; }
       filtered.forEach(card => {
         const article = document.createElement("article"); article.className = "card";
-        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "card-info";
         const title = document.createElement("div"); title.className = "card-title";
         const name = document.createElement("h3"); name.textContent = card.name;
@@ -476,7 +476,7 @@
       document.getElementById("admin-summary").textContent = `${playerSelect.selectedOptions[0]?.textContent || ""} · ${filtered.length} 张卡牌 · 收藏总数 ${total}`;
       filtered.forEach(card => {
         const row = document.createElement("article"); row.className = "admin-card";
-        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "admin-card-main";
         const name = document.createElement("strong"); name.textContent = card.name;
         const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
@@ -507,7 +507,7 @@
       }
       owned.forEach(card => {
         const row = document.createElement("article"); row.className = "player-card";
-        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "player-card-main";
         const name = document.createElement("strong"); name.textContent = card.name;
         const meta = document.createElement("small"); meta.textContent = card.star + "星 · " + card.type;
@@ -613,7 +613,7 @@
       }
       selected.forEach(card => {
         const row = document.createElement("article"); row.className = "builder-card";
-        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "builder-card-main";
         const name = document.createElement("strong"); name.textContent = card.name;
         const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
@@ -650,7 +650,7 @@
         });
       const makeCard = card => {
         const row = document.createElement("article"); row.className = "builder-card";
-        const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+        const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "builder-card-main";
         const name = document.createElement("strong"); name.textContent = card.name;
         const meta = document.createElement("small");
@@ -879,7 +879,7 @@
     }
     function renderSharedCard(card, quantity) {
       const row = document.createElement("article"); row.className = "shared-card";
-      const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+      const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
       const info = document.createElement("div"); info.className = "shared-card-main";
       const name = document.createElement("strong"); name.textContent = card.name;
       const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
@@ -1415,8 +1415,11 @@
 
     async function loadData() {
       try {
+        const cacheBust = "?v=" + Date.now();
         const [cardsResponse, packsResponse, playersResponse] = await Promise.all([
-          fetch("./data/cards.json"), fetch("./data/packs.json"), fetch("./data/players.json")
+          fetch("./data/cards.json" + cacheBust, { cache: "no-store" }),
+          fetch("./data/packs.json" + cacheBust, { cache: "no-store" }),
+          fetch("./data/players.json" + cacheBust, { cache: "no-store" })
         ]);
         if (!cardsResponse.ok || !packsResponse.ok || !playersResponse.ok) throw new Error("无法读取数据文件");
         allCards = await cardsResponse.json();
