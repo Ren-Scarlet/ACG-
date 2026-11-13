@@ -163,6 +163,34 @@
             <button id="generate-deck-link" type="button">生成分享链接</button>
             <span id="builder-validation" class="status">先选择卡牌开始构筑。</span>
           </div>
+          <div class="panel" style="margin-top:14px;margin-bottom:0">
+            <h3>本地保存的卡组</h3>
+            <p class="hint">卡组只保存在当前浏览器中，不会上传到 GitHub。请先为当前卡组填写名称，再点击保存。</p>
+            <div class="admin-top" style="margin-top:12px">
+              <div class="field">
+                <label for="local-deck-name">卡组名称</label>
+                <input id="local-deck-name" type="text" maxlength="40" placeholder="例如：妹红主力卡组">
+              </div>
+              <div class="field">
+                <label>保存当前构筑</label>
+                <button id="save-local-deck" class="primary" type="button">保存卡组</button>
+              </div>
+            </div>
+            <div class="admin-top" style="margin-top:12px">
+              <div class="field">
+                <label for="saved-deck-select">已保存的卡组</label>
+                <select id="saved-deck-select"><option value="">暂无已保存卡组</option></select>
+              </div>
+              <div class="field">
+                <label>读取或删除</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button id="load-local-deck" type="button">读取卡组</button>
+                  <button id="delete-local-deck" type="button">删除卡组</button>
+                </div>
+              </div>
+            </div>
+            <p id="local-deck-status" class="status" style="margin-top:10px">卡组保存在当前浏览器。</p>
+          </div>
           <div id="deck-share-area" class="hidden">
             <p class="hint">分享链接已生成。任何获得链接的人都可以查看这套卡组。</p>
             <div class="share-output">
@@ -265,6 +293,7 @@
     let builderPlayer = null;
     let builderCollections = [];
     let deckDraft = {};
+    const LOCAL_DECK_STORAGE_KEY = "acg_card_builder_saved_decks_v1";
     const playerSelect = document.getElementById("player-select");
     const adminSearch = document.getElementById("admin-search");
     const authStatus = document.getElementById("auth-status");
@@ -492,6 +521,105 @@
       document.getElementById("builder-validity").className = issues.length ? "rule-warning" : "";
       setStatus(document.getElementById("builder-validation"), issues.length ? issues.join("；") : "当前构筑符合数量限制。", issues.length ? "bad" : "good");
     }
+    function getLocalSavedDecks() {
+      try {
+        const raw = localStorage.getItem(LOCAL_DECK_STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : {};
+        return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+      } catch (error) {
+        throw new Error("无法读取浏览器中的本地卡组数据。");
+      }
+    }
+    function renderLocalSavedDecks() {
+      const select = document.getElementById("saved-deck-select");
+      const status = document.getElementById("local-deck-status");
+      select.replaceChildren();
+      if (!builderPlayer) {
+        const option = document.createElement("option"); option.value = ""; option.textContent = "请先读取玩家收藏"; select.appendChild(option);
+        return;
+      }
+      try {
+        const decks = getLocalSavedDecks()[builderPlayer.id] || [];
+        if (!Array.isArray(decks) || !decks.length) {
+          const option = document.createElement("option"); option.value = ""; option.textContent = "暂无已保存卡组"; select.appendChild(option);
+          setStatus(status, "该玩家在当前浏览器中还没有保存过卡组。");
+          return;
+        }
+        decks.slice().sort((a, b) => Number(b.savedAt || 0) - Number(a.savedAt || 0)).forEach(deck => {
+          const option = document.createElement("option");
+          option.value = deck.id;
+          option.textContent = deck.name + "（" + (Array.isArray(deck.cards) ? deck.cards.reduce((sum, card) => sum + Number(card.quantity || 0), 0) : 0) + " 张）";
+          select.appendChild(option);
+        });
+        setStatus(status, "找到 " + decks.length + " 套本地保存的卡组。");
+      } catch (error) {
+        const option = document.createElement("option"); option.value = ""; option.textContent = "读取失败"; select.appendChild(option);
+        setStatus(status, error.message, "bad");
+      }
+    }
+    function saveLocalDeck() {
+      if (!builderPlayer) { setStatus(document.getElementById("local-deck-status"), "请先读取玩家收藏。", "bad"); return; }
+      const issues = builderIssues();
+      const cards = Object.entries(deckDraft).filter(([, quantity]) => Number(quantity) > 0)
+        .map(([id, quantity]) => ({ id, quantity: Number(quantity) }));
+      if (!cards.length) { setStatus(document.getElementById("local-deck-status"), "当前卡组是空的，至少加入一张卡牌后再保存。", "bad"); return; }
+      if (issues.length) { setStatus(document.getElementById("local-deck-status"), "当前构筑未通过规则检查，暂时不能保存：" + issues.join("；"), "bad"); return; }
+      const name = document.getElementById("local-deck-name").value.trim();
+      if (!name) { setStatus(document.getElementById("local-deck-status"), "请先填写卡组名称。", "bad"); document.getElementById("local-deck-name").focus(); return; }
+      try {
+        const data = getLocalSavedDecks();
+        if (!Array.isArray(data[builderPlayer.id])) data[builderPlayer.id] = [];
+        const deck = { id: String(Date.now()), name, cards, savedAt: Date.now() };
+        data[builderPlayer.id].push(deck);
+        localStorage.setItem(LOCAL_DECK_STORAGE_KEY, JSON.stringify(data));
+        renderLocalSavedDecks();
+        document.getElementById("saved-deck-select").value = deck.id;
+        setStatus(document.getElementById("local-deck-status"), "「" + name + "」已保存在当前浏览器。没有修改玩家收藏，也没有消耗对战道具。", "good");
+      } catch (error) {
+        setStatus(document.getElementById("local-deck-status"), "保存失败：" + (error.message || "浏览器存储空间不可用。"), "bad");
+      }
+    }
+    function loadLocalDeck() {
+      if (!builderPlayer) { setStatus(document.getElementById("local-deck-status"), "请先读取玩家收藏。", "bad"); return; }
+      const selectedId = document.getElementById("saved-deck-select").value;
+      if (!selectedId) { setStatus(document.getElementById("local-deck-status"), "请先选择一套已保存的卡组。", "bad"); return; }
+      try {
+        const decks = getLocalSavedDecks()[builderPlayer.id] || [];
+        const deck = decks.find(item => item.id === selectedId);
+        if (!deck || !Array.isArray(deck.cards)) throw new Error("找不到这套卡组，可能已经被删除。");
+        const nextDraft = {};
+        for (const entry of deck.cards) {
+          if (!entry || typeof entry.id !== "string" || !Number.isInteger(entry.quantity) || entry.quantity < 1 || !allCards.some(card => card.id === entry.id)) {
+            throw new Error("保存的数据包含无效卡牌，无法读取。");
+          }
+          nextDraft[entry.id] = (nextDraft[entry.id] || 0) + entry.quantity;
+        }
+        deckDraft = nextDraft;
+        renderBuilder();
+        document.getElementById("deck-share-area").classList.add("hidden");
+        setStatus(document.getElementById("local-deck-status"), "已读取「" + deck.name + "」。如果收藏数量或规则后来发生变化，请留意构筑检查结果。", "good");
+      } catch (error) {
+        setStatus(document.getElementById("local-deck-status"), "读取失败：" + error.message, "bad");
+      }
+    }
+    function deleteLocalDeck() {
+      if (!builderPlayer) { setStatus(document.getElementById("local-deck-status"), "请先读取玩家收藏。", "bad"); return; }
+      const selectedId = document.getElementById("saved-deck-select").value;
+      if (!selectedId) { setStatus(document.getElementById("local-deck-status"), "请先选择要删除的卡组。", "bad"); return; }
+      try {
+        const data = getLocalSavedDecks();
+        const decks = Array.isArray(data[builderPlayer.id]) ? data[builderPlayer.id] : [];
+        const target = decks.find(item => item.id === selectedId);
+        if (!target) throw new Error("找不到这套卡组。");
+        data[builderPlayer.id] = decks.filter(item => item.id !== selectedId);
+        localStorage.setItem(LOCAL_DECK_STORAGE_KEY, JSON.stringify(data));
+        renderLocalSavedDecks();
+        setStatus(document.getElementById("local-deck-status"), "已删除本地卡组「" + target.name + "」。这不会影响玩家收藏。", "good");
+      } catch (error) {
+        setStatus(document.getElementById("local-deck-status"), "删除失败：" + error.message, "bad");
+      }
+    }
+
     function encodeDeckPayload(payload) {
       const bytes = new TextEncoder().encode(JSON.stringify(payload));
       let binary = "";
@@ -606,6 +734,7 @@
         deckRules = await rulesResponse.json();
         if (!Array.isArray(builderCollections)) throw new Error("收藏数据格式不正确。");
         builderPlayer = player; deckDraft = {};
+        renderLocalSavedDecks();
         document.getElementById("builder-player-name").textContent = player.id + " · " + player.name;
         document.getElementById("builder-rules-text").textContent = "测试版规则：礼装卡 " + deckRules.relicDeck.min + "～" + deckRules.relicDeck.max + " 张；超越、调律、共鸣攻击卡合计最多 " + deckRules.specialAttackDeck.maxTotal + " 张；同名卡最多 " + deckRules.relicDeck.maxCopiesPerName + " 张。";
         document.getElementById("builder-workspace").classList.remove("hidden");
@@ -722,6 +851,9 @@
     document.getElementById("clear-builder").addEventListener("click", () => { deckDraft = {}; renderBuilder(); document.getElementById("deck-share-area").classList.add("hidden"); });
     document.getElementById("generate-deck-link").addEventListener("click", generateDeckLink);
     document.getElementById("copy-deck-link").addEventListener("click", copyDeckLink);
+    document.getElementById("save-local-deck").addEventListener("click", saveLocalDeck);
+    document.getElementById("load-local-deck").addEventListener("click", loadLocalDeck);
+    document.getElementById("delete-local-deck").addEventListener("click", deleteLocalDeck);
     document.getElementById("back-to-builder").addEventListener("click", () => {
       document.getElementById("shared-deck-view").classList.add("hidden");
       document.getElementById("builder-view").classList.remove("hidden");
