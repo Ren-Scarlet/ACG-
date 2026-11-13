@@ -185,6 +185,8 @@
                 <label>读取或删除</label>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                   <button id="load-local-deck" type="button">读取卡组</button>
+                  <button id="overwrite-local-deck" type="button">覆盖保存</button>
+                  <button id="rename-local-deck" type="button">修改名称</button>
                   <button id="delete-local-deck" type="button">删除卡组</button>
                 </div>
               </div>
@@ -596,13 +598,64 @@
           nextDraft[entry.id] = (nextDraft[entry.id] || 0) + entry.quantity;
         }
         deckDraft = nextDraft;
+        document.getElementById("local-deck-name").value = deck.name;
         renderBuilder();
         document.getElementById("deck-share-area").classList.add("hidden");
-        setStatus(document.getElementById("local-deck-status"), "已读取「" + deck.name + "」。如果收藏数量或规则后来发生变化，请留意构筑检查结果。", "good");
+        setStatus(document.getElementById("local-deck-status"), "已读取「" + deck.name + "」。修改后可用「覆盖保存」更新原卡组，或用「保存卡组」另存一份。", "good");
       } catch (error) {
         setStatus(document.getElementById("local-deck-status"), "读取失败：" + error.message, "bad");
       }
     }
+    function overwriteLocalDeck() {
+      if (!builderPlayer) { setStatus(document.getElementById("local-deck-status"), "请先读取玩家收藏。", "bad"); return; }
+      const selectedId = document.getElementById("saved-deck-select").value;
+      if (!selectedId) { setStatus(document.getElementById("local-deck-status"), "请先选择要覆盖的卡组。", "bad"); return; }
+      const cards = Object.entries(deckDraft).filter(([, quantity]) => Number(quantity) > 0)
+        .map(([id, quantity]) => ({ id, quantity: Number(quantity) }));
+      if (!cards.length) { setStatus(document.getElementById("local-deck-status"), "当前构筑为空，不能覆盖已保存卡组。", "bad"); return; }
+      try {
+        const data = getLocalSavedDecks();
+        const decks = Array.isArray(data[builderPlayer.id]) ? data[builderPlayer.id] : [];
+        const index = decks.findIndex(item => item.id === selectedId);
+        if (index < 0) throw new Error("找不到要覆盖的卡组。");
+        const name = document.getElementById("local-deck-name").value.trim() || decks[index].name;
+        decks[index] = { ...decks[index], name, cards, savedAt: Date.now() };
+        data[builderPlayer.id] = decks;
+        localStorage.setItem(LOCAL_DECK_STORAGE_KEY, JSON.stringify(data));
+        renderLocalSavedDecks();
+        document.getElementById("saved-deck-select").value = selectedId;
+        const issues = builderIssues();
+        setStatus(document.getElementById("local-deck-status"), issues.length
+          ? "已覆盖保存为构筑草稿（目前未通过规则检查：" + issues.join("；") + "）。"
+          : "已覆盖更新「" + name + "」。没有修改玩家收藏，也没有消耗对战道具。", "good");
+      } catch (error) {
+        setStatus(document.getElementById("local-deck-status"), "覆盖保存失败：" + error.message, "bad");
+      }
+    }
+    function renameLocalDeck() {
+      if (!builderPlayer) { setStatus(document.getElementById("local-deck-status"), "请先读取玩家收藏。", "bad"); return; }
+      const selectedId = document.getElementById("saved-deck-select").value;
+      const name = document.getElementById("local-deck-name").value.trim();
+      if (!selectedId) { setStatus(document.getElementById("local-deck-status"), "请先选择要改名的卡组。", "bad"); return; }
+      if (!name) { setStatus(document.getElementById("local-deck-status"), "请先填写新的卡组名称。", "bad"); document.getElementById("local-deck-name").focus(); return; }
+      try {
+        const data = getLocalSavedDecks();
+        const decks = Array.isArray(data[builderPlayer.id]) ? data[builderPlayer.id] : [];
+        const deck = decks.find(item => item.id === selectedId);
+        if (!deck) throw new Error("找不到要改名的卡组。");
+        const oldName = deck.name;
+        deck.name = name;
+        deck.savedAt = Date.now();
+        data[builderPlayer.id] = decks;
+        localStorage.setItem(LOCAL_DECK_STORAGE_KEY, JSON.stringify(data));
+        renderLocalSavedDecks();
+        document.getElementById("saved-deck-select").value = selectedId;
+        setStatus(document.getElementById("local-deck-status"), "已将「" + oldName + "」改名为「" + name + "」。卡牌内容没有改变。", "good");
+      } catch (error) {
+        setStatus(document.getElementById("local-deck-status"), "修改名称失败：" + error.message, "bad");
+      }
+    }
+
     function deleteLocalDeck() {
       if (!builderPlayer) { setStatus(document.getElementById("local-deck-status"), "请先读取玩家收藏。", "bad"); return; }
       const selectedId = document.getElementById("saved-deck-select").value;
@@ -854,6 +907,8 @@
     document.getElementById("copy-deck-link").addEventListener("click", copyDeckLink);
     document.getElementById("save-local-deck").addEventListener("click", saveLocalDeck);
     document.getElementById("load-local-deck").addEventListener("click", loadLocalDeck);
+    document.getElementById("overwrite-local-deck").addEventListener("click", overwriteLocalDeck);
+    document.getElementById("rename-local-deck").addEventListener("click", renameLocalDeck);
     document.getElementById("delete-local-deck").addEventListener("click", deleteLocalDeck);
     document.getElementById("back-to-builder").addEventListener("click", () => {
       document.getElementById("shared-deck-view").classList.add("hidden");
