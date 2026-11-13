@@ -69,6 +69,13 @@
     .builder-count button { width:32px; height:32px; padding:0; font-size:19px; }
     .builder-count span { min-width:18px; text-align:center; font-weight:bold; }
     .rule-warning { color:#ffb2a8; }
+    .share-output { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:10px; }
+    .shared-card { display:flex; gap:10px; align-items:center; padding:9px; background:#222536; border:1px solid #383d50; border-radius:10px; }
+    .shared-card img { width:54px; aspect-ratio:5/7; object-fit:contain; background:#11131b; border-radius:5px; }
+    .shared-card-main { flex:1; min-width:0; }
+    .shared-card-main strong,.shared-card-main small { display:block; }
+    .shared-card-main small { color:#a6abc0; margin-top:4px; }
+    @media(max-width:700px) { .share-output { grid-template-columns:1fr; } }
     @media(max-width:700px) { .builder-stats { grid-template-columns:1fr 1fr 1fr; gap:6px; } .builder-stat { padding:9px; font-size:12px; } .builder-stat strong { font-size:17px; } .builder-card { gap:7px; padding:7px; } .builder-card img { width:46px; } .builder-count { gap:4px; } .builder-count button { width:29px; height:29px; } }
     @media(max-width:700px) { .player-search { grid-template-columns:1fr; } .player-card { gap:8px; padding:8px; } .player-card img { width:54px; } }
     .status { color:#a6abc0; font-size:13px; }
@@ -153,7 +160,16 @@
           <input id="builder-card-search" type="search" placeholder="搜索你拥有的卡牌……">
           <div class="save-row">
             <button id="clear-builder" type="button">清空当前构筑</button>
+            <button id="generate-deck-link" type="button">生成分享链接</button>
             <span id="builder-validation" class="status">先选择卡牌开始构筑。</span>
+          </div>
+          <div id="deck-share-area" class="hidden">
+            <p class="hint">分享链接已生成。任何获得链接的人都可以查看这套卡组。</p>
+            <div class="share-output">
+              <input id="deck-share-link" type="text" readonly aria-label="卡组分享链接">
+              <button id="copy-deck-link" type="button">复制链接</button>
+            </div>
+            <p id="deck-share-status" class="status" style="margin-top:8px"></p>
           </div>
         </div>
         <div class="builder-section">
@@ -166,6 +182,23 @@
           <p class="hint">三种特殊攻击卡合计最多放入规定数量，不计入礼装卡数量。</p>
           <section id="special-builder-list" class="grid"></section>
         </div>
+      </div>
+    </section>
+
+
+    <section id="shared-deck-view" class="hidden">
+      <div class="panel">
+        <h3>分享的卡组</h3>
+        <p class="hint" id="shared-deck-summary"></p>
+        <div class="builder-section">
+          <h3>礼装卡（主卡组）</h3>
+          <section id="shared-relic-list" class="grid"></section>
+        </div>
+        <div class="builder-section">
+          <h3>超越／调律／共鸣攻击卡</h3>
+          <section id="shared-special-list" class="grid"></section>
+        </div>
+        <button id="back-to-builder" type="button">返回卡组构筑</button>
       </div>
     </section>
 
@@ -459,6 +492,93 @@
       document.getElementById("builder-validity").className = issues.length ? "rule-warning" : "";
       setStatus(document.getElementById("builder-validation"), issues.length ? issues.join("；") : "当前构筑符合数量限制。", issues.length ? "bad" : "good");
     }
+    function encodeDeckPayload(payload) {
+      const bytes = new TextEncoder().encode(JSON.stringify(payload));
+      let binary = "";
+      bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+    function decodeDeckPayload(encoded) {
+      let base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+      while (base64.length % 4) base64 += "=";
+      const binary = atob(base64);
+      const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    }
+    function generateDeckLink() {
+      const issues = builderIssues();
+      if (issues.length) {
+        setStatus(document.getElementById("builder-validation"), "当前构筑尚未通过规则检查，暂时不能生成分享链接：" + issues.join("；"), "bad");
+        return;
+      }
+      const cards = Object.entries(deckDraft)
+        .filter(([, quantity]) => Number(quantity) > 0)
+        .map(([id, quantity]) => ({ id, quantity: Number(quantity) }));
+      if (!cards.length) return;
+      const encoded = encodeDeckPayload({ version: 1, cards });
+      const link = window.location.origin + window.location.pathname + "#deck=" + encoded;
+      document.getElementById("deck-share-link").value = link;
+      document.getElementById("deck-share-area").classList.remove("hidden");
+      setStatus(document.getElementById("deck-share-status"), "链接已生成。分享后，对方可以直接查看卡组。", "good");
+    }
+    async function copyDeckLink() {
+      const field = document.getElementById("deck-share-link");
+      try {
+        await navigator.clipboard.writeText(field.value);
+        setStatus(document.getElementById("deck-share-status"), "已复制分享链接。", "good");
+      } catch (error) {
+        field.focus(); field.select();
+        setStatus(document.getElementById("deck-share-status"), "浏览器未允许自动复制，请手动复制上方链接。");
+      }
+    }
+    function renderSharedCard(card, quantity) {
+      const row = document.createElement("article"); row.className = "shared-card";
+      const img = document.createElement("img"); img.src = card.image; img.alt = card.name; img.loading = "lazy";
+      const info = document.createElement("div"); info.className = "shared-card-main";
+      const name = document.createElement("strong"); name.textContent = card.name;
+      const meta = document.createElement("small"); meta.textContent = card.star + "星 · " + card.type + " · × " + quantity;
+      info.append(name, meta); row.append(img, info); return row;
+    }
+    async function openSharedDeckFromUrl() {
+      const match = window.location.hash.match(/^#deck=([A-Za-z0-9_-]+)$/);
+      if (!match) return false;
+      try {
+        const payload = decodeDeckPayload(match[1]);
+        if (!payload || payload.version !== 1 || !Array.isArray(payload.cards) || !payload.cards.length) throw new Error("分享数据格式不正确。");
+        const rulesResponse = await fetch("./data/deck_rules.json?refresh=" + Date.now(), {cache:"no-store"});
+        if (!rulesResponse.ok) throw new Error("无法读取构筑规则。");
+        const rules = await rulesResponse.json();
+        const relicList = document.getElementById("shared-relic-list");
+        const specialList = document.getElementById("shared-special-list");
+        relicList.replaceChildren(); specialList.replaceChildren();
+        let relicCount = 0, specialCount = 0;
+        for (const entry of payload.cards) {
+          if (!entry || typeof entry.id !== "string" || !Number.isInteger(entry.quantity) || entry.quantity < 1) throw new Error("卡组中包含无效卡牌数据。");
+          const card = allCards.find(item => item.id === entry.id);
+          if (!card) throw new Error("分享卡组中存在无法识别的卡牌：" + entry.id);
+          if (rules.specialAttackDeck.types.includes(card.type)) {
+            specialCount += entry.quantity; specialList.appendChild(renderSharedCard(card, entry.quantity));
+          } else if (card.type !== rules.battleItemType) {
+            relicCount += entry.quantity; relicList.appendChild(renderSharedCard(card, entry.quantity));
+          }
+        }
+        if (!relicList.children.length) relicList.innerHTML = '<div class="empty">这套卡组没有礼装卡。</div>';
+        if (!specialList.children.length) specialList.innerHTML = '<div class="empty">这套卡组没有特殊攻击卡。</div>';
+        document.getElementById("shared-deck-summary").textContent = "礼装卡 " + relicCount + " 张 · 特殊攻击卡 " + specialCount + " 张";
+        document.getElementById("library-view").classList.add("hidden");
+        document.getElementById("player-view").classList.add("hidden");
+        document.getElementById("builder-view").classList.add("hidden");
+        document.getElementById("admin-view").classList.add("hidden");
+        document.getElementById("shared-deck-view").classList.remove("hidden");
+        document.querySelectorAll(".tabs button").forEach(button => button.classList.remove("active"));
+        packName.textContent = "分享的卡组";
+        return true;
+      } catch (error) {
+        alert("无法打开这套分享卡组：" + error.message);
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+        return false;
+      }
+    }
     async function loadBuilderPlayer() {
       const id = document.getElementById("builder-player-id").value.trim().toUpperCase();
       const status = document.getElementById("builder-status");
@@ -590,7 +710,16 @@
     document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
     document.getElementById("builder-player-id").addEventListener("keydown", event => { if (event.key === "Enter") loadBuilderPlayer(); });
     document.getElementById("builder-card-search").addEventListener("input", renderBuilder);
-    document.getElementById("clear-builder").addEventListener("click", () => { deckDraft = {}; renderBuilder(); });
+    document.getElementById("clear-builder").addEventListener("click", () => { deckDraft = {}; renderBuilder(); document.getElementById("deck-share-area").classList.add("hidden"); });
+    document.getElementById("generate-deck-link").addEventListener("click", generateDeckLink);
+    document.getElementById("copy-deck-link").addEventListener("click", copyDeckLink);
+    document.getElementById("back-to-builder").addEventListener("click", () => {
+      document.getElementById("shared-deck-view").classList.add("hidden");
+      document.getElementById("builder-view").classList.remove("hidden");
+      document.getElementById("tab-builder").classList.add("active");
+      packName.textContent = "卡组构筑";
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    });
     playerIdInput.addEventListener("keydown", event => { if (event.key === "Enter") lookupPlayerCollection(); });
     document.getElementById("player-card-search").addEventListener("input", renderPlayerCollection);
     document.getElementById("verify-token").addEventListener("click", verifyToken);
@@ -622,6 +751,7 @@
           const option = document.createElement("option"); option.value = player.id; option.textContent = player.id + " · " + player.name; playerSelect.appendChild(option);
         });
         renderCards();
+        await openSharedDeckFromUrl();
       } catch (error) {
         summary.textContent = "卡牌资料读取失败";
         cardList.innerHTML = '<div class="error">读取失败。请稍后刷新网页，或检查 data 文件是否存在。</div>';
