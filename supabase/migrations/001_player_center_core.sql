@@ -399,6 +399,53 @@ begin
 end;
 $$;
 
+
+-- Re-check collection and draw achievements whenever their source data changes.
+create or replace function public.on_player_progress_changed()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_user_id uuid;
+begin
+  if tg_op = 'DELETE' then
+    v_user_id := old.user_id;
+  else
+    v_user_id := new.user_id;
+  end if;
+  perform public.check_player_achievements(v_user_id);
+  if tg_op = 'DELETE' then return old; else return new; end if;
+end;
+$;
+
+do $
+begin
+  if not exists (
+    select 1 from pg_trigger
+    where tgname = 'card_inventory_progress_changed'
+      and tgrelid = 'public.card_inventory'::regclass
+      and not tgisinternal
+  ) then
+    create trigger card_inventory_progress_changed
+    after insert or update or delete on public.card_inventory
+    for each row execute function public.on_player_progress_changed();
+  end if;
+
+  if not exists (
+    select 1 from pg_trigger
+    where tgname = 'card_draws_progress_changed'
+      and tgrelid = 'public.card_draws'::regclass
+      and not tgisinternal
+  ) then
+    create trigger card_draws_progress_changed
+    after insert on public.card_draws
+    for each row execute function public.on_player_progress_changed();
+  end if;
+end
+$;
+
 -- Remove direct client-side write privileges from protected player data.
 revoke insert, update, delete, truncate, references, trigger
   on public.profiles, public.player_stats, public.card_inventory,
