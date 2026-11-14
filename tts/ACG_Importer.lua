@@ -128,22 +128,37 @@ local function ACG_spawnCard(card, index, onDone)
     local faceUrl = ACG_absoluteImageUrl(card.image)
     local backUrl = ACG_CARD_BACK_URL ~= "" and ACG_CARD_BACK_URL or faceUrl
 
-    spawnObject({
-        type = "CardCustom",
-        position = position,
-        callback_function = function(obj)
-            local ok, err = pcall(function()
-                obj.setCustomObject({
-                    face = faceUrl,
-                    back = backUrl,
-                    sideways = false
-                })
-                obj.setName(card.name or card.id)
-                obj.setDescription((card.effect or "") .. "\n\n卡牌ID：" .. card.id)
-            end)
-            if onDone then onDone(ok, err) end
+    -- TTS 要求在 spawnObject 返回后立即设置自定义卡面，
+    -- 不要等 callback_function（生成完成后的回调）才设置。
+    local ok, objOrError = pcall(function()
+        local obj = spawnObject({
+            type = "CardCustom",
+            position = position,
+            callback_function = function(spawnedObj)
+                local callbackOk, callbackError = pcall(function()
+                    spawnedObj.setName(card.name or card.id)
+                    spawnedObj.setDescription((card.effect or "") .. "\\n\\n卡牌ID：" .. card.id)
+                end)
+                if onDone then onDone(callbackOk, callbackError) end
+            end
+        })
+
+        if not obj then
+            error("TTS 未能创建卡牌对象。")
         end
-    })
+
+        obj.setCustomObject({
+            face = faceUrl,
+            back = backUrl,
+            sideways = false
+        })
+
+        return obj
+    end)
+
+    if not ok and onDone then
+        onDone(false, objOrError)
+    end
 end
 
 function ACG_importDeck(player, value, id)
