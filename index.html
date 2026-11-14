@@ -161,6 +161,17 @@
     body:not(.acg-home-active) td{border-color:#245477}
     body:not(.acg-home-active) .status,body:not(.acg-home-active) .notice{border-radius:2px}
     @media(max-width:700px){body:not(.acg-home-active)>main{padding:14px 10px 35px}}
+
+    /* Compact, replaceable BGM controller */
+    #acg-bgm{position:fixed;right:18px;bottom:18px;z-index:12000;display:flex;align-items:center;gap:9px;padding:9px 12px;background:linear-gradient(110deg,#071b45ed,#075ca9ed);border:1px solid #65eaff;border-left:3px solid #fff000;box-shadow:0 5px 20px #00102c88;color:#efffff;font:800 10px Arial,"Microsoft YaHei",sans-serif;letter-spacing:.08em}
+    #acg-bgm button{border:0;background:transparent;color:#b9faff;font-size:15px;cursor:pointer;padding:2px 4px}
+    #acg-bgm button:hover{color:#fff}
+    #acg-bgm .bgm-meta{display:flex;flex-direction:column;gap:3px;min-width:102px}
+    #acg-bgm .bgm-meta small{font-size:8px;font-weight:600;color:#a9d5ed;letter-spacing:.12em}
+    #acg-bgm input[type=range]{width:66px;accent-color:#b9faff}
+    #acg-bgm .bgm-volume{display:flex;align-items:center;gap:4px}
+    #acg-bgm-status{font-size:8px;color:#fff000;max-width:85px;line-height:1.2}
+    @media(max-width:700px){#acg-bgm{right:8px;bottom:8px;padding:7px 9px;gap:6px}#acg-bgm .bgm-meta{min-width:82px}#acg-bgm input[type=range]{width:48px}#acg-bgm-status{display:none}}
   </style>
 </head>
 <body>
@@ -207,6 +218,16 @@
   </div>
  </section>
 </div>
+
+<div id="acg-bgm" aria-label="背景音乐控制器">
+  <button id="acg-bgm-toggle" type="button" aria-label="播放背景音乐" title="播放 / 暂停">▶</button>
+  <div class="bgm-meta"><span>MAIN THEME</span><small>BACKGROUND MUSIC</small><span id="acg-bgm-status">READY</span></div>
+  <div class="bgm-volume"><span aria-hidden="true">♪</span><input id="acg-bgm-volume" type="range" min="0" max="100" value="35" aria-label="音乐音量"></div>
+</div>
+<audio id="acg-bgm-audio" preload="none" loop>
+  <source src="./assets/bgm/main-theme.mp3" type="audio/mpeg">
+</audio>
+
 <button id="acg-home-exit" class="home-exit" type="button">⌂ 返回主界面</button>
 
   <header><h1>ACG 卡牌构筑器</h1></header>
@@ -1643,6 +1664,33 @@
       }
     });
     document.getElementById("acg-home-exit").addEventListener("click",()=>acgHomeSetVisible(true));
+
+    // Replace ./assets/bgm/main-theme.mp3 to change the site's background music.
+    const acgBgmAudio=document.getElementById("acg-bgm-audio");
+    const acgBgmToggle=document.getElementById("acg-bgm-toggle");
+    const acgBgmVolume=document.getElementById("acg-bgm-volume");
+    const acgBgmStatus=document.getElementById("acg-bgm-status");
+    const acgBgmSavedVolume=Number(localStorage.getItem("acg-bgm-volume")||35);
+    acgBgmAudio.volume=Math.max(0,Math.min(1,acgBgmSavedVolume/100));
+    acgBgmVolume.value=String(acgBgmSavedVolume);
+    acgBgmAudio.addEventListener("play",()=>{acgBgmToggle.textContent="Ⅱ";acgBgmToggle.setAttribute("aria-label","暂停背景音乐");acgBgmStatus.textContent="PLAYING";});
+    acgBgmAudio.addEventListener("pause",()=>{acgBgmToggle.textContent="▶";acgBgmToggle.setAttribute("aria-label","播放背景音乐");if(!acgBgmAudio.error)acgBgmStatus.textContent="PAUSED";});
+    acgBgmAudio.addEventListener("error",()=>{acgBgmStatus.textContent="请放入音乐文件";acgBgmToggle.textContent="▶";});
+    acgBgmToggle.addEventListener("click",async()=>{
+      if(!acgBgmAudio.paused){acgBgmAudio.pause();return;}
+      try{await acgBgmAudio.play();}catch(error){acgBgmStatus.textContent="音乐文件尚未就绪";}
+    });
+    acgBgmVolume.addEventListener("input",()=>{
+      const value=Number(acgBgmVolume.value);
+      acgBgmAudio.volume=value/100;
+      localStorage.setItem("acg-bgm-volume",String(value));
+    });
+    if(localStorage.getItem("acg-bgm-enabled")==="true"){
+      // Playback is attempted only after a previous explicit user opt-in.
+      acgBgmAudio.play().catch(()=>{acgBgmStatus.textContent="点击播放";});
+    }
+    acgBgmToggle.addEventListener("click",()=>localStorage.setItem("acg-bgm-enabled",String(!acgBgmAudio.paused)));
+
     document.body.classList.add("acg-home-active");
     acgHomeLoadManifest();
 
