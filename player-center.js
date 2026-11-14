@@ -320,8 +320,8 @@
         const {data,error}=await client.rpc("dismantle_cards",{p_items:items,p_request_id:requestId});
         if(error)throw error;const result=Array.isArray(data)?data[0]:data;
         try{localStorage.removeItem(key);}catch(_){}
-        contentEl.prepend(node("div","pc-stat pc-positive","分解成功！获得 "+result.reward_tokens+" 代币，当前余额 "+result.remaining_tokens+"。"));
         await loadDismantle();
+        contentEl.prepend(node("div","pc-stat pc-positive","分解成功！获得 "+result.reward_tokens+" 代币，当前余额 "+result.remaining_tokens+"。"));
       }catch(error){summary.textContent="分解失败："+error.message;}
       finally{button.disabled=false;}
     });
