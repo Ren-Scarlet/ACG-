@@ -289,7 +289,7 @@
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
     const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*10)+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
-    const close=node("button","acg-td-close","关闭 ×");close.type="button";close.addEventListener("click",()=>overlay.remove());overlay.append(top,close);
+    const close=node("button","acg-td-close","关闭 ×");close.type="button";close.addEventListener("click",()=>{overlay.remove();loadPage("draw");});overlay.append(top,close);
     const main=node("div","acg-td-main"),title=node("div","acg-td-title");
     title.innerHTML='<small>MASTER DUEL INSPIRED · TEN PACK OPENING</small><h2>十连召唤</h2><p>十个卡包同时登场 · 共 50 张卡牌 · 结果已由服务器确定</p>';
     const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");
@@ -350,7 +350,7 @@
         el.append(inner,node("div","acg-td-cardname",info.name));cardGrid.appendChild(el);
       });
       summary.innerHTML="十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
-      revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回玩家中心");done.type="button";done.addEventListener("click",()=>overlay.remove());revealActions.appendChild(done);
+      revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回玩家中心");done.type="button";done.addEventListener("click",()=>{overlay.remove();loadPage("draw");});revealActions.appendChild(done);
       reveal.scrollIntoView({behavior:"smooth",block:"start"});
     }
     openBtn.addEventListener("click",()=>{if(finished)return;if(current===-1||flipped===5)openPackage();else{revealOne([...cardGrid.children].findIndex(el=>!el.classList.contains("flip")));}});
