@@ -229,8 +229,13 @@
     drawPools=pools||[];
     const {data:stats,error:statsError}=await client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle();
     if(statsError)throw statsError;
-    const {data:history,error:historyError}=await client.from("card_draw_history").select("id,pack_id,card_id,cost_tokens,created_at").eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(20);
+    const [{data:history,error:historyError,count:drawCount},{data:packRows,error:packError}]=await Promise.all([
+      client.from("card_draw_history").select("id,pack_id,card_id,cost_tokens,created_at",{count:"exact"}).eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(20),
+      client.from("card_draw_pools").select("pack_id,pack_name")
+    ]);
     if(historyError)throw historyError;
+    if(packError)throw packError;
+    const packNames=Object.fromEntries((packRows||[]).map(pack=>[pack.pack_id,pack.pack_name]));
     contentEl.replaceChildren();
     const balance=node("div","pc-stat","当前代币："+(stats?.tokens??0));
     contentEl.appendChild(balance);
@@ -243,12 +248,19 @@
       button.addEventListener("click",()=>performDraw(pool));
       card.appendChild(button);contentEl.appendChild(card);
     });
-    contentEl.appendChild(node("h3","","最近抽卡记录"));
+    contentEl.appendChild(node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 抽"));
     if(!history?.length){contentEl.appendChild(node("div","pc-empty","还没有抽卡记录。"));return;}
     history.forEach(item=>{
       const info=cardsById[item.card_id]||{name:item.card_id};
-      const row=node("div","pc-row"),left=node("div");
-      left.append(node("strong","",info.name),node("div","pc-muted",(info.star||"")+" 星 · "+new Date(item.created_at).toLocaleString("zh-CN")));
+      const row=node("div","pc-row"),left=node("div"),details=node("div","pc-muted");
+      left.style.display="flex";left.style.alignItems="center";left.style.gap="12px";
+      if(info.image){
+        const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";
+        img.style.cssText="width:48px;height:66px;object-fit:contain;border-radius:5px";
+        left.appendChild(img);
+      }
+      details.append(node("strong","",info.name),node("div","pc-muted",(info.star||"")+" 星 · "+(packNames[item.pack_id]||item.pack_id)),node("div","pc-muted",new Date(item.created_at).toLocaleString("zh-CN")));
+      left.appendChild(details);
       row.append(left,node("span","pc-muted","-"+item.cost_tokens+" 代币"));
       contentEl.appendChild(row);
     });
