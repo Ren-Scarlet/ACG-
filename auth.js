@@ -47,7 +47,7 @@
 
     const { data: profile, error } = await client
       .from("profiles")
-      .select("username, created_at")
+      .select("username, created_at, player_number")
       .eq("id", session.user.id)
       .maybeSingle();
 
@@ -59,8 +59,8 @@
     if (profile) {
       document.getElementById("account-username").textContent = profile.username;
       const created = new Date(profile.created_at).toLocaleDateString("zh-CN");
-      document.getElementById("account-created").textContent = "注册时间：" + created;
-      showStatus("登录成功，账号已连接。", "good");
+      document.getElementById("account-created").textContent = "注册时间：" + created + (profile.player_number ? " · 玩家编号：" + profile.player_number : " · 玩家编号待管理员分配");
+      showStatus(profile.player_number ? "登录成功，已绑定玩家编号 " + profile.player_number + "。" : "登录成功。请等待管理员为你分配玩家编号后再构筑卡组。", "good");
     } else {
       showStatus("已登录，但玩家资料尚未建立。请联系管理员检查注册触发器。", "bad");
     }
