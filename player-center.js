@@ -19,7 +19,7 @@
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家昵称</label><input id="pc-public-name" maxlength="20" placeholder="输入游戏昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
     '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div></div></div>',
-    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
+    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
 
@@ -218,6 +218,11 @@
       adminPlayers.forEach(player=>select.add(new Option(player.username,player.id)));
       if(adminPlayers.some(player=>player.id===previous))select.value=previous;
     });
+    const tokenSelect=view.querySelector("#pc-token-player");
+    const previousToken=tokenSelect.value;
+    tokenSelect.replaceChildren(new Option("请选择玩家",""));
+    adminPlayers.forEach(player=>tokenSelect.add(new Option(player.username,player.id)));
+    if(adminPlayers.some(player=>player.id===previousToken))tokenSelect.value=previousToken;
   }
   async function checkAdmin() {
     try {
@@ -300,6 +305,26 @@
     }catch(error){setMatchStatus("操作失败："+error.message,true);}
     finally{submit.disabled=false;}
   });
+  view.querySelector("#pc-token-form").addEventListener("submit",async event=>{
+    event.preventDefault();
+    const status=view.querySelector("#pc-token-status");
+    const button=event.currentTarget.querySelector("button[type=submit]");
+    const userId=view.querySelector("#pc-token-player").value;
+    const amount=Number(view.querySelector("#pc-token-amount").value);
+    const reason=view.querySelector("#pc-token-reason").value.trim();
+    if(!userId||!Number.isSafeInteger(amount)||amount<=0||!reason){status.textContent="请填写有效的玩家、数量和原因。";status.className="status bad";return;}
+    button.disabled=true;status.textContent="正在发放……";status.className="status";
+    try{
+      const {data,error}=await client.rpc("admin_grant_tokens",{p_user_id:userId,p_amount:amount,p_reason:reason});
+      if(error)throw error;
+      status.textContent="发放成功。玩家当前余额："+data;
+      status.className="status good";
+      view.querySelector("#pc-token-amount").value="";
+      view.querySelector("#pc-token-reason").value="";
+    }catch(error){status.textContent="发放失败："+error.message;status.className="status bad";}
+    finally{button.disabled=false;}
+  });
+
   view.querySelector("#pc-match-cancel").addEventListener("click",()=>{
     matchForm.reset();view.querySelector("#pc-match-id").value="";
     view.querySelector("#pc-match-submit").textContent="登记比赛";
