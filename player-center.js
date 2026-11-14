@@ -898,6 +898,9 @@
     if(error)throw error;
     list.replaceChildren();
     if(!data?.length){list.appendChild(node("div","pc-empty","没有卡池配置。"));return;}
+    const selectedPool=data.find(pool=>pool.pack_id===view.querySelector("#pc-pool-id").value)||data[0];
+    view.querySelector("#pc-pool-id").value=selectedPool.pack_id;
+    fillPoolCoverOptions(selectedPool.pack_id,selectedPool.cover_card_id||"");
     data.forEach(pool=>{
       const row=node("div","pc-row"),info=node("div"),actions=node("div");
       const ready=pool.price_tokens!==null&&pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null;
