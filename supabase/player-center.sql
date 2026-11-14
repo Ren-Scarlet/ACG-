@@ -250,3 +250,48 @@ revoke all on function public.admin_correct_2v2_match(bigint,text,uuid,uuid,uuid
 
 grant execute on function public.admin_register_2v2_match(text,uuid,uuid,uuid,uuid,text) to authenticated;
 grant execute on function public.admin_correct_2v2_match(bigint,text,uuid,uuid,uuid,uuid,text) to authenticated;
+
+
+-- Admin-only token grant. Positive amounts only; balance and ledger update atomically.
+create or replace function public.admin_grant_tokens(
+  p_user_id uuid,
+  p_amount bigint,
+  p_reason text
+)
+returns bigint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_balance bigint;
+begin
+  if auth.uid() is null or not public.is_admin() then
+    raise exception '只有管理员可以发放代币';
+  end if;
+  if p_user_id is null or not exists (select 1 from public.profiles where id = p_user_id) then
+    raise exception '玩家账号不存在';
+  end if;
+  if p_amount is null or p_amount <= 0 then
+    raise exception '发放数量必须大于 0';
+  end if;
+  if nullif(trim(p_reason), '') is null then
+    raise exception '请填写发放原因';
+  end if;
+
+  insert into public.player_stats (user_id,tokens)
+  values (p_user_id,p_amount)
+  on conflict (user_id) do update
+    set tokens = public.player_stats.tokens + excluded.tokens,
+        updated_at = now()
+  returning tokens into v_balance;
+
+  insert into public.token_transactions (user_id,amount,reason,created_by)
+  values (p_user_id,p_amount,trim(p_reason),auth.uid());
+
+  return v_balance;
+end;
+$$;
+
+revoke all on function public.admin_grant_tokens(uuid,bigint,text) from public, anon, authenticated;
+grant execute on function public.admin_grant_tokens(uuid,bigint,text) to authenticated;
