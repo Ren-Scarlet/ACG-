@@ -18,7 +18,7 @@
   view.innerHTML = [
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家昵称</label><input id="pc-public-name" maxlength="20" placeholder="输入游戏昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
-    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div></div></div>',
+    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
     '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
@@ -149,6 +149,55 @@
     rows.forEach(row=>{const line=node("div","pc-row");line.append(node("span","",cardsById[row.card_id]?.name||row.card_id),node("strong","","× "+row.quantity));contentEl.appendChild(line);});
   }
 
+
+  async function loadDisplayChoices() {
+    const titleSelect=view.querySelector("#pc-title-choice");
+    const badgeWrap=view.querySelector("#pc-badge-choices");
+    const status=view.querySelector("#pc-display-status");
+    const [{data:profile,error:pe},{data:unlocked,error:ue},{data:achievements,error:ae}]=await Promise.all([
+      client.from("profiles").select("selected_title,selected_badges").eq("id",currentUser.id).maybeSingle(),
+      client.from("player_achievements").select("achievement_id").eq("user_id",currentUser.id),
+      client.from("achievements").select("id,name,description").order("name")
+    ]);
+    if(pe)throw pe;if(ue)throw ue;if(ae)throw ae;
+    const unlockedIds=new Set((unlocked||[]).map(row=>row.achievement_id));
+    const available=(achievements||[]).filter(item=>unlockedIds.has(item.id));
+    titleSelect.replaceChildren(new Option("不展示称号",""));
+    available.forEach(item=>titleSelect.add(new Option(item.name,item.id)));
+    titleSelect.value=profile?.selected_title||"";
+    badgeWrap.replaceChildren();
+    const selected=new Set(profile?.selected_badges||[]);
+    available.forEach(item=>{
+      const label=node("label","pc-stat");
+      label.style.display="flex";label.style.alignItems="center";label.style.gap="8px";
+      const checkbox=node("input");checkbox.type="checkbox";checkbox.value=item.id;checkbox.checked=selected.has(item.id);
+      checkbox.addEventListener("change",()=>{
+        const checked=[...badgeWrap.querySelectorAll('input[type="checkbox"]:checked')];
+        if(checked.length>3){checkbox.checked=false;status.textContent="主页徽章最多选择三个。";status.className="status bad";}
+        else{status.textContent="";status.className="status";}
+      });
+      label.append(checkbox,node("span","",item.name));
+      label.title=item.description||"";
+      badgeWrap.appendChild(label);
+    });
+    if(!available.length)badgeWrap.appendChild(node("p","pc-muted","解锁成就后，就可以选择主页徽章。"));
+    status.textContent="";
+  }
+  view.querySelector("#pc-save-display").addEventListener("click",async()=>{
+    const status=view.querySelector("#pc-display-status");
+    const button=view.querySelector("#pc-save-display");
+    const titleId=view.querySelector("#pc-title-choice").value||null;
+    const badgeIds=[...view.querySelectorAll("#pc-badge-choices input:checked")].map(input=>input.value);
+    if(badgeIds.length>3){status.textContent="主页徽章最多选择三个。";status.className="status bad";return;}
+    button.disabled=true;status.textContent="正在保存……";status.className="status";
+    try{
+      const {error}=await client.rpc("save_profile_display",{p_title_id:titleId,p_badge_ids:badgeIds});
+      if(error)throw error;
+      status.textContent="主页展示设置已保存。";status.className="status good";
+    }catch(error){status.textContent="保存失败："+error.message;status.className="status bad";}
+    finally{button.disabled=false;}
+  });
+
   async function loadAchievements() {
     const [{data:all,error:ae},{data:owned,error:oe}]=await Promise.all([
       client.from("achievements").select("id,name,description").order("id"),
@@ -177,6 +226,7 @@
       else if(page==="tokens")await loadTokens();
       else if(page==="inventory")await loadInventory();
       else if(page==="achievements")await loadAchievements();
+      await loadDisplayChoices();
       setStatus("玩家中心已连接。",false);
     } catch(error) {
       contentEl.replaceChildren(node("div","pc-empty","读取失败："+error.message));
