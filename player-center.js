@@ -288,14 +288,15 @@
   }
   async function loadAchievements() {
     const [{data:all,error:ae},{data:owned,error:oe}]=await Promise.all([
-      client.from("achievements").select("id,name,description").order("id"),
+      client.from("achievements").select("id,name,description,is_active").order("id"),
       client.from("player_achievements").select("achievement_id,unlocked_at").eq("user_id",currentUser.id)
     ]);
     if(ae)throw ae;if(oe)throw oe;
     const map=Object.fromEntries((owned||[]).map(item=>[item.achievement_id,item.unlocked_at]));
-    contentEl.replaceChildren(node("p","pc-muted","已解锁 "+Object.keys(map).length+" / "+(all||[]).length+" 项成就"));
-    if(!all?.length){contentEl.appendChild(node("div","pc-empty","成就列表尚未配置。"));return;}
-    all.forEach(item=>{
+    const visible=(all||[]).filter(item=>item.is_active!==false||Object.prototype.hasOwnProperty.call(map,item.id));
+    contentEl.replaceChildren(node("p","pc-muted","已解锁 "+Object.keys(map).length+" 项 · 当前可见 "+visible.length+" 项成就"));
+    if(!visible.length){contentEl.appendChild(node("div","pc-empty","目前没有启用的成就。"));return;}
+    visible.forEach(item=>{
       const line=node("div","pc-row"),left=node("div");
       left.append(node("strong","",item.name),node("div","pc-muted",item.description||""));
       const date=map[item.id];
@@ -391,7 +392,7 @@
     view.querySelector("#pc-ach-reward").value="0";
     view.querySelector("#pc-ach-active").checked=true;
     view.querySelector("#pc-ach-status").textContent="";
-    minGamesWrap.classList.toggle("hidden",achievementType.value!=="win_rate");
+    syncAchievementConditionFields();
   }
   function syncAchievementConditionFields(){
     const isRate=achievementType.value==="win_rate";
