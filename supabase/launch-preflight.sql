@@ -110,6 +110,55 @@ policy_report as (
   ) order by tablename,policyname),'[]'::jsonb) as items
   from pg_policies
   where schemaname='public'
+),
+table_grants as (
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'table',table_name,
+    'anon_select',has_table_privilege('anon',format('public.%I',table_name),'SELECT'),
+    'anon_insert',has_table_privilege('anon',format('public.%I',table_name),'INSERT'),
+    'anon_update',has_table_privilege('anon',format('public.%I',table_name),'UPDATE'),
+    'anon_delete',has_table_privilege('anon',format('public.%I',table_name),'DELETE'),
+    'authenticated_select',has_table_privilege('authenticated',format('public.%I',table_name),'SELECT'),
+    'authenticated_insert',has_table_privilege('authenticated',format('public.%I',table_name),'INSERT'),
+    'authenticated_update',has_table_privilege('authenticated',format('public.%I',table_name),'UPDATE'),
+    'authenticated_delete',has_table_privilege('authenticated',format('public.%I',table_name),'DELETE')
+  ) order by table_name),'[]'::jsonb) as items
+  from table_status where object_exists
+),
+definer_functions as (
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'function',p.proname,
+    'identity_arguments',pg_get_function_identity_arguments(p.oid),
+    'anon_execute',has_function_privilege('anon',p.oid,'EXECUTE'),
+    'authenticated_execute',has_function_privilege('authenticated',p.oid,'EXECUTE'),
+    'security_definer',p.prosecdef,
+    'configuration',coalesce(p.proconfig,'{}'::text[])
+  ) order by p.proname,pg_get_function_identity_arguments(p.oid)),'[]'::jsonb) as items
+  from pg_proc p
+  join pg_namespace n on n.oid=p.pronamespace
+  where n.nspname='public' and p.prosecdef
+),
+app_triggers as (
+  select coalesce(jsonb_agg(jsonb_build_object(
+    'table',n.nspname||'.'||c.relname,
+    'trigger',t.tgname,
+    'function',p.proname,
+    'enabled',t.tgenabled
+  ) order by c.relname,t.tgname),'[]'::jsonb) as items
+  from pg_trigger t
+  join pg_class c on c.oid=t.tgrelid
+  join pg_namespace n on n.oid=c.relnamespace
+  join pg_proc p on p.oid=t.tgfoid
+  where n.nspname='public' and not t.tgisinternal
+),
+view_status as (
+  select jsonb_build_object(
+    'public_profiles_exists',to_regclass('public.public_profiles') is not null,
+    'anon_select',case when to_regclass('public.public_profiles') is not null
+      then has_table_privilege('anon','public.public_profiles','SELECT') else false end,
+    'authenticated_select',case when to_regclass('public.public_profiles') is not null
+      then has_table_privilege('authenticated','public.public_profiles','SELECT') else false end
+  ) as item
 )
 select jsonb_pretty(jsonb_build_object(
   'tables', (
@@ -128,5 +177,9 @@ select jsonb_pretty(jsonb_build_object(
     from function_status
   ),
   'auth_users_triggers', (select items from auth_triggers),
-  'public_policies', (select items from policy_report)
+  'public_policies', (select items from policy_report),
+  'table_grants', (select items from table_grants),
+  'security_definer_functions', (select items from definer_functions),
+  'public_triggers', (select items from app_triggers),
+  'public_profile_view', (select item from view_status)
 )) as report;
