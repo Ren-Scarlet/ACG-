@@ -218,7 +218,7 @@
 
    
     /* Main terminal redesign: black diagonal menu on the left, replaceable full-bleed season art on the right */
-    #acg-home .home-stage{grid-template-columns:minmax(300px,34%) minmax(0,66%)!important;min-height:min(650px,calc(100dvh - 150px))!important;height:calc(100dvh - 150px)!important;max-height:850px!important;flex:0 0 auto!important;background:#050b18!important}
+    #acg-home .home-stage{grid-template-columns:minmax(300px,34%) minmax(0,66%)!important;min-height:100dvh!important;height:100dvh!important;max-height:none!important;flex:0 0 100dvh!important;background:#050b18!important}
     #acg-home .home-left{position:relative!important;z-index:5!important;overflow:hidden!important;isolation:isolate;background:linear-gradient(155deg,#050912 0%,#07152c 60%,#02060d 100%)!important;color:#f4fbff!important;padding:26px clamp(14px,2vw,30px) 58px!important;border-right:3px solid #13d6ee}
     #acg-home .home-left:before{content:"";position:absolute;z-index:-1;left:-25%;bottom:-25%;width:115%;height:48%;background:linear-gradient(145deg,#061b43,#0a3675 48%,#031020);clip-path:polygon(0 0,100% 40%,82% 100%,0 100%);opacity:.8}
     #acg-home .home-left:after{content:"";position:absolute;z-index:-1;right:-20%;top:17%;width:55%;height:36%;background:linear-gradient(145deg,#0b315d,#071020);clip-path:polygon(28% 0,100% 0,72% 100%,0 75%);opacity:.55}
@@ -260,7 +260,7 @@
     #acg-home .home-player-visual{position:absolute;z-index:3;right:20px;bottom:18px;font-size:9px;letter-spacing:.2em;font-weight:900;color:#e5fbff;text-shadow:1px 2px 5px #031b52}
     #acg-home .home-intro{background:#080d18!important}
     @media(max-width:760px){
-      #acg-home .home-stage{grid-template-columns:minmax(205px,39%) minmax(0,61%)!important;min-height:610px!important;height:calc(100dvh - 150px)!important}
+      #acg-home .home-stage{grid-template-columns:minmax(205px,39%) minmax(0,61%)!important;min-height:100dvh!important;height:100dvh!important;max-height:none!important;flex-basis:100dvh!important}
       #acg-home .home-left{padding:18px 10px 54px!important}
       #acg-home .home-nav-head{gap:7px;padding-bottom:14px}
       #acg-home .home-mark{font-size:36px}
