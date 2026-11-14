@@ -203,6 +203,8 @@
 
   let drawPools=[];
   let drawBusy=false;
+  // Reuse the same request ID after an uncertain network failure so a retry cannot charge twice.
+  const pendingDrawRequests = new Map();
   async function loadDraw() {
     const {data:pools,error}=await client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_3,rate_4,rate_5,enabled").eq("enabled",true).order("pack_id");
     if(error)throw error;
@@ -237,7 +239,8 @@
     if(drawBusy)return;
     drawBusy=true;
     const buttons=[...contentEl.querySelectorAll("button")];buttons.forEach(button=>button.disabled=true);
-    const requestId=crypto.randomUUID();
+    let requestId=pendingDrawRequests.get(pool.pack_id);
+    if(!requestId){requestId=crypto.randomUUID();pendingDrawRequests.set(pool.pack_id,requestId);}
     const loading=node("p","pc-muted","正在抽取，请稍候……");
     contentEl.prepend(loading);
     try{
