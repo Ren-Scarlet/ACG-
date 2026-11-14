@@ -27,10 +27,6 @@
     statusEl.className = "status" + (kind ? " " + kind : "");
   }
 
-  function usernameToEmail(username) {
-    return username.trim().toLowerCase() + "@users.example.com";
-  }
-
   function validUsername(username) {
     return /^[a-zA-Z0-9_]{3,20}$/.test(username);
   }
@@ -72,12 +68,17 @@
   signupForm.addEventListener("submit", async event => {
     event.preventDefault();
     const username = document.getElementById("signup-username").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
     const password = document.getElementById("signup-password").value;
     const confirm = document.getElementById("signup-password-confirm").value;
     const button = signupForm.querySelector("button[type=submit]");
 
     if (!validUsername(username)) {
       showStatus("用户名须为 3～20 位，只能使用英文字母、数字和下划线。", "bad");
+      return;
+    }
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      showStatus("请输入有效的邮箱地址，例如 QQ 邮箱。", "bad");
       return;
     }
     if (password.length < 8) {
@@ -93,7 +94,7 @@
     showStatus("正在创建账号……", "");
     try {
       const { data, error } = await client.auth.signUp({
-        email: usernameToEmail(username),
+        email,
         password,
         options: { data: { username: username.toLowerCase() } }
       });
@@ -113,12 +114,12 @@
 
   loginForm.addEventListener("submit", async event => {
     event.preventDefault();
-    const username = document.getElementById("login-username").value.trim();
+    const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
     const button = loginForm.querySelector("button[type=submit]");
 
-    if (!validUsername(username)) {
-      showStatus("请检查用户名格式（3～20 位英文字母、数字或下划线）。", "bad");
+    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      showStatus("请输入有效的邮箱地址。", "bad");
       return;
     }
 
@@ -126,14 +127,14 @@
     showStatus("正在登录……", "");
     try {
       const { data, error } = await client.auth.signInWithPassword({
-        email: usernameToEmail(username),
+        email,
         password
       });
       if (error) throw error;
       await renderSession(data.session);
       loginForm.reset();
     } catch (error) {
-      showStatus("登录失败：请检查用户名和密码。", "bad");
+      showStatus("登录失败：请检查邮箱和密码。", "bad");
     } finally {
       button.disabled = false;
     }
