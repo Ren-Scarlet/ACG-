@@ -28,7 +28,7 @@
   }
 
   function usernameToEmail(username) {
-    return username.trim().toLowerCase() + "@users.acg.invalid";
+    return username.trim().toLowerCase() + "@users.example.com";
   }
 
   function validUsername(username) {
