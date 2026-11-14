@@ -81,6 +81,9 @@ alter table public.card_draw_pools
       and round(rate_3 + rate_4 + rate_5 + rate_alt, 2) = 100)
   );
 
+-- Pause existing pools until the administrator confirms the new four-part rates.
+update public.card_draw_pools set enabled=false, updated_at=now();
+
 alter table public.card_draw_history
   add column if not exists draw_index integer not null default 1;
 
