@@ -1,6 +1,6 @@
--- ACG launch preflight (READ ONLY).
--- Run this before tonight-launch.sql. It does not modify any database object.
--- Send the complete result grid back for review.
+-- ACG launch preflight: compact, READ-ONLY report.
+-- Run this in Supabase SQL Editor. It returns ONE ROW / ONE CELL (report).
+-- Copy the report cell and send it back. No database objects or data are changed.
 
 with expected_tables(table_name) as (
   values
@@ -8,108 +8,73 @@ with expected_tables(table_name) as (
     ('matches'),('match_results'),('achievements'),('player_achievements'),
     ('draw_card_catalog'),('card_draw_pools'),('card_draw_history')
 ),
-table_report as (
-  select
-    'TABLE'::text as section,
-    e.table_name as object_name,
-    case when c.oid is null then 'MISSING'
-      else 'exists; RLS='||c.relrowsecurity||'; FORCE RLS='||c.relforcerowsecurity
-    end as details
+expected_columns(table_name,column_name) as (
+  values
+    ('profiles','id'),('profiles','username'),('profiles','created_at'),('profiles','is_admin'),
+    ('card_inventory','user_id'),('card_inventory','card_id'),('card_inventory','quantity'),
+    ('player_stats','user_id'),('player_stats','tokens'),('player_stats','games_played'),
+    ('player_stats','wins'),('player_stats','losses'),
+    ('matches','id'),('matches','created_by'),('matches','created_at'),
+    ('match_results','match_id'),('match_results','user_id'),('match_results','result'),
+    ('achievements','id'),('achievements','name'),('achievements','description'),
+    ('achievements','reward_tokens'),('achievements','is_active'),('achievements','condition_type'),
+    ('achievements','threshold'),('achievements','min_games'),
+    ('player_achievements','user_id'),('player_achievements','achievement_id'),
+    ('token_transactions','user_id'),('token_transactions','amount'),('token_transactions','reason')
+),
+table_status as (
+  select e.table_name,
+         c.oid is not null as exists,
+         coalesce(c.relrowsecurity,false) as rls_enabled,
+         coalesce(c.relforcerowsecurity,false) as force_rls
   from expected_tables e
   left join pg_namespace n on n.nspname='public'
   left join pg_class c on c.relnamespace=n.oid and c.relname=e.table_name and c.relkind in ('r','p')
 ),
-expected_columns(table_name,column_name,required_now) as (
-  values
-    ('profiles','id',true),('profiles','username',true),('profiles','created_at',true),('profiles','is_admin',true),('profiles','player_number',false),
-    ('card_inventory','user_id',true),('card_inventory','card_id',true),('card_inventory','quantity',true),('card_inventory','updated_at',true),
-    ('player_stats','user_id',true),('player_stats','tokens',true),('player_stats','games_played',true),('player_stats','wins',true),('player_stats','losses',true),
-    ('matches','id',true),('matches','created_by',true),('matches','created_at',true),('matches','winning_team',false),
-    ('match_results','match_id',true),('match_results','user_id',true),('match_results','result',true),('match_results','team',false),
-    ('achievements','id',true),('achievements','name',true),('achievements','description',true),('achievements','reward_tokens',true),('achievements','is_active',true),('achievements','condition_type',true),('achievements','threshold',true),('achievements','min_games',true),
-    ('player_achievements','user_id',true),('player_achievements','achievement_id',true),
-    ('token_transactions','user_id',true),('token_transactions','amount',true),('token_transactions','reason',true)
-),
-column_report as (
-  select
-    'COLUMN'::text as section,
-    e.table_name||'.'||e.column_name as object_name,
-    case when c.column_name is null
-      then 'MISSING'||case when e.required_now then ' (required before launch)' when e.table_name='profiles' and e.column_name='player_number' then ' (added by this launch migration)' else ' (expected from earlier migration)' end
-      else c.data_type||case when c.is_nullable='NO' then '; NOT NULL' else '; nullable' end
-    end as details
+missing_columns as (
+  select e.table_name||'.'||e.column_name as column_name
   from expected_columns e
-  left join information_schema.columns c
-    on c.table_schema='public' and c.table_name=e.table_name and c.column_name=e.column_name
-),
-function_report as (
-  select
-    'FUNCTION'::text as section,
-    'public.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')' as object_name,
-    case when p.prosecdef then 'SECURITY DEFINER' else 'invoker' end||
-      '; owner='||pg_get_userbyid(p.proowner)||chr(10)||pg_get_functiondef(p.oid) as details
-  from pg_proc p
-  join pg_namespace n on n.oid=p.pronamespace
-  where n.nspname='public'
-    and p.proname in ('is_admin','admin_register_2v2_match','admin_grant_tokens','draw_one_card','admin_save_achievement')
-),
-required_function_report as (
-  select
-    'FUNCTION'::text as section,
-    'public.'||required.required_name as object_name,
-    'MISSING: required for launch' as details
-  from (values ('is_admin'),('admin_register_2v2_match'),('admin_grant_tokens')) required(required_name)
   where not exists (
-    select 1 from pg_proc p
-    join pg_namespace n on n.oid=p.pronamespace
-    where n.nspname='public' and p.proname=required.required_name
+    select 1 from information_schema.columns c
+    where c.table_schema='public' and c.table_name=e.table_name and c.column_name=e.column_name
   )
 ),
-auth_trigger_report as (
-  select
-    'AUTH_TRIGGER'::text as section,
-    t.tgname as object_name,
-    pg_get_triggerdef(t.oid)||chr(10)||'FUNCTION: '||pg_get_functiondef(t.tgfoid) as details
+function_status as (
+  select required.function_name,
+         exists (
+           select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+           where n.nspname='public' and p.proname=required.function_name
+         ) as exists
+  from (values
+    ('is_admin'),('admin_register_2v2_match'),('admin_grant_tokens'),
+    ('draw_one_card'),('admin_save_achievement')
+  ) required(function_name)
+),
+auth_triggers as (
+  select jsonb_agg(jsonb_build_object(
+    'trigger',t.tgname,
+    'function',p.proname
+  ) order by t.tgname) as items
   from pg_trigger t
   join pg_class c on c.oid=t.tgrelid
   join pg_namespace n on n.oid=c.relnamespace
+  join pg_proc p on p.oid=t.tgfoid
   where n.nspname='auth' and c.relname='users' and not t.tgisinternal
-  union all
-  select 'AUTH_TRIGGER','auth.users','MISSING: no user-profile trigger found'
-  where not exists (
-    select 1 from pg_trigger t
-    join pg_class c on c.oid=t.tgrelid
-    join pg_namespace n on n.oid=c.relnamespace
-    where n.nspname='auth' and c.relname='users' and not t.tgisinternal
-  )
 ),
-policy_report as (
-  select
-    'POLICY'::text as section,
-    tablename||'.'||policyname as object_name,
-    'command='||cmd||'; roles='||array_to_string(roles,',')||
-      '; using='||coalesce(qual,'<none>')||
-      '; check='||coalesce(with_check,'<none>') as details
+policy_counts as (
+  select tablename,count(*)::int as policies
   from pg_policies
   where schemaname='public'
-),
-constraint_report as (
-  select
-    'CONSTRAINT'::text as section,
-    conrelid::regclass::text||'.'||conname as object_name,
-    pg_get_constraintdef(oid) as details
-  from pg_constraint
-  where connamespace='public'::regnamespace
-    and conrelid::regclass::text in (
-      'profiles','card_inventory','player_stats','token_transactions',
-      'matches','match_results','achievements','player_achievements'
-    )
+  group by tablename
 )
-select * from table_report
-union all select * from column_report
-union all select * from function_report
-union all select * from required_function_report
-union all select * from auth_trigger_report
-union all select * from policy_report
-union all select * from constraint_report
-order by section, object_name;
+select jsonb_pretty(jsonb_build_object(
+  'tables', (select jsonb_agg(jsonb_build_object(
+      'name',table_name,'exists',exists,'RLS',rls_enabled,'force_RLS',force_rls
+    ) order by table_name) from table_status),
+  'missing_required_columns', coalesce((select jsonb_agg(column_name order by column_name) from missing_columns),'[]'::jsonb),
+  'functions', (select jsonb_object_agg(function_name,exists order by function_name) from function_status),
+  'auth_user_triggers', coalesce((select items from auth_triggers),'[]'::jsonb),
+  'policy_counts_by_table', coalesce((
+    select jsonb_object_agg(tablename,policies order by tablename) from policy_counts
+  ),'{}'::jsonb)
+)) as report;
