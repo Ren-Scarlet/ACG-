@@ -1673,8 +1673,8 @@
     const acgBgmSavedVolume=Number(localStorage.getItem("acg-bgm-volume")||35);
     acgBgmAudio.volume=Math.max(0,Math.min(1,acgBgmSavedVolume/100));
     acgBgmVolume.value=String(acgBgmSavedVolume);
-    acgBgmAudio.addEventListener("play",()=>{acgBgmToggle.textContent="Ⅱ";acgBgmToggle.setAttribute("aria-label","暂停背景音乐");acgBgmStatus.textContent="PLAYING";});
-    acgBgmAudio.addEventListener("pause",()=>{acgBgmToggle.textContent="▶";acgBgmToggle.setAttribute("aria-label","播放背景音乐");if(!acgBgmAudio.error)acgBgmStatus.textContent="PAUSED";});
+    acgBgmAudio.addEventListener("play",()=>{localStorage.setItem("acg-bgm-enabled","true");acgBgmToggle.textContent="Ⅱ";acgBgmToggle.setAttribute("aria-label","暂停背景音乐");acgBgmStatus.textContent="PLAYING";});
+    acgBgmAudio.addEventListener("pause",()=>{localStorage.setItem("acg-bgm-enabled","false");acgBgmToggle.textContent="▶";acgBgmToggle.setAttribute("aria-label","播放背景音乐");if(!acgBgmAudio.error)acgBgmStatus.textContent="PAUSED";});
     acgBgmAudio.addEventListener("error",()=>{acgBgmStatus.textContent="请放入音乐文件";acgBgmToggle.textContent="▶";});
     acgBgmToggle.addEventListener("click",async()=>{
       if(!acgBgmAudio.paused){acgBgmAudio.pause();return;}
@@ -1689,7 +1689,6 @@
       // Playback is attempted only after a previous explicit user opt-in.
       acgBgmAudio.play().catch(()=>{acgBgmStatus.textContent="点击播放";});
     }
-    acgBgmToggle.addEventListener("click",()=>localStorage.setItem("acg-bgm-enabled",String(!acgBgmAudio.paused)));
 
     document.body.classList.add("acg-home-active");
     acgHomeLoadManifest();
