@@ -267,7 +267,7 @@ begin
 
   return v_quantity;
 end;
-$;
+$$;
 
 revoke all on function public.admin_list_player_accounts() from public, anon, authenticated;
 revoke all on function public.admin_list_player_registry() from public, anon, authenticated;
@@ -444,7 +444,7 @@ begin
 
   return jsonb_build_object('committed', true, 'duplicate_request', false, 'items', p_item_cards);
 end;
-$;
+$$;
 
 revoke all on function public.admin_sync_battle_item_catalog(jsonb) from public, anon, authenticated;
 grant execute on function public.admin_sync_battle_item_catalog(jsonb) to authenticated;
