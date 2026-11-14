@@ -83,7 +83,7 @@
     #acg-home *{box-sizing:border-box}
     #acg-home .home-stage{position:relative;flex:1 0 auto;min-height:min(560px,calc(100dvh - 160px));height:auto;max-height:none;display:grid;grid-template-columns:32% 68%;overflow:hidden;background:linear-gradient(135deg,#16c9e9,#0875df 45%,#071b80)}
     #acg-home .home-left{position:relative;background:#f7f8fa;color:#080b12;overflow:visible;z-index:4;isolation:isolate}
-    #acg-home .home-wordmark{position:absolute;left:0;top:0;width:12%;height:100%;display:flex;align-items:center;justify-content:center;background:#f7f8fa;writing-mode:vertical-rl;transform:rotate(180deg);font-size:clamp(43px,6.2vw,88px);font-weight:1000;letter-spacing:-.11em;line-height:.8;white-space:nowrap;z-index:4}
+    #acg-home .home-wordmark{display:none!important}
     #acg-home .home-art{position:absolute;z-index:3;left:12%;top:0;width:103%;height:100%;pointer-events:none;overflow:hidden}
     #acg-home .home-art img{width:100%;height:100%;object-fit:cover;object-position:var(--home-x,50%) var(--home-y,50%);transform:scale(var(--home-scale,1.12));transform-origin:var(--home-x,50%) var(--home-y,50%)}
     #acg-home .home-art-placeholder{position:absolute;inset:0;background:linear-gradient(135deg,#fff 0 30%,#c8f9ff 31% 36%,#11bce9 37% 42%,transparent 43%);overflow:hidden}
@@ -96,17 +96,17 @@
     #acg-home .home-brand b{color:#ffe23e}
     #acg-home .home-token{position:absolute;top:18px;left:22px;z-index:5;padding:5px 9px;background:#071b45aa;border:1px solid #c8faff55;border-radius:2px;color:#e9fbff;font-size:9px;letter-spacing:.1em;display:none;align-items:center;gap:7px;box-shadow:0 3px 12px #00123b33}
     #acg-home .home-token strong{font-family:Georgia,serif;font-size:17px;font-weight:600;margin:0;color:#fff}
-    #acg-home .home-menu-label{position:relative;z-index:2;margin:76px 0 7px 12%;font-size:9px;letter-spacing:.42em;font-weight:900;color:#e6ffff}
-    #acg-home .home-menu{position:relative;z-index:3;width:86%;height:calc(100% - 145px);margin-left:8%;display:block}
+    #acg-home .home-menu-label{position:relative;z-index:2;margin:62px 0 5px 10%;font-size:9px;letter-spacing:.34em;font-weight:900;color:#e6ffff}
+    #acg-home .home-menu{position:relative;z-index:3;width:72%;height:calc(100% - 118px);margin-left:11%;display:block}
     #acg-home .home-menu button{position:absolute;border:0;background:transparent;color:#9bffff;padding:2px 8px;text-align:left;cursor:pointer;font-style:italic;font-weight:1000;text-shadow:2px 4px 0 #0752ad,0 0 16px #08caff66;transition:filter .18s,transform .18s}
     #acg-home .home-menu button .en{display:block;font-size:clamp(23px,3.5vw,43px);line-height:.96;letter-spacing:-.055em;white-space:nowrap}
     #acg-home .home-menu button .cn{display:block;margin:5px 0 0 9px;font-size:10px;font-style:normal;letter-spacing:.12em;color:#efffff;text-shadow:1px 2px 3px #064b9c;white-space:nowrap}
-    #acg-home .home-menu button:nth-child(1){left:5%;top:2%;transform:rotate(-2deg)}
-    #acg-home .home-menu button:nth-child(2){left:25%;top:15%;transform:rotate(1deg)}
-    #acg-home .home-menu button:nth-child(3){left:13%;top:29%;transform:rotate(-1deg)}
-    #acg-home .home-menu button:nth-child(4){left:34%;top:43%;transform:rotate(2deg)}
-    #acg-home .home-menu button:nth-child(5){left:23%;top:57%;transform:rotate(-2deg)}
-    #acg-home .home-menu button:nth-child(6){left:9%;top:71%;transform:rotate(1deg)}
+    #acg-home .home-menu button:nth-child(1){left:4%;top:1%;transform:rotate(-2deg)}
+    #acg-home .home-menu button:nth-child(2){left:22%;top:13%;transform:rotate(1deg)}
+    #acg-home .home-menu button:nth-child(3){left:10%;top:25%;transform:rotate(-1deg)}
+    #acg-home .home-menu button:nth-child(4){left:25%;top:37%;transform:rotate(2deg)}
+    #acg-home .home-menu button:nth-child(5){left:15%;top:49%;transform:rotate(-2deg)}
+    #acg-home .home-menu button:nth-child(6){left:3%;top:61%;transform:rotate(1deg)}
     #acg-home .home-menu button.active{color:#fff;filter:drop-shadow(0 0 11px #baffff);transform:scale(1.06) rotate(-1deg);transform-origin:left center}
     #acg-home .home-menu button.active:before{content:"";position:absolute;left:-13px;top:2px;width:7px;height:80%;background:#fff000;transform:skewX(-12deg)}
     #acg-home .home-menu button:hover{color:#fff;filter:drop-shadow(0 0 12px #d8ffff);transform:translateX(8px) rotate(0deg)}
@@ -141,29 +141,29 @@
       .admin-top { grid-template-columns:1fr; }
     }
 
-    /* Unified Persona 3 Reload-inspired skin for all existing site views */
-    body:not(.acg-home-active){background:#071b43;color:#eafaff}
-    body:not(.acg-home-active)>header{background:linear-gradient(105deg,#071c4c,#087acb 65%,#092b79);border-bottom:2px solid #19d4ef}
+    /* Unified P3R-inspired UI: vivid blue chrome, light ice-blue work surfaces */
+    body:not(.acg-home-active){background:linear-gradient(135deg,#e9f8ff 0%,#ccecff 48%,#eefaff 100%);color:#102d54}
+    body:not(.acg-home-active)>header{background:linear-gradient(105deg,#0755a9,#078bd0 65%,#20c7df);border-bottom:3px solid #f02c58;color:#fff}
     body:not(.acg-home-active)>header h1{font-weight:1000;font-style:italic;letter-spacing:.04em;text-shadow:2px 3px #034b9d}
     body:not(.acg-home-active)>main{max-width:1440px;padding:22px clamp(14px,3vw,38px) 50px}
-    body:not(.acg-home-active) main h2,body:not(.acg-home-active) main h3{color:#b5faff;font-weight:1000;font-style:italic;letter-spacing:.01em}
-    body:not(.acg-home-active) main .intro,body:not(.acg-home-active) main .hint{color:#a9cce8}
+    body:not(.acg-home-active) main h2,body:not(.acg-home-active) main h3{color:#0756a6;font-weight:1000;font-style:italic;letter-spacing:.01em}
+    body:not(.acg-home-active) main .intro,body:not(.acg-home-active) main .hint{color:#456b91}
     body:not(.acg-home-active) .tabs{gap:9px;margin:16px 0 22px}
-    body:not(.acg-home-active) .tabs button,body:not(.acg-home-active) main button{border:1px solid #27c5e5;border-radius:2px;background:linear-gradient(110deg,#123d83,#075bb5);color:#e9fbff;box-shadow:3px 3px 0 #031d58;font-weight:800;transition:filter .15s,transform .15s}
-    body:not(.acg-home-active) .tabs button:hover,body:not(.acg-home-active) main button:hover{filter:brightness(1.2);transform:translateY(-1px)}
-    body:not(.acg-home-active) .tabs button.active,body:not(.acg-home-active) main button.primary{background:#eafcff;color:#063a78;border:1px solid #fff;box-shadow:4px 4px 0 #f02c58}
-    body:not(.acg-home-active) .panel,body:not(.acg-home-active) main section.panel,body:not(.acg-home-active) .card{background:linear-gradient(145deg,#102b59,#091a3b);border:1px solid #247eaf;border-radius:3px;box-shadow:0 8px 24px #00102c66}
+    body:not(.acg-home-active) .tabs button,body:not(.acg-home-active) main button{border:1px solid #159fc9;border-radius:2px;background:linear-gradient(110deg,#0875c5,#12b7d4);color:#fff;box-shadow:3px 3px 0 #07519a;font-weight:800;transition:filter .15s,transform .15s}
+    body:not(.acg-home-active) .tabs button:hover,body:not(.acg-home-active) main button:hover{filter:brightness(1.08);transform:translateY(-1px)}
+    body:not(.acg-home-active) .tabs button.active,body:not(.acg-home-active) main button.primary{background:#fff;color:#0756a6;border:1px solid #fff;box-shadow:4px 4px 0 #f02c58}
+    body:not(.acg-home-active) .panel,body:not(.acg-home-active) main section.panel,body:not(.acg-home-active) .card{background:linear-gradient(145deg,#ffffff,#eaf8ff);color:#16375e;border:1px solid #8bdcf0;border-radius:3px;box-shadow:0 8px 24px #14518a20}
     body:not(.acg-home-active) .panel{padding:18px;margin-bottom:16px}
-    body:not(.acg-home-active) input,body:not(.acg-home-active) select,body:not(.acg-home-active) textarea{background:#061a3a!important;color:#effcff!important;border:1px solid #278bb9!important;border-radius:2px!important;outline-color:#21d4f2}
-    body:not(.acg-home-active) input::placeholder,body:not(.acg-home-active) textarea::placeholder{color:#789cbd}
-    body:not(.acg-home-active) table{border-color:#2677a5}
-    body:not(.acg-home-active) th{background:#0b4d91;color:#d8fbff}
-    body:not(.acg-home-active) td{border-color:#245477}
+    body:not(.acg-home-active) input,body:not(.acg-home-active) select,body:not(.acg-home-active) textarea{background:#fff!important;color:#16375e!important;border:1px solid #7dcce4!important;border-radius:2px!important;outline-color:#21bddd}
+    body:not(.acg-home-active) input::placeholder,body:not(.acg-home-active) textarea::placeholder{color:#7898b5}
+    body:not(.acg-home-active) table{border-color:#8bcde2}
+    body:not(.acg-home-active) th{background:#0875bd;color:#fff}
+    body:not(.acg-home-active) td{border-color:#c2e3ef}
     body:not(.acg-home-active) .status,body:not(.acg-home-active) .notice{border-radius:2px}
     @media(max-width:700px){body:not(.acg-home-active)>main{padding:14px 10px 35px}}
 
     /* Compact, replaceable BGM controller */
-    #acg-bgm{position:fixed;right:18px;bottom:18px;z-index:12000;display:flex;align-items:center;gap:9px;padding:9px 12px;background:linear-gradient(110deg,#071b45ed,#075ca9ed);border:1px solid #65eaff;border-left:3px solid #fff000;box-shadow:0 5px 20px #00102c88;color:#efffff;font:800 10px Arial,"Microsoft YaHei",sans-serif;letter-spacing:.08em}
+    #acg-bgm{position:fixed;right:18px;top:14px;bottom:auto;z-index:12000;display:flex;align-items:center;gap:9px;padding:9px 12px;background:linear-gradient(110deg,#071b45ed,#075ca9ed);border:1px solid #65eaff;border-left:3px solid #fff000;box-shadow:0 5px 20px #00102c88;color:#efffff;font:800 10px Arial,"Microsoft YaHei",sans-serif;letter-spacing:.08em}
     #acg-bgm button{border:0;background:transparent;color:#b9faff;font-size:15px;cursor:pointer;padding:2px 4px}
     #acg-bgm button:hover{color:#fff}
     #acg-bgm .bgm-meta{display:flex;flex-direction:column;gap:3px;min-width:102px}
@@ -171,7 +171,7 @@
     #acg-bgm input[type=range]{width:66px;accent-color:#b9faff}
     #acg-bgm .bgm-volume{display:flex;align-items:center;gap:4px}
     #acg-bgm-status{font-size:8px;color:#fff000;max-width:85px;line-height:1.2}
-    @media(max-width:700px){#acg-bgm{right:8px;bottom:8px;padding:7px 9px;gap:6px}#acg-bgm .bgm-meta{min-width:82px}#acg-bgm input[type=range]{width:48px}#acg-bgm-status{display:none}}
+    @media(max-width:700px){#acg-bgm{right:8px;top:8px;bottom:auto;padding:7px 9px;gap:6px}#acg-bgm .bgm-meta{min-width:82px}#acg-bgm input[type=range]{width:48px}#acg-bgm-status{display:none}}
   </style>
 </head>
 <body>
