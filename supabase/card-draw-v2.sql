@@ -259,6 +259,7 @@ create table if not exists public.card_dismantle_requests (
   user_id uuid not null references public.profiles(id) on delete cascade,
   request_id uuid not null,
   reward_tokens bigint not null,
+  items jsonb not null,
   created_at timestamptz not null default now(),
   primary key(user_id,request_id)
 );
@@ -278,6 +279,7 @@ declare
   v_user_id uuid := auth.uid();
   v_balance bigint;
   v_old_reward bigint;
+  v_old_items jsonb;
   v_item record;
   v_current integer;
   v_reward bigint := 0;
@@ -293,9 +295,12 @@ begin
   where user_id=v_user_id for update;
   if not found then raise exception '玩家资料尚未初始化'; end if;
 
-  select reward_tokens into v_old_reward from public.card_dismantle_requests
+  select reward_tokens,items into v_old_reward,v_old_items from public.card_dismantle_requests
   where user_id=v_user_id and request_id=p_request_id;
   if found then
+    if v_old_items <> p_items then
+      raise exception '该分解请求编号已用于另一份卡牌清单，请刷新后重试';
+    end if;
     return jsonb_build_object('reward_tokens',v_old_reward,'remaining_tokens',v_balance,'duplicate_request',true);
   end if;
 
@@ -353,8 +358,8 @@ begin
   insert into public.token_transactions(user_id,amount,reason)
   values(v_user_id,v_reward,'分解卡牌');
 
-  insert into public.card_dismantle_requests(user_id,request_id,reward_tokens)
-  values(v_user_id,p_request_id,v_reward);
+  insert into public.card_dismantle_requests(user_id,request_id,reward_tokens,items)
+  values(v_user_id,p_request_id,v_reward,p_items);
 
   return jsonb_build_object('reward_tokens',v_reward,'remaining_tokens',v_balance,'duplicate_request',false);
 end;
