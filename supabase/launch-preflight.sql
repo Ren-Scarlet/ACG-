@@ -43,7 +43,7 @@ function_report as (
     'FUNCTION'::text as section,
     'public.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')' as object_name,
     case when p.prosecdef then 'SECURITY DEFINER' else 'invoker' end||
-      '; owner='||pg_get_userbyid(p.proowner) as details
+      '; owner='||pg_get_userbyid(p.proowner)||E'\\n'||pg_get_functiondef(p.oid) as details
   from pg_proc p
   join pg_namespace n on n.oid=p.pronamespace
   where n.nspname='public'
