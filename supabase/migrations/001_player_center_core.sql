@@ -460,6 +460,7 @@ grant select on public.player_titles, public.card_draws to authenticated;
 -- RPC execution is the only client write path for these operations.
 revoke all on function public.rebuild_player_match_stats() from public, anon, authenticated;
 revoke all on function public.check_player_achievements(uuid) from public, anon, authenticated;
+revoke all on function public.on_player_progress_changed() from public, anon, authenticated;
 revoke all on function public.admin_record_match(uuid[], uuid[], text, text) from public, anon, authenticated;
 revoke all on function public.admin_update_match(bigint, uuid[], uuid[], text, text) from public, anon, authenticated;
 revoke all on function public.admin_delete_match(bigint) from public, anon, authenticated;
