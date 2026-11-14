@@ -119,7 +119,7 @@ begin
      or p_rate_alt < 0 or p_rate_5 < 0 or p_rate_4 < 0 or p_rate_3 < 0
      or p_rate_alt > 100 or p_rate_5 > 100 or p_rate_4 > 100 or p_rate_3 > 100
      or round(p_rate_alt + p_rate_5 + p_rate_4 + p_rate_3, 2) <> 100 then
-    raise exception '异画、五星、四星、三星概率之和必须为 100%%（最多两位小数）';
+    raise exception '异画、五星、四星、三星概率之和必须等于百分之百（最多两位小数）';
   end if;
 
   select pack_name into v_pack_name
