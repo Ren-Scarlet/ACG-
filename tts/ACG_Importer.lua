@@ -13,8 +13,8 @@ local ACG_shareUrl = ""
 
 -- 仅负责界面 XML；由现有 applyAllUI() 统一发送。
 ACG_UI_XML = [[
-<Button id="ACGOpenButton" text="ACG 卡组导入" rectAlignment="LowerLeft"
-        offsetXY="50 45" width="170" height="42"
+<Button id="ACGOpenButton" text="ACG 卡组导入" rectAlignment="UpperLeft"
+        offsetXY="50 -50" width="170" height="42"
         colors="#303744|#46536A|#252B35|#303744"
         textColor="#FFFFFF" fontSize="17" onClick="ACG_togglePanel"/>
 <Panel id="ACGPanel" active="false" width="520" height="230"
