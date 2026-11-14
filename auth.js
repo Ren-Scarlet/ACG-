@@ -77,10 +77,6 @@
       showStatus("用户名须为 3～20 位，只能使用英文字母、数字和下划线。", "bad");
       return;
     }
-    if (!email.includes("@") || email.includes(" ") || email.lastIndexOf(".") < email.indexOf("@") + 2 || email.endsWith(".")) {
-      showStatus("请输入有效的邮箱地址，例如 QQ 邮箱。", "bad");
-      return;
-    }
     if (password.length < 8) {
       showStatus("密码至少需要 8 位。", "bad");
       return;
@@ -118,10 +114,6 @@
     const password = document.getElementById("login-password").value;
     const button = loginForm.querySelector("button[type=submit]");
 
-    if (!email.includes("@") || email.includes(" ") || email.lastIndexOf(".") < email.indexOf("@") + 2 || email.endsWith(".")) {
-      showStatus("请输入有效的邮箱地址。", "bad");
-      return;
-    }
 
     button.disabled = true;
     showStatus("正在登录……", "");
