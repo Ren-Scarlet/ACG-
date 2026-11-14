@@ -8,6 +8,7 @@
   const style = document.createElement("style");
   style.textContent = "#player-center-view .pc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}#player-center-view .pc-tabs button{padding:8px 12px}#player-center-view .pc-tabs button.active{background:#5967a5;border-color:#7181c7}#player-center-view .pc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}#player-center-view .pc-stat{padding:14px;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-stat strong{display:block;font-size:22px;margin-top:5px}#player-center-view .pc-row{display:flex;justify-content:space-between;gap:12px;padding:12px 4px;border-bottom:1px solid #383d50}#player-center-view .pc-muted{color:#a6abc0;font-size:13px;line-height:1.6}#player-center-view .pc-positive{color:#8bd5a7}#player-center-view .pc-negative{color:#ff9b9b}#player-center-view .pc-search{display:flex;gap:8px;align-items:end;flex-wrap:wrap}#player-center-view .pc-search .field{flex:1;min-width:190px}#player-center-view .pc-empty{padding:18px;text-align:center;color:#a6abc0;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-draw-card{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid #383d50;border-radius:10px;margin:10px 0}#player-center-view .pc-draw-card img{width:84px;height:116px;object-fit:contain;border-radius:6px}#player-center-view .pc-draw-card .pc-draw-info{flex:1}#player-center-view .pc-inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}#player-center-view .pc-inventory-card{display:flex;gap:10px;align-items:center;min-width:0;padding:9px;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-inventory-card img{width:58px;height:82px;object-fit:contain;flex:0 0 auto;border-radius:5px;background:#151824}#player-center-view .pc-inventory-card .pc-card-info{flex:1;min-width:0}#player-center-view .pc-inventory-card .pc-card-info strong{display:block;overflow-wrap:anywhere;font-size:13px}#player-center-view .pc-inventory-card .pc-card-info small{display:block;color:#a6abc0;font-size:11px;margin-top:4px}#player-center-view .pc-quantity-controls{display:flex;align-items:center;gap:6px;margin-top:7px}#player-center-view .pc-quantity-controls button{min-width:30px;width:30px;height:30px;padding:0;font-size:18px}#player-center-view .pc-quantity-controls strong{min-width:22px;text-align:center;font-variant-numeric:tabular-nums}#player-center-view .pc-quantity-controls button:disabled{opacity:.35;cursor:not-allowed}@media(max-width:600px){#player-center-view .pc-row{align-items:flex-start;flex-direction:column;gap:4px}}";
   style.textContent += "#acg-ten-draw{position:fixed;inset:0;z-index:99999;background:radial-gradient(ellipse at 50% 0%,#38465b 0,#111827 55%,#050811 100%);color:#edf4ff;display:flex;flex-direction:column;overflow:auto;font-family:Inter,\"Microsoft YaHei\",sans-serif}#acg-ten-draw *{box-sizing:border-box}#acg-ten-draw .acg-td-top{padding:14px 22px;border-bottom:1px solid #ffffff22;background:#070b13d9;display:flex;justify-content:space-between;align-items:center;gap:12px}#acg-ten-draw .acg-td-brand{font-weight:1000;letter-spacing:3px}#acg-ten-draw .acg-td-brand b{color:#f3d36f}#acg-ten-draw .acg-td-balance{font-size:11px;color:#f5d98c;border:1px solid #8e7948;padding:7px 10px}#acg-ten-draw .acg-td-main{width:min(1120px,100%);margin:auto;padding:22px 18px 45px}#acg-ten-draw .acg-td-title{text-align:center;margin:0 0 20px}#acg-ten-draw .acg-td-title small{color:#8dddf5;letter-spacing:4px;font-weight:800}#acg-ten-draw .acg-td-title h2{font-size:clamp(24px,4vw,36px);letter-spacing:3px;margin:7px 0}#acg-ten-draw .acg-td-title p{font-size:12px;color:#aab8ca;margin:0}#acg-ten-draw .acg-td-stage{position:relative;border:1px solid #56637a;background:radial-gradient(ellipse at 50% 42%,#414b5d 0,#222b3d 40%,#111827 78%);padding:22px 16px;box-shadow:0 20px 55px #0009,inset 0 0 55px #0008}#acg-ten-draw .acg-td-stage:before{content:\"\";position:absolute;inset:8px;border:1px solid #c2a65b55;pointer-events:none}#acg-ten-draw .acg-td-stagehead{text-align:center;position:relative;z-index:1}#acg-ten-draw .acg-td-stagehead b{color:#f5d77f;letter-spacing:3px;font-size:14px}#acg-ten-draw .acg-td-stagehead p{font-size:11px;color:#aab8ca;margin:6px 0 0}#acg-ten-draw .acg-td-packs{position:relative;z-index:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 15px;max-width:800px;margin:24px auto 0;perspective:900px}#acg-ten-draw .acg-td-pack{position:relative;aspect-ratio:.69;min-width:0;max-height:220px;border:2px solid #d8bd69;background:radial-gradient(ellipse at 50% 42%,#e2c66b55,transparent 55%),linear-gradient(140deg,#334f71,#17243a 58%,#080d17);box-shadow:0 9px 18px #0009,inset 0 0 22px #7aa4d333;overflow:hidden;animation:acgPackIn .6s both;animation-delay:calc(var(--i)*55ms);transition:.3s}#acg-ten-draw .acg-td-pack:nth-child(n+6){transform:translateY(14px)}#acg-ten-draw .acg-td-pack:before{content:\"\";position:absolute;inset:6px;border:1px solid #e8d28b77}#acg-ten-draw .acg-td-pack:after{content:\"ACG\";position:absolute;left:0;right:0;top:43%;text-align:center;font-size:clamp(17px,2.4vw,27px);font-weight:1000;letter-spacing:4px;color:#f2d989;text-shadow:0 2px 8px #000,0 0 16px #e7be5b}#acg-ten-draw .acg-td-pack.r4{border-color:#9bc5ff;box-shadow:0 0 13px #7ab8ff88,0 9px 18px #0009}#acg-ten-draw .acg-td-pack.r5{border-color:#ffdc69;box-shadow:0 0 22px #ffdb65dd,0 0 5px #fff,0 9px 18px #0009}#acg-ten-draw .acg-td-pack.alt{border-color:#ed9dff;box-shadow:0 0 26px #db80ff,0 0 7px #fff,0 9px 18px #0009}#acg-ten-draw .acg-td-pack.opened{opacity:.28;filter:grayscale(.8)}#acg-ten-draw .acg-td-pack.opened:after{content:\"✓\";font-size:40px;top:36%;color:white}#acg-ten-draw .acg-td-pack span{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:2px;z-index:1;text-shadow:0 2px 5px #000}#acg-ten-draw .acg-td-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:26px auto 0;position:relative;z-index:2}#acg-ten-draw button{cursor:pointer;color:inherit;font:inherit}#acg-ten-draw .acg-td-btn{min-width:145px;padding:12px 20px;border:1px solid #66758b;background:linear-gradient(#25344b,#121d2e);font-weight:900;font-size:12px;letter-spacing:2px}#acg-ten-draw .acg-td-btn.primary{color:#191711;border-color:#fff0b0;background:linear-gradient(110deg,#c59c42,#ffe99b 48%,#d4a34c);box-shadow:0 0 24px #eac65a55}#acg-ten-draw .acg-td-btn:disabled{opacity:.35;cursor:not-allowed}#acg-ten-draw .acg-td-reveal{display:none;margin-top:22px;padding:18px;border:1px solid #53637a;background:#0c1422ed;position:relative;z-index:2}#acg-ten-draw .acg-td-reveal.show{display:block;animation:acgFade .35s}#acg-ten-draw .acg-td-rhead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}#acg-ten-draw .acg-td-rhead b{font-size:14px;letter-spacing:2px}#acg-ten-draw .acg-td-rhead span{font-size:11px;color:#aab8ca}#acg-ten-draw .acg-td-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}#acg-ten-draw .acg-td-card{min-width:0;perspective:900px;cursor:pointer}#acg-ten-draw .acg-td-inner{position:relative;aspect-ratio:2/2.9;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.75,.2,1)}#acg-ten-draw .acg-td-card.flip .acg-td-inner{transform:rotateY(180deg)}#acg-ten-draw .acg-td-face{position:absolute;inset:0;backface-visibility:hidden;overflow:hidden;border:1px solid #697b92;background:#16243a}#acg-ten-draw .acg-td-back{display:grid;place-items:center;background:repeating-linear-gradient(135deg,#172b45 0 7px,#263d5c 7px 14px)}#acg-ten-draw .acg-td-back:after{content:\"ACG\";font-size:clamp(15px,2vw,24px);font-weight:1000;letter-spacing:3px;color:#d9c17c;text-shadow:0 0 12px #e5c65e}#acg-ten-draw .acg-td-front{transform:rotateY(180deg)}#acg-ten-draw .acg-td-front img{width:100%;height:100%;object-fit:cover;display:block}#acg-ten-draw .acg-td-front strong{position:absolute;bottom:0;left:0;right:0;text-align:center;padding:22px 4px 6px;background:linear-gradient(transparent,#050912);font-size:clamp(9px,1vw,12px)}#acg-ten-draw .acg-td-card.r5 .acg-td-front{border:2px solid #ffdb72;box-shadow:0 0 16px #ffd65b}#acg-ten-draw .acg-td-card.r4 .acg-td-front{border:2px solid #9ec8ff;box-shadow:0 0 13px #8bbaff}#acg-ten-draw .acg-td-card.alt .acg-td-front{border:2px solid #e9a0ff;box-shadow:0 0 20px #e69aff}#acg-ten-draw .acg-td-cardname{text-align:center;font-size:10px;color:#aab6c8;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#acg-ten-draw .acg-td-card:not(.flip) .acg-td-cardname{color:#5f6e84}#acg-ten-draw .acg-td-summary{text-align:center;color:#aab8ca;font-size:12px;margin-top:14px}#acg-ten-draw .acg-td-summary b{color:#f3d77e}#acg-ten-draw .acg-td-close{position:fixed;top:10px;right:14px;z-index:5;background:#121b2a;border:1px solid #68758a;padding:8px 12px;font-size:12px}@keyframes acgPackIn{from{opacity:0;transform:translateY(38px) rotateX(20deg) scale(.82)}to{opacity:1;transform:none}}@keyframes acgFade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@media(max-width:650px){#acg-ten-draw .acg-td-main{padding:16px 9px 32px}#acg-ten-draw .acg-td-stage{padding:17px 8px}#acg-ten-draw .acg-td-packs{gap:8px 5px}#acg-ten-draw .acg-td-pack:before{inset:3px}#acg-ten-draw .acg-td-pack span{font-size:7px;letter-spacing:1px}#acg-ten-draw .acg-td-cards{gap:7px}#acg-ten-draw .acg-td-reveal{padding:12px}#acg-ten-draw .acg-td-btn{min-width:120px;padding:10px 12px}}@media(max-width:420px){#acg-ten-draw .acg-td-cards{grid-template-columns:repeat(3,minmax(0,1fr))}#acg-ten-draw .acg-td-title p{font-size:10px}}";
+  style.textContent += "#acg-draw-lobby{position:fixed;inset:0;z-index:99990;overflow:auto;background:radial-gradient(ellipse at 50% 0%,#1b2940 0,#101827 48%,#090e18 100%);color:#edf4ff;font-family:Inter,\"Microsoft YaHei\",sans-serif}#acg-draw-lobby *{box-sizing:border-box}#acg-draw-lobby .adl-top{height:55px;padding:0 max(18px,calc((100vw - 1120px)/2));display:flex;align-items:center;justify-content:space-between;background:#070b13e8;border-bottom:1px solid #ffffff1c}#acg-draw-lobby .adl-brand{font-weight:1000;letter-spacing:3px}#acg-draw-lobby .adl-brand b{color:#efc45d}#acg-draw-lobby .adl-topright{display:flex;gap:12px;align-items:center}#acg-draw-lobby .adl-token{border:1px solid #34445c;padding:8px 12px;color:#eecb78;font-size:12px}#acg-draw-lobby button{font:inherit;cursor:pointer;color:inherit}#acg-draw-lobby .adl-close{border:1px solid #53637a;background:#172235;padding:8px 13px;font-size:12px}#acg-draw-lobby .adl-main{max-width:1160px;margin:auto;padding:30px 20px 55px}#acg-draw-lobby .adl-eyebrow{text-align:center;color:#78d9f4;font-size:10px;letter-spacing:5px;font-weight:800}#acg-draw-lobby .adl-hero{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:8px 0 24px}#acg-draw-lobby .adl-hero h1{font-size:clamp(28px,4vw,42px);margin:0 0 5px;letter-spacing:2px}#acg-draw-lobby .adl-hero p{font-size:12px;color:#aab8ca;margin:0}#acg-draw-lobby .adl-tokenbox{border:1px solid #34445c;border-radius:5px;padding:12px 18px;white-space:nowrap;color:#aab8ca;font-size:11px}#acg-draw-lobby .adl-tokenbox b{font-size:21px;color:#f1bd56;margin-left:12px}#acg-draw-lobby .adl-section{display:flex;align-items:center;gap:12px;margin:25px 0 12px;font-weight:800;font-size:14px}#acg-draw-lobby .adl-section small{font-size:9px;color:#91a9c7;font-weight:400}#acg-draw-lobby .adl-section:after{content:\"\";height:1px;flex:1;background:#35435a}#acg-draw-lobby .adl-pools{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}#acg-draw-lobby .adl-pool{border:1px solid #394b64;background:#0d1522;border-radius:8px;overflow:hidden;cursor:pointer;transition:.2s;min-width:0}#acg-draw-lobby .adl-pool.active{border:2px solid #e9bd59;box-shadow:0 0 0 1px #e9bd5944,inset 0 0 20px #e9bd5911}#acg-draw-lobby .adl-cover{height:170px;display:grid;place-items:center;position:relative;overflow:hidden;background:radial-gradient(ellipse,#526a85,#18263a 60%,#0c1421)}#acg-draw-lobby .adl-cover:before{content:\"\";position:absolute;width:75%;aspect-ratio:1;transform:rotate(45deg);background:#07101caa;border:1px solid #ffffff22}#acg-draw-lobby .adl-cover img{height:145px;max-width:78%;object-fit:contain;position:relative;z-index:1;transform:rotate(-7deg);filter:drop-shadow(0 8px 10px #000b)}#acg-draw-lobby .adl-pool:nth-child(2) .adl-cover{background:radial-gradient(ellipse,#65517b,#211b37 60%,#0c1421)}#acg-draw-lobby .adl-pool:nth-child(3) .adl-cover{background:radial-gradient(ellipse,#805339,#30202a 60%,#0c1421)}#acg-draw-lobby .adl-pool:nth-child(4) .adl-cover{background:radial-gradient(ellipse,#285d7b,#142b43 60%,#0c1421)}#acg-draw-lobby .adl-poolinfo{padding:12px 14px 14px}#acg-draw-lobby .adl-poolinfo h3{margin:0 0 5px;font-size:15px}#acg-draw-lobby .adl-poolinfo p{margin:0 0 7px;color:#9eafc7;font-size:11px}#acg-draw-lobby .adl-poolinfo strong{font-size:11px;color:#edc15d}#acg-draw-lobby .adl-config{margin-top:26px;padding:17px 18px;border:1px solid #34445c;background:#111b2a;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:15px}#acg-draw-lobby .adl-config h3{font-size:16px;margin:0 0 5px}#acg-draw-lobby .adl-config p{font-size:11px;color:#9eafc7;margin:0}#acg-draw-lobby .adl-actions{display:flex;gap:9px;flex-wrap:wrap}#acg-draw-lobby .adl-btn{border:1px solid #596a81;background:#1c2b40;padding:12px 16px;font-size:12px;font-weight:800;white-space:nowrap}#acg-draw-lobby .adl-btn.primary{background:linear-gradient(110deg,#c59c42,#ffe99b);color:#17130a;border-color:#ffe7a2;box-shadow:0 0 20px #eac65a33}#acg-draw-lobby .adl-rates{font-size:11px;color:#aab8ca;margin:13px 0 0;display:flex;gap:16px;flex-wrap:wrap}#acg-draw-lobby .adl-rates .alt{color:#e99bff}#acg-draw-lobby .adl-rates .r5{color:#ffda73}#acg-draw-lobby .adl-rates .r4{color:#a8caff}#acg-draw-lobby .adl-history{margin-top:28px;border-top:1px solid #34445c;padding-top:16px}#acg-draw-lobby .adl-history h3{font-size:14px}#acg-draw-lobby .adl-historyrow{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #ffffff12;font-size:12px;color:#dbe4f2}#acg-draw-lobby .adl-historyrow img{width:38px;height:52px;object-fit:contain}#acg-draw-lobby .adl-muted{color:#91a1b8;font-size:11px}#acg-draw-lobby .adl-status{margin:12px 0;color:#f2cd77;font-size:12px;min-height:18px}@media(max-width:680px){#acg-draw-lobby .adl-main{padding:20px 11px 35px}#acg-draw-lobby .adl-hero{align-items:flex-start;flex-direction:column}#acg-draw-lobby .adl-config{align-items:flex-start;flex-direction:column}#acg-draw-lobby .adl-actions{width:100%}#acg-draw-lobby .adl-btn{flex:1}#acg-draw-lobby .adl-cover{height:140px}#acg-draw-lobby .adl-cover img{height:120px}}";
   document.head.appendChild(style);
 
   const tab = document.createElement("button");
@@ -221,6 +222,50 @@
   function clearDrawRequestId(packId,packCount) {
     pendingDrawRequests.delete(packId+":"+packCount);try{localStorage.removeItem(drawRequestStorageKey(packId,packCount));}catch(_){}
   }
+  let drawLobbyRoot=null;
+  function closeDrawLobby(){if(drawLobbyRoot){drawLobbyRoot.remove();drawLobbyRoot=null;}}
+  function renderDrawLobby(pools,stats,history,drawCount,packNames){
+    closeDrawLobby();
+    const root=node("div");root.id="acg-draw-lobby";drawLobbyRoot=root;
+    const top=node("header","adl-top"),brand=node("div","adl-brand");brand.innerHTML='ACG <b>PACK LAB</b>';
+    const right=node("div","adl-topright"),token=node("div","adl-token","代币："+(stats?.tokens??0)),close=node("button","adl-close","返回玩家中心");
+    close.type="button";close.addEventListener("click",closeDrawLobby);right.append(token,close);top.append(brand,right);
+    const main=node("main","adl-main"),eyebrow=node("div","adl-eyebrow","CARD PACK COLLECTION"),hero=node("div","adl-hero");
+    const hgroup=node("div");hgroup.append(node("h1","","卡包召唤"),node("p","","选择你的卡包，开启下一张传说。每包 5 张卡，十连共 50 张。"));
+    const tokenbox=node("div","adl-tokenbox");tokenbox.append(document.createTextNode("当前代币"),node("b","",String(stats?.tokens??0)));hero.append(hgroup,tokenbox);
+    const section=node("div","adl-section");section.append(document.createTextNode("选择卡包"),node("small","","SELECT YOUR PACK"));
+    const grid=node("div","adl-pools");let selectedPool=pools[0]||null;
+    const cards=Object.values(cardsById);
+    pools.forEach((pool,index)=>{
+      const tile=node("article","adl-pool"+(index===0?" active":""));tile.dataset.packId=pool.pack_id;
+      const cover=node("div","adl-cover");
+      const coverCard=cards.find(c=>c.pack_id===pool.pack_id&&c.image);
+      if(coverCard){const img=node("img");img.src=coverCard.image;img.alt=pool.pack_name;img.loading="lazy";cover.appendChild(img);}
+      const info=node("div","adl-poolinfo");info.append(node("h3","",pool.pack_name),node("p","",pool.description||"ACG 卡牌卡池"),node("strong","","单包 "+pool.price_tokens+" 代币 · 5 张卡"));
+      tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;grid.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
+    });
+    const config=node("section","adl-config"),configInfo=node("div"),configTitle=node("h3","",selectedPool?.pack_name||"暂无开放卡池"),configDesc=node("p","","每包 5 张卡 · 经典卡池");
+    configInfo.append(configTitle,configDesc);const actions=node("div","adl-actions"),single=node("button","adl-btn primary","开启 1 包 · 5 张"),ten=node("button","adl-btn","开启 10 包 · 50 张");
+    single.type=ten.type="button";actions.append(single,ten);config.append(configInfo,actions);
+    const rates=node("div","adl-rates"),status=node("div","adl-status","");
+    function updateConfig(){
+      if(!selectedPool)return;
+      configTitle.textContent=selectedPool.pack_name;configDesc.textContent="每包 5 张 · 单包 "+selectedPool.price_tokens+" 代币";
+      rates.innerHTML='<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
+    }
+    updateConfig();
+    const historySection=node("section","adl-history"),historyTitle=node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张");
+    historySection.appendChild(historyTitle);
+    if(!history?.length)historySection.appendChild(node("p","adl-muted","还没有抽卡记录。"));
+    else history.forEach(item=>{
+      const info=cardsById[item.card_id]||{name:item.card_id},line=node("div","adl-historyrow");
+      if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;line.appendChild(img);}
+      const detail=node("div");detail.append(node("strong","",info.name),node("div","adl-muted",(info.star||"")+" 星 · "+(packNames[item.pack_id]||item.pack_id)+" · "+new Date(item.created_at).toLocaleString("zh-CN")));line.appendChild(detail);historySection.appendChild(line);
+    });
+    const launch=count=>{if(!selectedPool)return;status.textContent="正在连接召唤系统……";single.disabled=ten.disabled=true;performDraw(selectedPool,count).finally(()=>{single.disabled=ten.disabled=false;});};
+    single.addEventListener("click",()=>launch(1));ten.addEventListener("click",()=>launch(10));
+    main.append(eyebrow,hero,section,grid,config,rates,status,historySection);root.append(top,main);document.body.appendChild(root);
+  }
   async function loadDraw() {
     const {data:pools,error}=await client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled").eq("enabled",true).order("pack_id");
     if(error)throw error;drawPools=pools||[];
@@ -232,30 +277,11 @@
     ]);
     if(historyError)throw historyError;if(packError)throw packError;
     const packNames=Object.fromEntries((packRows||[]).map(pack=>[pack.pack_id,pack.pack_name]));
-    contentEl.replaceChildren();contentEl.appendChild(node("div","pc-stat","当前代币："+(stats?.tokens??0)));
-    if(!drawPools.length)contentEl.appendChild(node("div","pc-empty","目前没有开放的卡池。请等待管理员完成卡池设置。"));
-    drawPools.forEach(pool=>{
-      const card=node("div","pc-stat");
-      card.append(node("h3","",pool.pack_name),node("p","pc-muted","每包 5 张 · 单包 "+pool.price_tokens+" 代币"),
-        node("p","pc-muted","异画 "+Number(pool.rate_alt||0)+"% · 五星 "+pool.rate_5+"% · 四星 "+pool.rate_4+"% · 三星 "+pool.rate_3+"%"));
-      const actions=node("div");actions.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
-      [[1,"单抽（1包·5张）"],[10,"十连（10包·50张）"]].forEach(([count,label])=>{
-        const button=node("button",count===1?"primary":"",""+label);button.type="button";
-        button.addEventListener("click",()=>performDraw(pool,count));actions.appendChild(button);
-      });
-      card.appendChild(actions);contentEl.appendChild(card);
-    });
-    contentEl.appendChild(node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张卡"));
-    if(!history?.length){contentEl.appendChild(node("div","pc-empty","还没有抽卡记录。"));return;}
-    history.forEach(item=>{
-      const info=cardsById[item.card_id]||{name:item.card_id};const line=node("div","pc-row"),left=node("div"),details=node("div","pc-muted");
-      left.style.display="flex";left.style.alignItems="center";left.style.gap="12px";
-      if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";img.style.cssText="width:48px;height:66px;object-fit:contain;border-radius:5px";left.appendChild(img);}
-      details.append(node("strong","",info.name),node("div","pc-muted",(info.star||"")+" 星 · "+(packNames[item.pack_id]||item.pack_id)),
-        node("div","pc-muted",new Date(item.created_at).toLocaleString("zh-CN")));
-      left.appendChild(details);line.append(left,node("span","pc-muted","已加入收藏"));contentEl.appendChild(line);
-    });
+    contentEl.replaceChildren();
+    if(!drawPools.length){contentEl.appendChild(node("div","pc-empty","目前没有开放的卡池。请等待管理员完成卡池设置。"));return;}
+    renderDrawLobby(drawPools,stats,history,drawCount,packNames);
   }
+
   function showTenPackOpening(pool,result) {
     const cards=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index);
     const packs=Array.from({length:10},(_,i)=>cards.slice(i*5,(i+1)*5));
@@ -333,30 +359,42 @@
     skipBtn.addEventListener("click",()=>{if(finished)return;showComplete();});
   }
   async function performDraw(pool,packCount) {
-    if(drawBusy)return;drawBusy=true;contentEl.querySelectorAll("button").forEach(button=>button.disabled=true);
-    const requestId=getDrawRequestId(pool.pack_id,packCount);const loading=node("p","pc-muted","正在抽取 "+(packCount*5)+" 张卡，请稍候……");contentEl.prepend(loading);
+    if(drawBusy)return;drawBusy=true;
+    const requestId=getDrawRequestId(pool.pack_id,packCount);
+    const loading=node("div","adl-status","正在抽取 "+(packCount*5)+" 张卡，请稍候……");
+    if(drawLobbyRoot)drawLobbyRoot.querySelector(".adl-main").appendChild(loading);
     try{
       const {data,error}=await client.rpc("draw_packages",{p_pack_id:pool.pack_id,p_request_id:requestId,p_pack_count:packCount});
       if(error)throw error;const result=Array.isArray(data)?data[0]:data;
       if(!result?.cards||result.cards.length!==packCount*5)throw new Error("服务器没有返回完整抽卡结果；请重试，系统会沿用同一请求编号避免重复扣费。");
-      clearDrawRequestId(pool.pack_id,packCount);loading.remove();
+      clearDrawRequestId(pool.pack_id,packCount);
       await loadDraw();
-      if(packCount===10){showTenPackOpening(pool,result);}
-      else{
-        const box=node("div","pc-stat");box.append(node("h3","","抽卡结果 · 1 包 / 5 张"),
-          node("p","pc-muted","本次消耗 "+(result.charged_tokens??pool.price_tokens)+" 代币 · 剩余 "+result.remaining_tokens+" 代币"));
-        const grid=node("div","pc-inventory-grid");
-        result.cards.forEach(card=>{
-          const info=cardsById[card.card_id]||{name:card.card_id};const tile=node("div","pc-inventory-card");
-          if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";tile.appendChild(img);}
-          const meta=node("div","pc-card-info");meta.append(node("strong","",info.name),node("small","",card.is_alt?"异画":(card.rarity||info.star)+" 星"));
-          tile.appendChild(meta);grid.appendChild(tile);
-        });
-        box.appendChild(grid);if(result.duplicate_request)box.appendChild(node("p","pc-muted","本次请求已处理，已返回原结果，没有重复扣费。"));
-        contentEl.prepend(box);
-      }
-    }catch(error){loading.textContent="抽卡失败："+error.message;loading.className="pc-empty";}
-    finally{drawBusy=false;contentEl.querySelectorAll("button").forEach(button=>button.disabled=false);}
+      if(packCount===10){closeDrawLobby();showTenPackOpening(pool,result);}
+      else{closeDrawLobby();showSinglePackOpening(pool,result);}
+    }catch(error){loading.textContent="抽卡失败："+error.message;loading.style.color="#ff9b9b";}
+    finally{drawBusy=false;}
+  }
+  function showSinglePackOpening(pool,result){
+    const overlay=node("div");overlay.id="acg-ten-draw";
+    const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
+    const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens)+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
+    const close=node("button","acg-td-close","返回卡包大厅");close.type="button";close.addEventListener("click",()=>{overlay.remove();loadPage("draw");});overlay.append(top,close);
+    const main=node("div","acg-td-main"),title=node("div","acg-td-title");title.innerHTML='<small>MASTER DUEL INSPIRED · PACK OPENING</small><h2>'+pool.pack_name+'</h2><p>单包召唤 · 5 张卡牌</p>';
+    const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");head.append(node("b","","ONE PACK OPENING"),node("p","","点击卡牌逐张揭晓"));
+    const grid=node("div","acg-td-cards");
+    const rarity=card=>card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
+    result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index).forEach((card,i)=>{
+      const info=cardsById[card.card_id]||{name:card.card_id},grade=rarity(card),el=node("div","acg-td-card"+(grade==="r3"?"":" "+grade));
+      const inner=node("div","acg-td-inner"),back=node("div","acg-td-face acg-td-back"),front=node("div","acg-td-face acg-td-front"),img=node("img");
+      img.src=info.image||"";img.alt=info.name;const name=node("strong","",info.name);front.append(img,name);inner.append(back,front);
+      const label=node("div","acg-td-cardname","未揭晓");el.append(inner,label);
+      el.addEventListener("click",()=>{if(el.classList.contains("flip"))return;el.classList.add("flip");label.textContent=info.name;});grid.appendChild(el);
+    });
+    const summary=node("div","acg-td-summary","点击卡牌翻开"),actions=node("div","acg-td-actions");
+    const all=node("button","acg-td-btn primary","全部揭晓"),backBtn=node("button","acg-td-btn","返回卡包大厅");
+    all.type=backBtn.type="button";all.addEventListener("click",()=>[...grid.children].forEach((el,i)=>setTimeout(()=>{el.classList.add("flip");el.querySelector(".acg-td-cardname").textContent=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index)[i]&&cardsById[result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index)[i].card_id]?.name||"";},i*90)));
+    backBtn.addEventListener("click",()=>{overlay.remove();loadPage("draw");});actions.append(all,backBtn);
+    stage.append(head,grid,summary,actions);main.append(title,stage);overlay.append(main);document.body.appendChild(overlay);
   }
   async function loadDismantle() {
     const [{data:inventory,error:ie},{data:stats,error:se}]=await Promise.all([
