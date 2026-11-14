@@ -68,7 +68,7 @@
     result.replaceChildren(node("p","pc-muted","正在查询……"));
     const {data,error} = await client.from("public_profiles")
       .select("username,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate")
-      .ilike("username",username).maybeSingle();
+      .eq("username",username.toLowerCase()).maybeSingle();
     result.replaceChildren();
     if (error) { result.appendChild(node("p","pc-empty","查询失败："+error.message)); return; }
     if (!data) { result.appendChild(node("p","pc-empty","没有找到这个玩家。请确认昵称是否正确。")); return; }
@@ -203,8 +203,26 @@
 
   let drawPools=[];
   let drawBusy=false;
-  // Reuse the same request ID after an uncertain network failure so a retry cannot charge twice.
+  // Persist uncertain draw request IDs so refreshing the page cannot accidentally charge twice.
   const pendingDrawRequests = new Map();
+  function drawRequestStorageKey(packId) {
+    return "acg-pending-draw:" + currentUser.id + ":" + packId;
+  }
+  function getDrawRequestId(packId) {
+    let requestId = pendingDrawRequests.get(packId);
+    if (requestId) return requestId;
+    try { requestId = localStorage.getItem(drawRequestStorageKey(packId)); } catch (_) {}
+    if (!requestId) {
+      requestId = crypto.randomUUID();
+      try { localStorage.setItem(drawRequestStorageKey(packId), requestId); } catch (_) {}
+    }
+    pendingDrawRequests.set(packId, requestId);
+    return requestId;
+  }
+  function clearDrawRequestId(packId) {
+    pendingDrawRequests.delete(packId);
+    try { localStorage.removeItem(drawRequestStorageKey(packId)); } catch (_) {}
+  }
   async function loadDraw() {
     const {data:pools,error}=await client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_3,rate_4,rate_5,enabled").eq("enabled",true).order("pack_id");
     if(error)throw error;
@@ -239,8 +257,7 @@
     if(drawBusy)return;
     drawBusy=true;
     const buttons=[...contentEl.querySelectorAll("button")];buttons.forEach(button=>button.disabled=true);
-    let requestId=pendingDrawRequests.get(pool.pack_id);
-    if(!requestId){requestId=crypto.randomUUID();pendingDrawRequests.set(pool.pack_id,requestId);}
+    const requestId=getDrawRequestId(pool.pack_id);
     const loading=node("p","pc-muted","正在抽取，请稍候……");
     contentEl.prepend(loading);
     try{
@@ -249,7 +266,7 @@
       const result=Array.isArray(data)?data[0]:data;
       if(!result?.card_id)throw new Error("服务器没有返回有效的抽卡结果，请重试；系统会使用同一请求编号避免重复扣费。");
       // The server has confirmed this draw. A future deliberate draw must use a fresh request ID.
-      pendingDrawRequests.delete(pool.pack_id);
+      clearDrawRequestId(pool.pack_id);
       const info=cardsById[result.card_id]||{name:result.card_id};
       loading.remove();
       const box=node("div","pc-stat");
