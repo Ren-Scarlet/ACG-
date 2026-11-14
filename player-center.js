@@ -513,8 +513,12 @@
   }
   view.querySelectorAll("[data-page]").forEach(button=>button.addEventListener("click",()=>loadPage(button.dataset.page)));
 
-  async function onSession(session) {
+  let lastSessionUserId=null;
+  async function onSession(session,event="INITIAL_SESSION") {
     currentUser=session?.user||null;
+    const nextUserId=currentUser?.id||null;
+    const userChanged=nextUserId!==lastSessionUserId;
+    lastSessionUserId=nextUserId;
     if(!currentUser){
       personalEl.classList.add("hidden");
       loginHint.textContent="登录后可查看自己的对战记录、代币、收藏和成就。公开主页仍可供访客查询。";
@@ -1007,7 +1011,7 @@
   });
 
     loadCardNames();
-  client.auth.onAuthStateChange((_event,session)=>{onSession(session);});
+  client.auth.onAuthStateChange((event,session)=>{onSession(session,event);});
   client.auth.getSession().then(({data,error})=>{
     if(error){setStatus("无法读取登录状态："+error.message,true);return;}
     onSession(data?.session||null);
