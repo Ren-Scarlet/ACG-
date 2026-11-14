@@ -463,8 +463,8 @@
     function compareCardsById(a, b) {
       const idA = String(a.id || "");
       const idB = String(b.id || "");
-      const numA = Number((idA.match(/\\d+/g) || []).join(""));
-      const numB = Number((idB.match(/\\d+/g) || []).join(""));
+      const numA = Number((idA.match(/\d+/g) || []).join(""));
+      const numB = Number((idB.match(/\d+/g) || []).join(""));
       return (Number.isFinite(numA) ? numA : 0) - (Number.isFinite(numB) ? numB : 0) || idA.localeCompare(idB);
     }
     function sortCards(cards, mode) {
