@@ -18,7 +18,8 @@
   view.innerHTML = [
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家昵称</label><input id="pc-public-name" maxlength="20" placeholder="输入游戏昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
-    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div></div></div>'
+    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div></div></div>',
+    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
 
@@ -29,6 +30,7 @@
   const loginHint = view.querySelector("#pc-login-hint");
   const contentEl = view.querySelector("#pc-personal-content");
   let currentUser = null, currentPage = "overview", cardsById = {};
+  let adminPlayers = [];
 
   function node(tag, cls, text) {
     const item = document.createElement(tag);
@@ -195,9 +197,117 @@
     loginHint.textContent="已登录。以下内容仅本人可查看。";
     view.querySelector("#pc-public-name").value=currentUser.user_metadata?.username||"";
     await loadPage(currentPage);
+    await checkAdmin();
   }
 
-  loadCardNames();
+
+  const adminPanel = view.querySelector("#pc-admin-panel");
+  const matchForm = view.querySelector("#pc-match-form");
+  const matchStatus = view.querySelector("#pc-match-status");
+  const matchList = view.querySelector("#pc-admin-match-list");
+  const matchSelectIds = ["pc-blue-1","pc-blue-2","pc-red-1","pc-red-2"];
+
+  function setMatchStatus(message,bad) {
+    matchStatus.textContent=message;
+    matchStatus.className="status"+(bad?" bad":" good");
+  }
+  function fillPlayerSelects() {
+    matchSelectIds.forEach(id=>{
+      const select=view.querySelector("#"+id),previous=select.value;
+      select.replaceChildren(new Option("请选择玩家",""));
+      adminPlayers.forEach(player=>select.add(new Option(player.username,player.id)));
+      if(adminPlayers.some(player=>player.id===previous))select.value=previous;
+    });
+  }
+  async function checkAdmin() {
+    try {
+      const {data,error}=await client.from("profiles").select("is_admin").eq("id",currentUser.id).maybeSingle();
+      if(error)throw error;
+      if(!data?.is_admin){adminPanel.classList.add("hidden");return;}
+      adminPanel.classList.remove("hidden");
+      const {data:players,error:playersError}=await client.from("profiles").select("id,username").order("username");
+      if(playersError)throw playersError;
+      adminPlayers=players||[];
+      fillPlayerSelects();
+      await loadAdminMatches();
+    } catch(error) {
+      adminPanel.classList.add("hidden");
+      setStatus("管理员资料读取失败："+error.message,true);
+    }
+  }
+  async function loadAdminMatches() {
+    const {data:matches,error}=await client.from("matches").select("id,description,created_at,winning_team").order("created_at",{ascending:false}).limit(50);
+    if(error)throw error;
+    matchList.replaceChildren();
+    if(!matches?.length){matchList.appendChild(node("div","pc-empty","暂时没有登记过比赛。"));return;}
+    const ids=matches.map(match=>match.id);
+    const {data:results,error:resultsError}=await client.from("match_results").select("match_id,user_id,result,team").in("match_id",ids);
+    if(resultsError)throw resultsError;
+    const playerNames=Object.fromEntries(adminPlayers.map(player=>[player.id,player.username]));
+    const byMatch={};
+    (results||[]).forEach(result=>(byMatch[result.match_id]??=[]).push(result));
+    matches.forEach(match=>{
+      const row=node("div","pc-row"),left=node("div");
+      const teamNames=(byMatch[match.id]||[]).map(result=>(result.team==="blue"?"蓝队":"红队")+"："+(playerNames[result.user_id]||"未知玩家")).join("、");
+      left.append(node("strong","",match.description||("比赛 #"+match.id)),node("div","pc-muted",new Date(match.created_at).toLocaleString("zh-CN")+" · "+teamNames));
+      const edit=node("button","","更正");
+      edit.type="button";
+      edit.addEventListener("click",()=>{
+        const entries=byMatch[match.id]||[];
+        const blue=entries.filter(entry=>entry.team==="blue"),red=entries.filter(entry=>entry.team==="red");
+        if(blue.length!==2||red.length!==2){setMatchStatus("这场比赛缺少完整的队伍记录，暂时不能更正。",true);return;}
+        view.querySelector("#pc-match-id").value=match.id;
+        view.querySelector("#pc-match-description").value=match.description||"";
+        view.querySelector("#pc-blue-1").value=blue[0].user_id;
+        view.querySelector("#pc-blue-2").value=blue[1].user_id;
+        view.querySelector("#pc-red-1").value=red[0].user_id;
+        view.querySelector("#pc-red-2").value=red[1].user_id;
+        view.querySelector("#pc-winning-team").value=match.winning_team|| (blue[0].result==="win"?"blue":"red");
+        view.querySelector("#pc-match-submit").textContent="保存更正";
+        view.querySelector("#pc-match-cancel").classList.remove("hidden");
+        setMatchStatus("正在更正比赛 #"+match.id+"。修改完成后会重新计算统计。",false);
+        matchForm.scrollIntoView({behavior:"smooth",block:"center"});
+      });
+      row.append(left,edit);matchList.appendChild(row);
+    });
+  }
+  matchForm.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const players=matchSelectIds.map(id=>view.querySelector("#"+id).value);
+    if(players.some(value=>!value)||new Set(players).size!==4){setMatchStatus("请选择四名不同的玩家。",true);return;}
+    const matchId=view.querySelector("#pc-match-id").value;
+    const args={
+      p_description:view.querySelector("#pc-match-description").value.trim(),
+      p_blue_player_1:players[0],p_blue_player_2:players[1],
+      p_red_player_1:players[2],p_red_player_2:players[3],
+      p_winning_team:view.querySelector("#pc-winning-team").value
+    };
+    const submit=view.querySelector("#pc-match-submit");
+    submit.disabled=true;
+    setMatchStatus(matchId?"正在保存比赛更正……":"正在登记比赛……",false);
+    try{
+      const response=matchId
+        ?await client.rpc("admin_correct_2v2_match",{p_match_id:Number(matchId),...args})
+        :await client.rpc("admin_register_2v2_match",args);
+      if(response.error)throw response.error;
+      matchForm.reset();
+      view.querySelector("#pc-match-id").value="";
+      submit.textContent="登记比赛";
+      view.querySelector("#pc-match-cancel").classList.add("hidden");
+      setMatchStatus(matchId?"比赛更正成功，相关玩家统计已重新计算。":"比赛登记成功，四名玩家的统计已更新。",false);
+      await loadAdminMatches();
+      await loadPage(currentPage);
+    }catch(error){setMatchStatus("操作失败："+error.message,true);}
+    finally{submit.disabled=false;}
+  });
+  view.querySelector("#pc-match-cancel").addEventListener("click",()=>{
+    matchForm.reset();view.querySelector("#pc-match-id").value="";
+    view.querySelector("#pc-match-submit").textContent="登记比赛";
+    view.querySelector("#pc-match-cancel").classList.add("hidden");
+    setMatchStatus("已取消更正。",false);
+  });
+
+    loadCardNames();
   client.auth.onAuthStateChange((_event,session)=>{onSession(session);});
   client.auth.getSession().then(({data,error})=>{
     if(error){setStatus("无法读取登录状态："+error.message,true);return;}
