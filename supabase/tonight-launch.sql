@@ -450,7 +450,7 @@ with expected(table_name) as (
     ('matches'),('match_results'),('achievements'),('player_achievements'),
     ('draw_card_catalog'),('card_draw_pools'),('card_draw_history'),
     ('player_registry'),('legacy_card_collections'),('legacy_collection_imports'),
-    ('battle_item_catalog'),('battle_item_deck_commits')
+    ('battle_item_catalog'),('battle_item_deck_commits'),('card_inventory_adjustments')
 ), actual as (
   select e.table_name,
          coalesce(c.relrowsecurity,false) as rls_enabled,
