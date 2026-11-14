@@ -305,7 +305,7 @@ begin
      or coalesce(array_length(p_red_players, 1), 0) <> 2 then
     raise exception '蓝队和红队必须各有两名玩家';
   end if;
-  if p_winning_team not in ('blue', 'red') then
+  if p_winning_team is null or p_winning_team not in ('blue', 'red') then
     raise exception '胜利队伍只能是 blue 或 red';
   end if;
 
