@@ -309,6 +309,27 @@ body:not(.acg-home-active) main button:not(.tabs button){border-radius:0!importa
 body:not(.acg-home-active) main .grid{gap:14px!important}
 body:not(.acg-home-active) main .card,body:not(.acg-home-active) main .builder-stat{border-radius:0!important;border:1px solid #8ebfd0!important;box-shadow:3px 4px 0 #b5dce7!important}
 @media(max-width:820px){body:not(.acg-home-active) main{grid-template-columns:1fr!important;width:calc(100% - 18px)!important;gap:12px!important}body:not(.acg-home-active) main>nav.tabs{position:relative!important;grid-column:1!important;grid-row:auto!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}body:not(.acg-home-active) main>section{grid-column:1!important;min-height:50vh}}
+
+/* Actual three-column page composition matching the approved mockups */
+body:not(.acg-home-active) main{display:grid!important;grid-template-columns:minmax(0,190px) minmax(0,1fr)!important;grid-template-rows:auto auto minmax(0,1fr)!important;gap:0 16px!important;max-width:1500px!important;padding:18px!important;background:linear-gradient(135deg,#10b9d0,#0873c7 70%,#0754a7)!important;border:1px solid #21d4e8!important;box-shadow:0 12px 35px #00172d88!important}
+body:not(.acg-home-active) main>h2,body:not(.acg-home-active) main>.intro,body:not(.acg-home-active) main>nav.tabs{display:none!important}
+body:not(.acg-home-active) main>.acg-page-head{grid-column:1 / -1;grid-row:1;display:flex;align-items:end;justify-content:space-between;gap:15px;padding:2px 4px 14px;margin:0 0 16px;border-bottom:4px solid #ed315e}
+body:not(.acg-home-active) main>.acg-page-head .acg-eyebrow{font-size:10px;letter-spacing:.2em;font-weight:1000;color:#eaffff}
+body:not(.acg-home-active) main>.acg-page-head h2{margin:10px 0 2px;color:#061b35!important;font-size:clamp(26px,4vw,38px);font-style:italic;font-weight:1000;letter-spacing:-.04em;text-shadow:3px 3px 0 #27d4e9}
+body:not(.acg-home-active) main>.acg-page-head p{margin:0;color:#e6fbff!important;font-size:11px}
+body:not(.acg-home-active) main>.acg-subnav{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:8px;align-self:start;padding:0 0 12px}
+body:not(.acg-home-active) main>.acg-subnav .acg-subnav-title{font-size:10px;letter-spacing:.18em;font-weight:1000;color:#d9faff;padding:0 10px 7px}
+body:not(.acg-home-active) main>.acg-subnav button{min-height:44px;text-align:left;padding:10px 12px;background:linear-gradient(105deg,#061b35,#0b3155)!important;color:#f0fbff!important;border:0!important;border-left:5px solid #16c5dc!important;clip-path:polygon(0 0,100% 0,93% 100%,0 100%);font-weight:900;cursor:pointer}
+body:not(.acg-home-active) main>.acg-subnav button:nth-of-type(2n){border-left-color:#ef3765!important}
+body:not(.acg-home-active) main>.acg-subnav button.active{background:#d9f7ff!important;color:#07345b!important;box-shadow:4px 4px 0 #ed315e!important}
+body:not(.acg-home-active) main>section:not(.hidden){grid-column:2!important;grid-row:2;min-width:0;min-height:62vh;margin:0!important;padding:clamp(14px,2vw,24px)!important;background:linear-gradient(145deg,#c8f0fa,#a9e1f1)!important;border:1px solid #e4fbff!important;border-radius:0!important;box-shadow:5px 6px 0 #07508a!important;color:#082c4b!important}
+body:not(.acg-home-active) main>section:not(.hidden):before{display:none!important}
+body:not(.acg-home-active) main>section:not(.hidden)>.panel{background:rgba(239,251,255,.72)!important;border:1px solid #83c7dc!important;border-radius:0!important;box-shadow:none!important;color:#092e4d!important}
+body:not(.acg-home-active) main>section:not(.hidden) h3{color:#073c69!important}
+body:not(.acg-home-active) main>section:not(.hidden) .hint,body:not(.acg-home-active) main>section:not(.hidden) p{color:#35627a!important}
+body:not(.acg-home-active) main>section:not(.hidden) input,body:not(.acg-home-active) main>section:not(.hidden) select{background:#f3fcff!important;color:#0a3455!important;border:1px solid #7dbed3!important;border-radius:0!important}
+body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav button){border-radius:0!important;clip-path:polygon(0 0,100% 0,95% 100%,0 100%);font-weight:900}
+@media(max-width:760px){body:not(.acg-home-active) main{grid-template-columns:1fr!important}body:not(.acg-home-active) main>.acg-subnav{grid-column:1;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}body:not(.acg-home-active) main>section:not(.hidden){grid-column:1!important;grid-row:3}}
 </style>
 </head>
 <body>
@@ -1869,5 +1890,55 @@ body:not(.acg-home-active) main .card,body:not(.acg-home-active) main .builder-s
     loadData();
   </script>
   <script src="./auth.js?v=24"></script>
-</body>
+
+<script>
+(()=> {
+ const main=document.querySelector('main'); if(!main||main.dataset.acgPageShell)return; main.dataset.acgPageShell='1';
+ const sections=['account-view','library-view','builder-view','admin-view','shared-deck-view'].map(id=>document.getElementById(id)).filter(Boolean);
+ const head=document.createElement('div');head.className='acg-page-head';
+ const eyebrow=document.createElement('div');eyebrow.className='acg-eyebrow';
+ const h=document.createElement('h2');const sub=document.createElement('p');
+ head.append(Object.assign(document.createElement('div'),{className:'acg-head-copy'}));
+ head.firstChild.append(eyebrow,h,sub);main.insertBefore(head,main.querySelector('nav.tabs'));
+ const side=document.createElement('aside');side.className='acg-subnav';side.innerHTML='<div class="acg-subnav-title">SELECT CATEGORY / 页面分类</div>';main.insertBefore(side,main.querySelector('nav.tabs'));
+ const config={
+ 'library-view':{en:'CARD COLLECTION',title:'CARD INDEX',desc:'卡牌图鉴 / 浏览收藏',items:[['全部卡牌','all'],['角色卡','角色卡'],['技能卡','技能卡'],['装备卡','装备卡'],['事件卡','事件卡'],['其他','其他']]},
+ 'builder-view':{en:'DECK BUILDER',title:'DECK EDIT',desc:'卡组构筑 / 管理卡组',items:[['DECK 01','deck0'],['DECK 02','deck1'],['DECK 03','deck2'],['DECK 04','deck3'],['DECK 05','deck4']]},
+ 'account-view':{en:'SYSTEM CONFIGURATION',title:'SYSTEM',desc:'系统设置 / 账号管理',items:[['账号设置','account'],['界面设置','interface'],['音乐设置','music'],['帮助与说明','help']]},
+ 'admin-view':{en:'ADMINISTRATION',title:'SYSTEM ADMIN',desc:'系统管理 / 管理员工具',items:[['卡牌资料','cards'],['卡包管理','packs'],['玩家管理','players'],['抽卡设置','gacha']]},
+ 'shared-deck-view':{en:'SHARED DECK',title:'DECK SHARE',desc:'卡组分享 / 查看配置',items:[['卡组内容','share']]}
+ };
+ let current='';
+ function activate(id){
+  const c=config[id]||config['library-view'];current=id;
+  eyebrow.textContent=c.en+' / '+c.desc;h.textContent=c.title;sub.textContent=c.desc;
+  side.querySelectorAll('button').forEach(b=>b.remove());
+  c.items.forEach(([label,key],i)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.classList.toggle('active',i===0);b.addEventListener('click',()=>selectCategory(key,b));side.append(b)});
+  side.style.display='flex';
+ }
+ function selectCategory(key,button){
+  side.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===button));
+  if(key==='all'){const f=document.getElementById('type-filter');if(f){f.value='';f.dispatchEvent(new Event('change',{bubbles:true}))}}
+  else if(current==='library-view'){const f=document.getElementById('type-filter');if(f){const o=[...f.options].find(x=>x.text.includes(key)||x.value===key);if(o){f.value=o.value;f.dispatchEvent(new Event('change',{bubbles:true}))}}}
+  else if(key.startsWith('deck')){const sel=document.getElementById('saved-deck-select');if(sel&&sel.options.length>1){const ix=Number(key.slice(4))+1;if(sel.options[ix]){sel.selectedIndex=ix;document.getElementById('load-local-deck')?.click()}}}
+  else if(current==='account-view'){
+   const ids={account:'account-forms',interface:'account-profile',music:'account-profile',help:'account-status'};
+   const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
+  }else if(current==='admin-view'){
+   const ids={cards:'admin-cards-panel',packs:'admin-packs-panel',players:'pc-admin-panel',gacha:'admin-view'};
+   const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+ }
+ function update(){
+  const active=sections.find(x=>!x.classList.contains('hidden'));
+  if(active){activate(active.id);return}
+  const pc=document.getElementById('player-center-view');
+  if(pc&&!pc.classList.contains('hidden')){head.style.display='none';side.style.display='none';return}
+  if(document.getElementById('acg-ten-draw')){head.style.display='none';side.style.display='none';return}
+ }
+ const observer=new MutationObserver(update);sections.forEach(x=>observer.observe(x,{attributes:true,attributeFilter:['class']}));
+ document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>setTimeout(update,0)));
+ update();
+})();
+</script></body>
 </html>
