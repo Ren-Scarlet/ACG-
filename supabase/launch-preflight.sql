@@ -35,7 +35,7 @@ column_report as (
     'COLUMN'::text as section,
     e.table_name||'.'||e.column_name as object_name,
     case when c.column_name is null
-      then 'MISSING'||case when e.required_now then ' (required before launch)' else ' (expected from earlier migration)' end
+      then 'MISSING'||case when e.required_now then ' (required before launch)' when e.table_name='profiles' and e.column_name='player_number' then ' (added by this launch migration)' else ' (expected from earlier migration)' end
       else c.data_type||case when c.is_nullable='NO' then '; NOT NULL' else '; nullable' end
     end as details
   from expected_columns e
