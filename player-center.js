@@ -19,7 +19,7 @@
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家昵称</label><input id="pc-public-name" maxlength="20" placeholder="输入游戏昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
     '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="draw">抽卡</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
-    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">价格和星级概率由管理员设置。卡池未设置并保存前不会开放。</p><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="pack_001">无限泡影</option><option value="pack_002">梦幻</option></select></div><div class="field"><label for="pc-pool-price">单抽价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="1" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就奖励管理</h4><p class="pc-muted">设置每项成就首次解锁时发放的代币。设为 0 即不发放；修改奖励不会给已经解锁的玩家补发。</p><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
+    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">价格和星级概率由管理员设置。卡池未设置并保存前不会开放。</p><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="pack_001">无限泡影</option><option value="pack_002">梦幻</option></select></div><div class="field"><label for="pc-pool-price">单抽价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="1" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
 
@@ -380,54 +380,103 @@
       setStatus("管理员资料读取失败："+error.message,true);
     }
   }
-  async function loadAdminAchievements() {
+  const achievementForm=view.querySelector("#pc-achievement-form");
+  const achievementType=view.querySelector("#pc-ach-type");
+  const minGamesWrap=view.querySelector("#pc-ach-min-games-wrap");
+  function resetAchievementForm(){
+    achievementForm.reset();
+    view.querySelector("#pc-ach-id").readOnly=false;
+    view.querySelector("#pc-ach-submit").textContent="创建成就";
+    view.querySelector("#pc-ach-min-games").value="10";
+    view.querySelector("#pc-ach-reward").value="0";
+    view.querySelector("#pc-ach-active").checked=true;
+    view.querySelector("#pc-ach-status").textContent="";
+    minGamesWrap.classList.toggle("hidden",achievementType.value!=="win_rate");
+  }
+  function syncAchievementConditionFields(){
+    const isRate=achievementType.value==="win_rate";
+    minGamesWrap.classList.toggle("hidden",!isRate);
+    view.querySelector("#pc-ach-min-games").required=isRate;
+  }
+  achievementType.addEventListener("change",syncAchievementConditionFields);
+  view.querySelector("#pc-ach-reset").addEventListener("click",resetAchievementForm);
+  async function loadAdminAchievements(){
     const list=view.querySelector("#pc-admin-achievement-list");
     list.replaceChildren(node("p","pc-muted","正在读取成就配置……"));
     const {data,error}=await client.from("achievements")
-      .select("id,name,description,reward_tokens").order("id");
+      .select("id,name,description,reward_tokens,is_active,condition_type,threshold,min_games").order("id");
     if(error)throw error;
     list.replaceChildren();
     if(!data?.length){list.appendChild(node("div","pc-empty","暂无成就配置。"));return;}
+    const typeNames={matches:"完成比赛场次",wins:"累计胜场",win_streak:"连续胜场",win_rate:"比赛胜率",collection:"拥有不同卡牌",draws:"累计抽卡次数"};
     data.forEach(item=>{
-      const row=node("div","pc-row"),info=node("div"),controls=node("div");
+      const row=node("div","pc-row"),info=node("div"),actions=node("div");
+      const goal=item.condition_type==="win_rate"
+        ? "胜率达到 "+item.threshold+"%，且至少完成 "+item.min_games+" 场比赛"
+        : typeNames[item.condition_type]+"达到 "+item.threshold;
       info.append(node("strong","",item.name),node("div","pc-muted",item.description||""));
-      controls.style.display="flex";controls.style.alignItems="center";controls.style.gap="8px";
-      const input=node("input");
-      input.type="number";input.min="0";input.step="1";
-      input.value=String(item.reward_tokens??0);
-      input.setAttribute("aria-label",item.name+"的代币奖励");
-      input.style.width="110px";
-      const save=node("button","","保存");
-      save.type="button";save.dataset.achievementId=item.id;
-      controls.append(input,save);
-      row.append(info,controls);
+      info.append(node("div","pc-muted",goal+" · 首次解锁奖励 "+item.reward_tokens+" 代币 · "+(item.is_active?"已启用":"已停用")));
+      actions.style.display="flex";actions.style.alignItems="center";
+      const edit=node("button","","编辑");edit.type="button";
+      edit.addEventListener("click",()=>{
+        view.querySelector("#pc-ach-id").value=item.id;
+        view.querySelector("#pc-ach-id").readOnly=true;
+        view.querySelector("#pc-ach-name").value=item.name;
+        view.querySelector("#pc-ach-description").value=item.description||"";
+        view.querySelector("#pc-ach-reward").value=String(item.reward_tokens??0);
+        achievementType.value=item.condition_type||"matches";
+        view.querySelector("#pc-ach-threshold").value=String(item.threshold??1);
+        view.querySelector("#pc-ach-min-games").value=String(item.min_games??10);
+        view.querySelector("#pc-ach-active").checked=item.is_active!==false;
+        view.querySelector("#pc-ach-submit").textContent="保存成就修改";
+        view.querySelector("#pc-ach-status").textContent="正在编辑「"+item.name+"」。成就 ID 保持不变。";
+        syncAchievementConditionFields();
+        achievementForm.scrollIntoView({behavior:"smooth",block:"center"});
+      });
+      actions.appendChild(edit);
+      row.append(info,actions);
       list.appendChild(row);
     });
   }
-  view.querySelector("#pc-admin-achievement-list").addEventListener("click",async event=>{
-    const button=event.target.closest("button[data-achievement-id]");
-    if(!button)return;
-    const id=button.dataset.achievementId;
-    const input=button.parentElement.querySelector("input");
-    const amount=Number(input.value);
-    if(!Number.isSafeInteger(amount)||amount<0){
-      setStatus("成就奖励必须填写 0 或正整数。",true);return;
+  achievementForm.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const status=view.querySelector("#pc-ach-status");
+    const button=view.querySelector("#pc-ach-submit");
+    const type=achievementType.value;
+    const threshold=Number(view.querySelector("#pc-ach-threshold").value);
+    const reward=Number(view.querySelector("#pc-ach-reward").value);
+    const minGames=type==="win_rate"?Number(view.querySelector("#pc-ach-min-games").value):0;
+    const args={
+      p_id:view.querySelector("#pc-ach-id").value.trim(),
+      p_name:view.querySelector("#pc-ach-name").value.trim(),
+      p_description:view.querySelector("#pc-ach-description").value.trim(),
+      p_reward_tokens:reward,
+      p_is_active:view.querySelector("#pc-ach-active").checked,
+      p_condition_type:type,
+      p_threshold:threshold,
+      p_min_games:minGames
+    };
+    if(!/^[a-z0-9][a-z0-9_-]{1,49}$/.test(args.p_id)){
+      status.textContent="成就 ID 需为 2–50 位小写字母、数字、下划线或短横线。";status.className="status bad";return;
     }
-    button.disabled=true;
-    const previous=button.textContent;
-    button.textContent="保存中…";
+    if(!args.p_name||args.p_name.length>40||!args.p_description||args.p_description.length>160||
+       !Number.isSafeInteger(reward)||reward<0||!Number.isFinite(threshold)||threshold<=0||
+       (type!=="win_rate"&&!Number.isSafeInteger(threshold))||
+       (type==="win_rate"&&(threshold>100||!Number.isSafeInteger(minGames)||minGames<1))){
+      status.textContent="请检查名称、描述、奖励和解锁目标是否填写正确。";status.className="status bad";return;
+    }
+    button.disabled=true;status.textContent="正在保存成就……";status.className="status";
     try{
-      const {error}=await client.rpc("admin_set_achievement_reward",{
-        p_achievement_id:id,p_reward_tokens:amount
-      });
+      const {error}=await client.rpc("admin_save_achievement",args);
       if(error)throw error;
-      button.textContent="已保存";
-      setStatus("成就「"+button.parentElement.parentElement.querySelector("strong").textContent+"」的奖励已更新。",false);
-    }catch(error){
-      button.textContent=previous;
-      setStatus("保存成就奖励失败："+error.message,true);
-    }finally{button.disabled=false;}
+      status.textContent="成就已保存。新解锁的玩家将按当前条件获得奖励；已解锁记录不会重置。";
+      status.className="status good";
+      resetAchievementForm();
+      await loadAdminAchievements();
+    }catch(error){status.textContent="保存失败："+error.message;status.className="status bad";}
+    finally{button.disabled=false;}
   });
+  syncAchievementConditionFields();
 
   async function loadAdminMatches() {
     const {data:matches,error}=await client.from("matches").select("id,description,created_at,winning_team").order("created_at",{ascending:false}).limit(50);
