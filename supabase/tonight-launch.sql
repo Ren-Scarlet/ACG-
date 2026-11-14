@@ -1,7 +1,3 @@
--- ACG launch migration: account binding, legacy collection import, and battle-item commitment.
--- Execute this entire file once in Supabase SQL Editor.
--- It is designed to be safely re-runnable.
-
 -- ACG account binding and legacy collection migration.
 -- Run this file once in Supabase SQL Editor. Safe to run again.
 -- Players register normally; an administrator assigns each account its existing P001-style number.
@@ -398,12 +394,12 @@ begin
   end if;
 
   for v_item in
-    select x.card_id, x.quantity, c.type
+    select x.card_id, x.quantity, c.card_id as catalog_card_id
     from jsonb_to_recordset(p_item_cards) as x(card_id text, quantity integer)
     left join public.battle_item_catalog c on c.card_id = x.card_id and c.enabled = true
     order by x.card_id
   loop
-    if v_item.type is distinct from '对战道具' then
+    if v_item.catalog_card_id is null then
       raise exception '卡牌 % 不是有效的对战道具', v_item.card_id;
     end if;
 
@@ -438,7 +434,9 @@ begin
 end;
 $$;
 
-revoke all on function public.admin_sync_battle_item_catalog(jsonb) from public, anon, authenticated;\ngrant execute on function public.admin_sync_battle_item_catalog(jsonb) to authenticated;\nrevoke all on function public.commit_battle_item_deck(uuid, jsonb) from public, anon, authenticated;
+revoke all on function public.admin_sync_battle_item_catalog(jsonb) from public, anon, authenticated;
+grant execute on function public.admin_sync_battle_item_catalog(jsonb) to authenticated;
+revoke all on function public.commit_battle_item_deck(uuid, jsonb) from public, anon, authenticated;
 grant execute on function public.commit_battle_item_deck(uuid, jsonb) to authenticated;
 
 
