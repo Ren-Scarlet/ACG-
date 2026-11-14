@@ -41,7 +41,8 @@ column_report as (
 function_report as (
   select
     'FUNCTION'::text as section,
-    'public.'||p.proname||'('||pg_get_function_identity_arguments(p.oid)||')' as object_name,
+    case when p.prosecdef then 'SECURITY DEFINER' else 'invoker' end||
+      '; owner='||pg_get_userbyid(p.proowner)||chr(10)||pg_get_functiondef(p.oid) as details
     case when p.prosecdef then 'SECURITY DEFINER' else 'invoker' end||
       '; owner='||pg_get_userbyid(p.proowner)||E'\\n'||pg_get_functiondef(p.oid) as details
   from pg_proc p
@@ -53,7 +54,7 @@ auth_trigger_report as (
   select
     'AUTH_TRIGGER'::text as section,
     t.tgname as object_name,
-    pg_get_triggerdef(t.oid)||E'\\nFUNCTION: '||pg_get_functiondef(t.tgfoid) as details
+    pg_get_triggerdef(t.oid)||chr(10)||'FUNCTION: '||pg_get_functiondef(t.tgfoid) as details
   from pg_trigger t
   join pg_class c on c.oid=t.tgrelid
   join pg_namespace n on n.oid=c.relnamespace
