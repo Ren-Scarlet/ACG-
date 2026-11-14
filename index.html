@@ -113,6 +113,7 @@
       <button id="tab-builder" type="button">卡组构筑</button>
       <button id="tab-admin" type="button">管理员收藏管理</button>
       <button id="tab-account" type="button">玩家账号</button>
+      <button id="tab-player-center" type="button">玩家中心</button>
     </nav>
 
     <section id="account-view" class="hidden">
@@ -145,6 +146,79 @@
         <h3>欢迎回来，<span id="account-username"></span></h3>
         <p id="account-created" class="hint"></p>
         <button id="account-logout" type="button">退出登录</button>
+      </div>
+    </section>
+
+
+    <section id="player-center-view" class="hidden">
+      <div class="panel">
+        <h3>公开玩家主页</h3>
+        <p class="hint">输入游戏昵称即可查看公开资料。邮箱、代币余额和详细收藏不会公开。</p>
+        <div class="player-search" style="margin-top:12px">
+          <input id="public-profile-name" type="search" maxlength="20" placeholder="输入玩家昵称">
+          <button id="public-profile-search" class="primary" type="button">查询主页</button>
+        </div>
+        <p id="public-profile-status" class="status" style="margin-top:10px">输入昵称查询玩家主页。</p>
+        <div id="public-profile-result"></div>
+      </div>
+
+      <div id="center-login-hint" class="panel hidden">
+        <h3>登录后查看自己的玩家中心</h3>
+        <p class="hint">请先在「玩家账号」页面登录。登录后可以查看比赛记录、代币流水、收藏和成就。</p>
+      </div>
+
+      <div id="private-center" class="hidden">
+        <div class="panel">
+          <h3>欢迎回来，<span id="private-center-name"></span></h3>
+          <div id="private-center-stats"></div>
+          <p id="private-center-status" class="status">正在读取玩家资料……</p>
+        </div>
+        <div class="panel">
+          <h3>最近对战记录</h3>
+          <div id="center-match-list"></div>
+        </div>
+        <div class="panel">
+          <h3>代币流水</h3>
+          <div id="center-token-list"></div>
+        </div>
+        <div class="panel">
+          <h3>成就收藏册</h3>
+          <div id="center-achievement-list"></div>
+        </div>
+        <div class="panel">
+          <h3>卡牌收藏</h3>
+          <div id="center-inventory-list"></div>
+        </div>
+      </div>
+
+      <div id="admin-center" class="hidden">
+        <div class="panel">
+          <h3>管理员：登记或更正 2v2 比赛</h3>
+          <p class="hint">蓝队和红队各选择两名不同玩家。更正比赛时先从下方比赛列表载入记录，再修改并保存。</p>
+          <input id="edit-match-id" type="hidden">
+          <div class="admin-form-grid" style="margin-top:12px">
+            <div class="field"><label for="match-blue-1">蓝队玩家 1</label><select id="match-blue-1"><option value="">请选择玩家</option></select></div>
+            <div class="field"><label for="match-blue-2">蓝队玩家 2</label><select id="match-blue-2"><option value="">请选择玩家</option></select></div>
+            <div class="field"><label for="match-red-1">红队玩家 1</label><select id="match-red-1"><option value="">请选择玩家</option></select></div>
+            <div class="field"><label for="match-red-2">红队玩家 2</label><select id="match-red-2"><option value="">请选择玩家</option></select></div>
+            <div class="field"><label for="match-winning-team">胜利队伍</label><select id="match-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div>
+            <div class="field"><label for="match-description">比赛备注（可留空）</label><input id="match-description" maxlength="200" placeholder="例如：周末友谊赛"></div>
+          </div>
+          <div class="save-row">
+            <button id="record-match-button" class="primary" type="button">登记比赛</button>
+          </div>
+          <h3 style="margin-top:22px">最近登记的比赛</h3>
+          <div id="admin-match-list"></div>
+        </div>
+        <div class="panel">
+          <h3>管理员：发放代币</h3>
+          <div class="admin-form-grid">
+            <div class="field"><label for="token-player">玩家</label><select id="token-player"><option value="">请选择玩家</option></select></div>
+            <div class="field"><label for="token-amount">发放数量</label><input id="token-amount" type="number" min="1" step="1" placeholder="输入正整数"></div>
+            <div class="field wide"><label for="token-reason">发放原因</label><input id="token-reason" maxlength="120" placeholder="例如：活动奖励"></div>
+          </div>
+          <button id="grant-token-button" class="primary" type="button" style="margin-top:12px">确认发放</button>
+        </div>
       </div>
     </section>
 
@@ -1598,5 +1672,6 @@
     loadData();
   </script>
   <script src="./auth.js?v=4"></script>
+  <script src="./player-center.js?v=1"></script>
 </body>
 </html>
