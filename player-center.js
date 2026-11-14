@@ -264,7 +264,7 @@
       if(!result?.cards||result.cards.length!==packCount*5)throw new Error("服务器没有返回完整抽卡结果；请重试，系统会沿用同一请求编号避免重复扣费。");
       clearDrawRequestId(pool.pack_id,packCount);loading.remove();
       const box=node("div","pc-stat");box.append(node("h3","","抽卡结果 · "+packCount+" 包 / "+result.cards.length+" 张"),
-        node("p","pc-muted","本次消耗 "+(result.charged_tokens||pool.price_tokens*packCount)+" 代币 · 剩余 "+result.remaining_tokens+" 代币"));
+        node("p","pc-muted","本次消耗 "+(result.charged_tokens??pool.price_tokens*packCount)+" 代币 · 剩余 "+result.remaining_tokens+" 代币"));
       const grid=node("div","pc-inventory-grid");
       result.cards.forEach(card=>{
         const info=cardsById[card.card_id]||{name:card.card_id};const tile=node("div","pc-inventory-card");
