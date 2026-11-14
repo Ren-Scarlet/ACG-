@@ -6,7 +6,7 @@
   if (!client || !main || !nav || document.getElementById("player-center-view")) return;
 
   const style = document.createElement("style");
-  style.textContent = "#player-center-view .pc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}#player-center-view .pc-tabs button{padding:8px 12px}#player-center-view .pc-tabs button.active{background:#5967a5;border-color:#7181c7}#player-center-view .pc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}#player-center-view .pc-stat{padding:14px;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-stat strong{display:block;font-size:22px;margin-top:5px}#player-center-view .pc-row{display:flex;justify-content:space-between;gap:12px;padding:12px 4px;border-bottom:1px solid #383d50}#player-center-view .pc-muted{color:#a6abc0;font-size:13px;line-height:1.6}#player-center-view .pc-positive{color:#8bd5a7}#player-center-view .pc-negative{color:#ff9b9b}#player-center-view .pc-search{display:flex;gap:8px;align-items:end;flex-wrap:wrap}#player-center-view .pc-search .field{flex:1;min-width:190px}#player-center-view .pc-empty{padding:18px;text-align:center;color:#a6abc0;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-draw-card{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid #383d50;border-radius:10px;margin:10px 0}#player-center-view .pc-draw-card img{width:84px;height:116px;object-fit:contain;border-radius:6px}#player-center-view .pc-draw-card .pc-draw-info{flex:1}@media(max-width:600px){#player-center-view .pc-row{align-items:flex-start;flex-direction:column;gap:4px}}";
+  style.textContent = "#player-center-view .pc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}#player-center-view .pc-tabs button{padding:8px 12px}#player-center-view .pc-tabs button.active{background:#5967a5;border-color:#7181c7}#player-center-view .pc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:12px 0}#player-center-view .pc-stat{padding:14px;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-stat strong{display:block;font-size:22px;margin-top:5px}#player-center-view .pc-row{display:flex;justify-content:space-between;gap:12px;padding:12px 4px;border-bottom:1px solid #383d50}#player-center-view .pc-muted{color:#a6abc0;font-size:13px;line-height:1.6}#player-center-view .pc-positive{color:#8bd5a7}#player-center-view .pc-negative{color:#ff9b9b}#player-center-view .pc-search{display:flex;gap:8px;align-items:end;flex-wrap:wrap}#player-center-view .pc-search .field{flex:1;min-width:190px}#player-center-view .pc-empty{padding:18px;text-align:center;color:#a6abc0;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-draw-card{display:flex;align-items:center;gap:14px;padding:12px;border:1px solid #383d50;border-radius:10px;margin:10px 0}#player-center-view .pc-draw-card img{width:84px;height:116px;object-fit:contain;border-radius:6px}#player-center-view .pc-draw-card .pc-draw-info{flex:1}#player-center-view .pc-inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:12px}#player-center-view .pc-inventory-card{display:flex;gap:10px;align-items:center;min-width:0;padding:9px;background:#222536;border:1px solid #383d50;border-radius:10px}#player-center-view .pc-inventory-card img{width:58px;height:82px;object-fit:contain;flex:0 0 auto;border-radius:5px;background:#151824}#player-center-view .pc-inventory-card .pc-card-info{flex:1;min-width:0}#player-center-view .pc-inventory-card .pc-card-info strong{display:block;overflow-wrap:anywhere;font-size:13px}#player-center-view .pc-inventory-card .pc-card-info small{display:block;color:#a6abc0;font-size:11px;margin-top:4px}#player-center-view .pc-quantity-controls{display:flex;align-items:center;gap:6px;margin-top:7px}#player-center-view .pc-quantity-controls button{min-width:30px;width:30px;height:30px;padding:0;font-size:18px}#player-center-view .pc-quantity-controls strong{min-width:22px;text-align:center;font-variant-numeric:tabular-nums}#player-center-view .pc-quantity-controls button:disabled{opacity:.35;cursor:not-allowed}@media(max-width:600px){#player-center-view .pc-row{align-items:flex-start;flex-direction:column;gap:4px}}";
   document.head.appendChild(style);
 
   const tab = document.createElement("button");
@@ -19,7 +19,7 @@
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家昵称</label><input id="pc-public-name" maxlength="20" placeholder="输入游戏昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
     '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="draw">抽卡</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
-    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 玩家管理</h3><p class="pc-muted">新玩家先注册账号，再由管理员把账号绑定到现有玩家编号。绑定后会自动导入该编号原有的收藏数据。</p><div class="pc-grid"><div class="field"><label for="pc-bind-number">待分配玩家编号</label><select id="pc-bind-number"></select></div><div class="field"><label for="pc-bind-user">绑定到已注册账号</label><select id="pc-bind-user"></select></div></div><button id="pc-bind-submit" type="button">绑定玩家编号并导入旧收藏</button><p id="pc-bind-status" class="status"></p><div id="pc-bind-list" class="pc-muted"></div><h4 style="margin-top:22px">收藏库存调整</h4><p class="pc-muted">用于发放活动卡牌或修正库存。正数为增加，负数为扣除；系统会阻止扣成负数。</p><form id="pc-inventory-form"><div class="pc-grid"><div class="field"><label for="pc-inventory-user">玩家账号</label><select id="pc-inventory-user" required></select></div><div class="field"><label for="pc-inventory-card">卡牌</label><select id="pc-inventory-card" required></select></div><div class="field"><label for="pc-inventory-delta">调整数量（可为负数）</label><input id="pc-inventory-delta" type="number" step="1" required></div><div class="field"><label for="pc-inventory-reason">调整原因</label><input id="pc-inventory-reason" maxlength="120" required placeholder="例如：活动奖励"></div></div><button type="submit">确认调整库存</button><p id="pc-inventory-status" class="status"></p></form><h3 style="margin-top:24px">管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">价格和星级概率由管理员设置。卡池未设置并保存前不会开放。</p><div id="pc-admin-pool-list" class="pc-muted">正在读取卡池状态……</div><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="pack_001">无限泡影</option><option value="pack_002">梦幻</option></select></div><div class="field"><label for="pc-pool-price">单抽价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="1" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
+    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 玩家管理</h3><p class="pc-muted">新玩家先注册账号，再由管理员把账号绑定到现有玩家编号。绑定后会自动导入该编号原有的收藏数据。</p><div class="pc-grid"><div class="field"><label for="pc-bind-number">待分配玩家编号</label><select id="pc-bind-number"></select></div><div class="field"><label for="pc-bind-user">绑定到已注册账号</label><select id="pc-bind-user"></select></div></div><button id="pc-bind-submit" type="button">绑定玩家编号并导入旧收藏</button><p id="pc-bind-status" class="status"></p><div id="pc-bind-list" class="pc-muted"></div><h4 style="margin-top:22px">玩家收藏管理</h4><p class="pc-muted">选择玩家后会显示全部卡牌。点击「+」「−」即可直接调整数量，变更会立即保存。扣除数量不会低于 0。</p><div class="pc-grid"><div class="field"><label for="pc-inventory-user">选择玩家账号</label><select id="pc-inventory-user"><option value="">请选择玩家</option></select></div><div class="field"><label for="pc-inventory-reason">调整记录备注</label><input id="pc-inventory-reason" maxlength="120" value="管理员库存调整" placeholder="例如：活动奖励"></div></div><div class="pc-search"><div class="field"><label for="pc-inventory-search">搜索卡牌</label><input id="pc-inventory-search" placeholder="输入卡牌名称或编号"></div><div class="field"><label for="pc-inventory-pack">卡包</label><select id="pc-inventory-pack"><option value="">全部卡包</option></select></div><div class="field"><label for="pc-inventory-type">卡牌类型</label><select id="pc-inventory-type"><option value="">全部类型</option></select></div></div><p id="pc-inventory-status" class="status"></p><div id="pc-inventory-summary" class="pc-muted"></div><div id="pc-inventory-cards" class="pc-inventory-grid"><div class="pc-empty">请先选择玩家。</div></div><h3 style="margin-top:24px">管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">价格和星级概率由管理员设置。卡池未设置并保存前不会开放。</p><div id="pc-admin-pool-list" class="pc-muted">正在读取卡池状态……</div><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="pack_001">无限泡影</option><option value="pack_002">梦幻</option></select></div><div class="field"><label for="pc-pool-price">单抽价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="1" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
 
@@ -397,39 +397,112 @@
       setStatus("管理员资料读取失败："+error.message,true);
     }
   }
+  let adminInventory = {};
+  let inventoryBusy = new Set();
   function fillInventoryAdminSelects(){
     const userSelect=view.querySelector("#pc-inventory-user");
-    const cardSelect=view.querySelector("#pc-inventory-card");
-    userSelect.replaceChildren(new Option("请选择玩家账号",""));
+    const previous=userSelect.value;
+    userSelect.replaceChildren(new Option("请选择玩家",""));
     adminPlayers.forEach(player=>userSelect.add(new Option(player.username+(player.player_number?" · "+player.player_number:" · 未绑定"),player.id)));
-    cardSelect.replaceChildren(new Option("请选择卡牌",""));
-    Object.values(cardsById).sort((a,b)=>a.name.localeCompare(b.name,"zh-CN")).forEach(card=>{
-      cardSelect.add(new Option(card.name+" · "+card.id,card.id));
+    if(adminPlayers.some(player=>player.id===previous))userSelect.value=previous;
+    const packSelect=view.querySelector("#pc-inventory-pack");
+    const packs=[...new Set(Object.values(cardsById).map(card=>card.pack_id).filter(Boolean))];
+    packSelect.replaceChildren(new Option("全部卡包",""));
+    packs.forEach(id=>packSelect.add(new Option(id,id)));
+    const typeSelect=view.querySelector("#pc-inventory-type");
+    const types=[...new Set(Object.values(cardsById).map(card=>card.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"zh-CN"));
+    typeSelect.replaceChildren(new Option("全部类型",""));
+    types.forEach(type=>typeSelect.add(new Option(type,type)));
+    renderAdminInventory();
+    if(userSelect.value)loadAdminInventory();
+  }
+  async function loadAdminInventory(){
+    const userId=view.querySelector("#pc-inventory-user").value;
+    const list=view.querySelector("#pc-inventory-cards");
+    const status=view.querySelector("#pc-inventory-status");
+    const summary=view.querySelector("#pc-inventory-summary");
+    if(!userId){
+      adminInventory={};summary.textContent="";
+      list.replaceChildren(node("div","pc-empty","请先选择玩家。"));
+      status.textContent="";
+      return;
+    }
+    list.replaceChildren(node("div","pc-empty","正在读取该玩家的收藏……"));
+    status.textContent="正在读取库存……";status.className="status";
+    try{
+      const {data,error}=await client.from("card_inventory").select("card_id,quantity").eq("user_id",userId).gt("quantity",0);
+      if(error)throw error;
+      adminInventory=Object.fromEntries((data||[]).map(row=>[row.card_id,Number(row.quantity)]));
+      renderAdminInventory();
+      status.textContent="已读取玩家收藏。点击卡牌旁的 + / − 即可即时调整。";status.className="status good";
+    }catch(error){
+      list.replaceChildren(node("div","pc-empty","读取库存失败："+error.message));
+      status.textContent="读取失败："+error.message;status.className="status bad";
+    }
+  }
+  function renderAdminInventory(){
+    const list=view.querySelector("#pc-inventory-cards");
+    const summary=view.querySelector("#pc-inventory-summary");
+    if(!list)return;
+    const userId=view.querySelector("#pc-inventory-user").value;
+    if(!userId){list.replaceChildren(node("div","pc-empty","请先选择玩家。"));summary.textContent="";return;}
+    const query=view.querySelector("#pc-inventory-search").value.trim().toLowerCase();
+    const pack=view.querySelector("#pc-inventory-pack").value;
+    const type=view.querySelector("#pc-inventory-type").value;
+    const cards=Object.values(cardsById).filter(card=>
+      (!query||card.name.toLowerCase().includes(query)||card.id.toLowerCase().includes(query))&&
+      (!pack||card.pack_id===pack)&&(!type||card.type===type)
+    ).sort((a,b)=>a.name.localeCompare(b.name,"zh-CN"));
+    const owned=Object.values(adminInventory).reduce((sum,value)=>sum+value,0);
+    const kinds=Object.values(adminInventory).filter(value=>value>0).length;
+    summary.textContent="拥有 "+kinds+" 种卡牌，共 "+owned+" 张 · 当前显示 "+cards.length+" 张卡牌";
+    list.replaceChildren();
+    if(!cards.length){list.appendChild(node("div","pc-empty","没有符合筛选条件的卡牌。"));return;}
+    cards.forEach(card=>{
+      const quantity=adminInventory[card.id]||0;
+      const item=node("article","pc-inventory-card");
+      const img=node("img");img.src=card.image||"";img.alt=card.name;img.loading="lazy";
+      img.onerror=()=>{img.style.visibility="hidden";};
+      const info=node("div","pc-card-info");
+      info.append(node("strong","",card.name),node("small","",(card.star?card.star+" 星 · ":"")+(card.type||"")+" · "+card.id));
+      const controls=node("div","pc-quantity-controls");
+      const minus=node("button","","−");minus.type="button";minus.title="扣除一张";minus.disabled=quantity<=0||inventoryBusy.has(card.id);
+      const count=node("strong","",String(quantity));
+      const plus=node("button","","+");plus.type="button";plus.title="增加一张";plus.disabled=inventoryBusy.has(card.id);
+      minus.addEventListener("click",()=>adjustAdminInventory(card,-1));
+      plus.addEventListener("click",()=>adjustAdminInventory(card,1));
+      controls.append(minus,count,plus);info.appendChild(controls);item.append(img,info);list.appendChild(item);
     });
   }
-  view.querySelector("#pc-inventory-form").addEventListener("submit",async event=>{
-    event.preventDefault();
-    const form=event.currentTarget,button=form.querySelector("button[type=submit]");
-    const status=view.querySelector("#pc-inventory-status");
+  async function adjustAdminInventory(card,delta){
     const userId=view.querySelector("#pc-inventory-user").value;
-    const cardId=view.querySelector("#pc-inventory-card").value;
-    const delta=Number(view.querySelector("#pc-inventory-delta").value);
-    const reason=view.querySelector("#pc-inventory-reason").value.trim();
-    if(!userId||!cardId||!Number.isSafeInteger(delta)||delta===0||!reason){
-      status.textContent="请选择玩家和卡牌，填写非零整数数量及原因。";status.className="status bad";return;
-    }
-    button.disabled=true;status.textContent="正在调整库存……";status.className="status";
+    const status=view.querySelector("#pc-inventory-status");
+    if(!userId||inventoryBusy.has(card.id))return;
+    const current=adminInventory[card.id]||0;
+    if(delta<0&&current<=0)return;
+    const reason=view.querySelector("#pc-inventory-reason").value.trim()||"管理员库存调整";
+    inventoryBusy.add(card.id);renderAdminInventory();
+    status.textContent=(delta>0?"正在增加":"正在扣除")+"「"+card.name+"」……";status.className="status";
     try{
       const {data,error}=await client.rpc("admin_adjust_card_inventory",{
-        p_user_id:userId,p_card_id:cardId,p_delta:delta,p_reason:reason
+        p_user_id:userId,p_card_id:card.id,p_delta:delta,p_reason:reason
       });
       if(error)throw error;
-      status.textContent="库存调整成功，当前数量："+data;status.className="status good";
-      view.querySelector("#pc-inventory-delta").value="";
-      view.querySelector("#pc-inventory-reason").value="";
-    }catch(error){status.textContent="调整失败："+error.message;status.className="status bad";}
-    finally{button.disabled=false;}
-  });
+      const next=Number(data);
+      if(!Number.isSafeInteger(next)||next<0)throw new Error("服务器返回的库存数量异常，请重新读取库存确认。");
+      if(next===0)delete adminInventory[card.id];else adminInventory[card.id]=next;
+      status.textContent="已"+(delta>0?"增加":"扣除")+"「"+card.name+"」1 张，当前拥有 "+next+" 张。";status.className="status good";
+    }catch(error){
+      status.textContent="调整失败："+error.message;status.className="status bad";
+      await loadAdminInventory();
+    }finally{
+      inventoryBusy.delete(card.id);renderAdminInventory();
+    }
+  }
+  view.querySelector("#pc-inventory-user").addEventListener("change",loadAdminInventory);
+  view.querySelector("#pc-inventory-search").addEventListener("input",renderAdminInventory);
+  view.querySelector("#pc-inventory-pack").addEventListener("change",renderAdminInventory);
+  view.querySelector("#pc-inventory-type").addEventListener("change",renderAdminInventory);
 
   async function loadAdminBindings(){
     const numberSelect=view.querySelector("#pc-bind-number");
