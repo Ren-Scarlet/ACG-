@@ -239,7 +239,7 @@
     pools.forEach((pool,index)=>{
       const tile=node("article","adl-pool"+(index===0?" active":""));tile.dataset.packId=pool.pack_id;
       const cover=node("div","adl-cover");
-      const coverCard=cards.find(c=>c.pack_id===pool.pack_id&&c.image);
+      const coverCard=(cards.find(c=>c.id===pool.cover_card_id&&c.pack_id===pool.pack_id&&c.image)||cards.filter(c=>c.pack_id===pool.pack_id&&c.image).sort((a,b)=>Number(b.star||0)-Number(a.star||0))[0]);
       if(coverCard){const img=node("img");img.src=coverCard.image;img.alt=pool.pack_name;img.loading="lazy";cover.appendChild(img);}
       const info=node("div","adl-poolinfo");info.append(node("h3","",pool.pack_name),node("p","",pool.description||"ACG 卡牌卡池"),node("strong","","单包 "+pool.price_tokens+" 代币 · 5 张卡"));
       tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;grid.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
