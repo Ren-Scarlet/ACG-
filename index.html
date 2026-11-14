@@ -324,6 +324,13 @@
   <div id="acg-home-admin-panel" style="display:none;clear:both;padding-top:14px">
    <p style="font-size:11px;color:#b7c9dd;margin:0 0 12px">管理员通过 GitHub 授权后，可上传新一期插画并发布为全站首页主视觉。图片裁切铺满左侧栏，允许人物局部跨越边界。</p>
    <label style="display:block;font-size:11px;margin-bottom:6px">上传主视觉图片（JPG / PNG / WebP）</label><input id="acg-home-file" type="file" accept="image/jpeg,image/png,image/webp" style="font-size:11px;margin-bottom:12px">
+   <div style="margin:14px 0;padding:12px;border:1px solid #315b7d;background:#071a30">
+    <strong style="display:block;margin-bottom:8px;color:#d8f7ff">♪ BACKGROUND MUSIC / 背景音乐</strong>
+    <p style="font-size:11px;color:#b7c9dd;margin:0 0 8px">选择 MP3 后上传并替换全站背景音乐。替换后所有玩家刷新即可使用。</p>
+    <input id="acg-home-bgm-file" type="file" accept="audio/mpeg,.mp3" style="font-size:11px;margin-bottom:8px">
+    <button class="home-action" id="acg-home-bgm-upload" type="button">上传并启用 BGM</button>
+    <span id="acg-home-bgm-status" class="home-status">当前音乐文件：assets/bgm/main-theme.mp3</span>
+   </div>
    <label style="display:block;font-size:11px;margin-bottom:6px">主题名称</label><input id="acg-home-name" type="text" value="本期主视觉">
    <div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:11px"><label>水平位置</label><span id="acg-home-x-label">50%</span></div><input id="acg-home-x" type="range" min="0" max="100" value="50"></div>
    <div style="margin-top:8px"><div style="display:flex;justify-content:space-between;font-size:11px"><label>垂直位置</label><span id="acg-home-y-label">50%</span></div><input id="acg-home-y" type="range" min="0" max="100" value="50"></div>
@@ -1749,6 +1756,34 @@
       }catch(error){status.textContent="发布失败："+error.message;}
       finally{button.disabled=false;}
     }
+
+    document.getElementById("acg-home-bgm-upload").addEventListener("click",async()=>{
+      const status=document.getElementById("acg-home-bgm-status");
+      const file=document.getElementById("acg-home-bgm-file").files?.[0];
+      if(!authorized||!githubToken){status.textContent="请先在「卡牌资料管理」完成 GitHub 管理员授权。";return;}
+      if(!file){status.textContent="请先选择 MP3 音乐文件。";return;}
+      if(!/\.mp3$/i.test(file.name)&&file.type!=="audio/mpeg"){status.textContent="目前只接受 MP3 格式。";return;}
+      if(file.size>25*1024*1024){status.textContent="音乐文件请控制在 25 MB 以内。";return;}
+      const button=document.getElementById("acg-home-bgm-upload");button.disabled=true;status.textContent="正在上传音乐……";
+      try{
+        const path="assets/bgm/main-theme.mp3";
+        const existing=await fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+path+"?ref=main",{headers:apiHeaders(),cache:"no-store"});
+        let sha=null;
+        if(existing.ok){const old=await existing.json();sha=old.sha;}
+        else if(existing.status!==404)throw new Error("无法检查旧音乐文件（HTTP "+existing.status+"）");
+        const bytes=new Uint8Array(await file.arrayBuffer());let binary="";
+        for(let i=0;i<bytes.length;i+=0x8000)binary+=String.fromCharCode(...bytes.subarray(i,i+0x8000));
+        const payload={message:"Update site background music",content:btoa(binary)};
+        if(sha)payload.sha=sha;
+        const response=await fetch("https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+path,{method:"PUT",headers:{...apiHeaders(),"Content-Type":"application/json"},body:JSON.stringify(payload)});
+        const data=await response.json();if(!response.ok)throw new Error(data.message||"上传失败");
+        const audio=document.getElementById("acg-bgm-audio");
+        audio.querySelector("source").src="./assets/bgm/main-theme.mp3?v="+Date.now();audio.load();
+        status.textContent="上传成功！点击右上角播放按钮即可试听。";
+      }catch(error){status.textContent="上传失败："+error.message;}
+      finally{button.disabled=false;}
+    });
+
     document.getElementById("acg-home-publish").addEventListener("click",acgHomePublish);
     document.getElementById("acg-home-reset").addEventListener("click",async()=>{
       if(!authorized||!githubToken){document.getElementById("acg-home-status").textContent="请先完成 GitHub 管理员授权。";return;}
