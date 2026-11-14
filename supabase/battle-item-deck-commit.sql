@@ -76,7 +76,6 @@ declare
   v_old_items jsonb;
   v_item record;
   v_current integer;
-  v_result jsonb;
 begin
   if v_user_id is null then
     raise exception '请先登录';
@@ -91,7 +90,6 @@ begin
     raise exception '对战道具数量异常';
   end if;
 
-  -- Lock the player's inventory namespace before checking idempotency/inventory.
   perform 1 from public.profiles where id = v_user_id for update;
 
   select item_cards into v_old_items
@@ -105,7 +103,6 @@ begin
     return jsonb_build_object('committed', true, 'duplicate_request', true, 'items', v_old_items);
   end if;
 
-  -- Validate and aggregate duplicate IDs before changing anything.
   if exists (
     select 1
     from jsonb_to_recordset(p_item_cards) as x(card_id text, quantity integer)
@@ -149,13 +146,15 @@ begin
     from jsonb_to_recordset(p_item_cards) as x(card_id text, quantity integer)
     order by x.card_id
   loop
+    delete from public.card_inventory
+    where user_id = v_user_id and card_id = v_item.card_id
+      and quantity = v_item.quantity;
+
     update public.card_inventory
     set quantity = quantity - v_item.quantity,
         updated_at = now()
-    where user_id = v_user_id and card_id = v_item.card_id;
-
-    delete from public.card_inventory
-    where user_id = v_user_id and card_id = v_item.card_id and quantity <= 0;
+    where user_id = v_user_id and card_id = v_item.card_id
+      and quantity > v_item.quantity;
   end loop;
 
   insert into public.battle_item_deck_commits(user_id, request_id, item_cards)
@@ -163,7 +162,7 @@ begin
 
   return jsonb_build_object('committed', true, 'duplicate_request', false, 'items', p_item_cards);
 end;
-$$;
+$$
 
 revoke all on function public.admin_sync_battle_item_catalog(jsonb) from public, anon, authenticated;
 grant execute on function public.admin_sync_battle_item_catalog(jsonb) to authenticated;
