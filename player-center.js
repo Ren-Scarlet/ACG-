@@ -30,6 +30,9 @@
   const loginHint = view.querySelector("#pc-login-hint");
   const contentEl = view.querySelector("#pc-personal-content");
   let currentUser = null, currentPage = "overview", cardsById = {};
+  function compareCardsByStar(a,b) {
+    return Number(b.star||0)-Number(a.star||0) || String(a.name||"").localeCompare(String(b.name||""),"zh-CN");
+  }
   let adminPlayers = [];
 
   function node(tag, cls, text) {
@@ -145,7 +148,10 @@
   async function loadInventory() {
     const {data,error}=await client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id");
     if(error)throw error;
-    const rows=data||[],total=rows.reduce((sum,row)=>sum+Number(row.quantity),0);
+    const rows=(data||[]).slice().sort((a,b)=>compareCardsByStar(
+      cardsById[a.card_id]||{name:a.card_id,star:0},
+      cardsById[b.card_id]||{name:b.card_id,star:0}
+    )),total=rows.reduce((sum,row)=>sum+Number(row.quantity),0);
     contentEl.replaceChildren(node("p","pc-muted","拥有 "+rows.length+" 种卡牌，共 "+total+" 张"));
     if(!rows.length){contentEl.appendChild(node("div","pc-empty","还没有卡牌收藏记录。"));return;}
     rows.forEach(row=>{const line=node("div","pc-row");line.append(node("span","",cardsById[row.card_id]?.name||row.card_id),node("strong","","× "+row.quantity));contentEl.appendChild(line);});
@@ -452,7 +458,7 @@
     const cards=Object.values(cardsById).filter(card=>
       (!query||card.name.toLowerCase().includes(query)||card.id.toLowerCase().includes(query))&&
       (!pack||card.pack_id===pack)&&(!type||card.type===type)
-    ).sort((a,b)=>a.name.localeCompare(b.name,"zh-CN"));
+    ).sort(compareCardsByStar);
     const owned=Object.values(adminInventory).reduce((sum,value)=>sum+value,0);
     const kinds=Object.values(adminInventory).filter(value=>value>0).length;
     summary.textContent="拥有 "+kinds+" 种卡牌，共 "+owned+" 张 · 当前显示 "+cards.length+" 张卡牌";
