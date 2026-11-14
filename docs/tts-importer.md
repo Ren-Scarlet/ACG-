@@ -18,13 +18,13 @@
 2. 找到原本负责设置 UI 的这一行：
 
    ```lua
-   UI.setXml(CBOX_UI_XML .. "\\n" .. baseXmlNow() .. "\\n" .. (FOOD_MENU_UI_XML or ""))
+   UI.setXml(CBOX_UI_XML .. "\n" .. baseXmlNow() .. "\n" .. (FOOD_MENU_UI_XML or ""))
    ```
 
 3. 将这一行替换为：
 
    ```lua
-   UI.setXml(CBOX_UI_XML .. "\\n" .. baseXmlNow() .. "\\n" .. (FOOD_MENU_UI_XML or "") .. "\\n" .. (ACG_UI_XML or ""))
+   UI.setXml(CBOX_UI_XML .. "\n" .. baseXmlNow() .. "\n" .. (FOOD_MENU_UI_XML or "") .. "\n" .. (ACG_UI_XML or ""))
    ```
 
 4. 保留原有 `applyAllUI()` 中后面的 `restoreQueryUI()` 等原有逻辑，不要删除。
