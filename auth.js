@@ -127,7 +127,14 @@
       await renderSession(data.session);
       loginForm.reset();
     } catch (error) {
-      showStatus("登录失败：请检查邮箱和密码。", "bad");
+      const message = error?.message || String(error);
+      if (/email not confirmed/i.test(message)) {
+        showStatus("登录失败：这个邮箱尚未完成验证。请检查邮箱，或联系管理员确认 Supabase 邮箱验证设置。", "bad");
+      } else if (/invalid login credentials/i.test(message)) {
+        showStatus("登录失败：邮箱或密码不正确。请确认使用注册时的邮箱和密码。", "bad");
+      } else {
+        showStatus("登录失败：" + message, "bad");
+      }
     } finally {
       button.disabled = false;
     }
