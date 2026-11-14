@@ -98,8 +98,10 @@
     ]);
     if(pe) throw pe; if(se) throw se;
     const s=stats||{tokens:0,games_played:0,wins:0,losses:0};
+    let titleName="尚未设置称号";
+    if(profile?.selected_title){const titleResult=await client.from("achievements").select("name").eq("id",profile.selected_title).maybeSingle();if(titleResult.error)throw titleResult.error;titleName=titleResult.data?.name||"已设置称号";}
     contentEl.replaceChildren(node("h3","",profile?.username||"玩家"));
-    contentEl.appendChild(node("p","pc-muted",(profile?.selected_title||"尚未设置称号")+" · 加入于 "+(profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):"未知")));
+    contentEl.appendChild(node("p","pc-muted",titleName+" · 加入于 "+(profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):"未知")));
     const rate=s.games_played?(s.wins*100/s.games_played).toFixed(1)+"%":"0.0%";
     const grid=node("div","pc-grid");
     [["代币",s.tokens],["总场次",s.games_played],["胜场",s.wins],["败场",s.losses],["胜率",rate]].forEach(([label,value])=>{
