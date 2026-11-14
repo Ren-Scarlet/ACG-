@@ -163,7 +163,7 @@
   });
 
   const playerCenterScript = document.createElement("script");
-  playerCenterScript.src = "./player-center.js?v=25";
+  playerCenterScript.src = "./player-center.js?v=26";
   playerCenterScript.defer = true;
   document.body.appendChild(playerCenterScript);
 })();
