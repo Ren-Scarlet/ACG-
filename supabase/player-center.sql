@@ -148,7 +148,7 @@ begin
   if auth.uid() is null or not public.is_admin() then
     raise exception '只有管理员可以登记比赛';
   end if;
-  if p_winning_team not in ('blue','red') then
+  if p_winning_team is null or p_winning_team not in ('blue','red') then
     raise exception '获胜队伍必须是 blue 或 red';
   end if;
   if array_position(v_players, null) is not null or
