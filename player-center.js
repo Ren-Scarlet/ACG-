@@ -93,14 +93,14 @@
 
   async function loadOverview() {
     const [{data:profile,error:pe},{data:stats,error:se}]=await Promise.all([
-      client.from("profiles").select("username,created_at,selected_title,selected_badges").eq("id",currentUser.id).maybeSingle(),
+      client.from("profiles").select("username,created_at,selected_title,selected_badges,player_number").eq("id",currentUser.id).maybeSingle(),
       client.from("player_stats").select("tokens,games_played,wins,losses").eq("user_id",currentUser.id).maybeSingle()
     ]);
     if(pe) throw pe; if(se) throw se;
     const s=stats||{tokens:0,games_played:0,wins:0,losses:0};
     let titleName="尚未设置称号";
     if(profile?.selected_title){const titleResult=await client.from("achievements").select("name").eq("id",profile.selected_title).maybeSingle();if(titleResult.error)throw titleResult.error;titleName=titleResult.data?.name||"已设置称号";}
-    contentEl.replaceChildren(node("h3","",profile?.username||"玩家"));
+    contentEl.replaceChildren(node("h3","",(profile?.player_number?profile.player_number+" · ":"")+(profile?.username||"玩家")));
     contentEl.appendChild(node("p","pc-muted",titleName+" · 加入于 "+(profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):"未知")));
     const rate=s.games_played?(s.wins*100/s.games_played).toFixed(1)+"%":"0.0%";
     const grid=node("div","pc-grid");
