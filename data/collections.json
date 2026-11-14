@@ -8,5 +8,25 @@
     "player_id": "P001",
     "card_id": "card_010",
     "quantity": 2
+  },
+  {
+    "player_id": "P002",
+    "card_id": "card_020",
+    "quantity": 1
+  },
+  {
+    "player_id": "P002",
+    "card_id": "card_017",
+    "quantity": 1
+  },
+  {
+    "player_id": "P002",
+    "card_id": "card_011",
+    "quantity": 3
+  },
+  {
+    "player_id": "P002",
+    "card_id": "card_002",
+    "quantity": 3
   }
 ]
