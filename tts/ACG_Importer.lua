@@ -137,7 +137,7 @@ local function ACG_spawnCard(card, index, onDone)
             callback_function = function(spawnedObj)
                 local callbackOk, callbackError = pcall(function()
                     spawnedObj.setName(card.name or card.id)
-                    spawnedObj.setDescription((card.effect or "") .. "\\n\\n卡牌ID：" .. card.id)
+                    spawnedObj.setDescription((card.effect or "") .. "\n\n卡牌ID：" .. card.id)
                 end)
                 if onDone then onDone(callbackOk, callbackError) end
             end
