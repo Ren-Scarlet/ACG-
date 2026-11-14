@@ -137,6 +137,7 @@
         <select id="pack-filter"><option value="">全部卡包</option></select>
         <select id="star-filter"><option value="">全部星级</option><option value="3">3星</option><option value="4">4星</option><option value="5">5星</option></select>
         <select id="type-filter"><option value="">全部类型</option></select>
+        <select id="library-sort" aria-label="卡牌排序"><option value="star">按星级排序</option><option value="id">按编号排序</option></select>
       </section>
       <p class="summary" id="summary">正在读取卡牌资料……</p>
       <section class="grid" id="card-list"><div class="loading">正在加载卡牌……</div></section>
@@ -335,6 +336,7 @@
             <div class="admin-top">
               <div class="field"><label for="catalog-card-search">搜索卡牌</label><input id="catalog-card-search" type="search" placeholder="按名称、ID、效果搜索"></div>
               <div class="field"><label for="catalog-card-pack-filter">按卡包筛选</label><select id="catalog-card-pack-filter"><option value="">全部卡包</option></select></div>
+              <div class="field"><label for="catalog-card-sort">排序方式</label><select id="catalog-card-sort"><option value="star">按星级排序</option><option value="id">按编号排序</option></select></div>
             </div>
             <p id="catalog-card-summary" class="summary"></p>
             <section id="catalog-card-list"></section>
@@ -407,7 +409,8 @@
           .some(value => String(value).toLowerCase().includes(keyword));
         return matchesKeyword && (!pack || card.pack_id === pack) &&
           (!star || String(card.star) === star) && (!type || card.type === type);
-      }).sort(compareCardsByStar);
+      });
+      sortCards(filtered, document.getElementById("library-sort").value);
       summary.textContent = `显示 ${filtered.length} / ${allCards.length} 张卡牌`;
       cardList.replaceChildren();
       if (!filtered.length) { cardList.innerHTML = '<div class="empty">没有找到符合条件的卡牌。</div>'; return; }
@@ -456,6 +459,16 @@
     }
     function compareCardsByStar(a, b) {
       return Number(b.star || 0) - Number(a.star || 0) || a.name.localeCompare(b.name, "zh-CN");
+    }
+    function compareCardsById(a, b) {
+      const idA = String(a.id || "");
+      const idB = String(b.id || "");
+      const numA = Number((idA.match(/\\d+/g) || []).join(""));
+      const numB = Number((idB.match(/\\d+/g) || []).join(""));
+      return (Number.isFinite(numA) ? numA : 0) - (Number.isFinite(numB) ? numB : 0) || idA.localeCompare(idB);
+    }
+    function sortCards(cards, mode) {
+      return cards.sort(mode === "id" ? compareCardsById : compareCardsByStar);
     }
     function deckCardCount(cardId) { return Number(deckDraft[cardId] || 0); }
     function deckCountForName(name) {
@@ -974,7 +987,8 @@
       const packId = document.getElementById("catalog-card-pack-filter").value;
       const filtered = allCards.filter(card => (!packId || card.pack_id === packId) &&
         (!keyword || [card.id, card.name, card.effect, card.type].some(value => String(value || "").toLowerCase().includes(keyword))))
-        .sort(compareCardsByStar);
+        ;
+      sortCards(filtered, document.getElementById("catalog-card-sort").value);
       const list = document.getElementById("catalog-card-list");
       list.replaceChildren();
       document.getElementById("catalog-card-summary").textContent = "共 " + allCards.length + " 张卡牌，当前显示 " + filtered.length + " 张。";
@@ -1340,6 +1354,8 @@
     document.getElementById("discard-pack-data").addEventListener("click", () => reloadCatalogFile("packs"));
     document.getElementById("catalog-card-search").addEventListener("input", renderCatalogCards);
     document.getElementById("catalog-card-pack-filter").addEventListener("change", renderCatalogCards);
+    document.getElementById("catalog-card-sort").addEventListener("change", renderCatalogCards);
+    document.getElementById("library-sort").addEventListener("change", renderCards);
     searchInput.addEventListener("input", renderCards);
     starFilter.addEventListener("change", renderCards);
     typeFilter.addEventListener("change", renderCards);
