@@ -185,15 +185,11 @@
     <section id="builder-view" class="hidden">
       <div class="panel">
         <h3>开始构筑</h3>
-        <p class="hint">输入玩家编号读取你的收藏。网页会在本机记住上次使用的编号，方便下次构筑；这不是身份验证。构筑草稿只保存在当前页面，不会修改收藏数量。</p>
+        <p class="hint">请先登录已绑定玩家编号的账号。系统会自动读取该账号的收藏；未绑定编号的账号暂时不能构筑。</p>
         <div class="player-search" style="margin-top:14px">
-          <div class="field">
-            <label for="builder-player-id">玩家编号</label>
-            <input id="builder-player-id" type="text" maxlength="4" autocomplete="off" placeholder="例如 P001">
-          </div>
-          <button id="load-builder-player" class="primary" type="button">读取收藏并构筑</button>
+          <button id="load-builder-player" class="primary" type="button">读取我的收藏并开始构筑</button>
         </div>
-        <p id="builder-status" class="status" style="margin-top:12px">等待读取玩家收藏。</p>
+        <p id="builder-status" class="status" style="margin-top:12px">请登录后读取账号收藏。</p>
       </div>
       <div id="builder-workspace" class="hidden">
         <div class="panel">
@@ -924,23 +920,50 @@
       const bytes = Uint8Array.from(binary, char => char.charCodeAt(0));
       return JSON.parse(new TextDecoder().decode(bytes));
     }
-    function generateDeckLink() {
-      const issues = builderIssues();
-      const cards = Object.entries(deckDraft)
-        .filter(([, quantity]) => Number(quantity) > 0)
-        .map(([id, quantity]) => ({ id, quantity: Number(quantity) }));
-      if (!cards.length) {
-        setStatus(document.getElementById("deck-share-status"), "请先至少加入一张卡牌。", "bad");
+    async function generateDeckLink() {
+      const status=document.getElementById("deck-share-status");
+      const button=document.getElementById("generate-deck-link");
+      if(!builderPlayer){setStatus(status,"请先登录并读取账号收藏。","bad");return;}
+      const issues=builderIssues();
+      if(issues.length){setStatus(status,"构筑尚未通过检查："+issues.join("；"),"bad");document.getElementById("deck-share-area").classList.remove("hidden");return;}
+      const cards=Object.entries(deckDraft).filter(([,quantity])=>Number(quantity)>0).map(([id,quantity])=>({id,quantity:Number(quantity)}));
+      if(!cards.length){setStatus(status,"请先至少加入一张卡牌。","bad");document.getElementById("deck-share-area").classList.remove("hidden");return;}
+      const battleItems=cards.filter(entry=>{const card=allCards.find(item=>item.id===entry.id);return card&&isBattleItem(card);})
+        .map(entry=>({card_id:entry.id,quantity:entry.quantity}));
+      button.disabled=true;setStatus(status,battleItems.length?"正在确认并扣除对战道具……":"正在生成卡组分享链接……");
+      try{
+        if(battleItems.length){
+          const client=window.acgSupabaseClient;
+          if(!client)throw new Error("账号模块尚未加载，请刷新网页后重试。");
+          const fingerprint=JSON.stringify(battleItems);
+          const pendingKey="acg_battle_commit_pending_"+builderPlayer.id;
+          let pending=null;
+          try{pending=JSON.parse(localStorage.getItem(pendingKey)||"null");}catch(_){}
+          if(!pending||pending.fingerprint!==fingerprint){
+            pending={fingerprint,requestId:crypto.randomUUID()};
+            localStorage.setItem(pendingKey,JSON.stringify(pending));
+          }
+          const {error}=await client.rpc("commit_battle_item_deck",{p_request_id:pending.requestId,p_item_cards:battleItems});
+          if(error)throw error;
+          localStorage.removeItem(pendingKey);
+          battleItems.forEach(item=>{
+            const next=getCount(builderCollections,builderPlayer.id,item.card_id)-item.quantity;
+            setCount(builderCollections,builderPlayer.id,item.card_id,next);
+            delete deckDraft[item.card_id];
+          });
+          renderBuilder();
+        }
+        const encoded=encodeDeckPayload({version:1,cards,valid:true});
+        const link=window.location.origin+window.location.pathname+"#deck="+encoded;
+        document.getElementById("deck-share-link").value=link;
         document.getElementById("deck-share-area").classList.remove("hidden");
-        return;
-      }
-      const encoded = encodeDeckPayload({ version: 1, cards, valid: issues.length === 0 });
-      const link = window.location.origin + window.location.pathname + "#deck=" + encoded;
-      document.getElementById("deck-share-link").value = link;
-      document.getElementById("deck-share-area").classList.remove("hidden");
-      setStatus(document.getElementById("deck-share-status"), issues.length
-        ? "已生成预览链接（当前构筑未通过规则检查）。正式构筑仍需先满足规则：" + issues.join("；")
-        : "链接已生成。分享后，对方可以直接查看卡组。", issues.length ? "bad" : "good");
+        setStatus(status,battleItems.length
+          ?"分享链接已生成。对战道具已从你的收藏中永久扣除；重复导入这条链接不会再次扣除。"
+          :"链接已生成。分享后，对方可以直接查看卡组。","good");
+      }catch(error){
+        setStatus(status,"生成失败："+(error.message||String(error))+"。未确认成功前请不要重复构筑；可以再次点击安全重试。","bad");
+        document.getElementById("deck-share-area").classList.remove("hidden");
+      }finally{button.disabled=false;}
     }
     async function copyDeckLink() {
       const field = document.getElementById("deck-share-link");
@@ -1013,34 +1036,38 @@
       }
     }
     async function loadBuilderPlayer() {
-      const id = document.getElementById("builder-player-id").value.trim().toUpperCase();
       const status = document.getElementById("builder-status");
       const button = document.getElementById("load-builder-player");
-      if (!/^P\d{3}$/.test(id)) { setStatus(status, "请输入正确的玩家编号，例如 P001。", "bad"); return; }
-      const player = allPlayers.find(item => item.id === id);
-      if (!player) { setStatus(status, "没有找到这个玩家编号。", "bad"); return; }
-      button.disabled = true; setStatus(status, "正在读取收藏和构筑规则……");
+      const client = window.acgSupabaseClient;
+      if (!client) { setStatus(status, "账号模块尚未加载，请刷新网页后重试。", "bad"); return; }
+      button.disabled = true; setStatus(status, "正在读取登录账号和收藏……");
       try {
-        const [collectionResponse, rulesResponse] = await Promise.all([
-          fetch("./data/collections.json?refresh=" + Date.now(), {cache:"no-store"}),
-          fetch("./data/deck_rules.json?refresh=" + Date.now(), {cache:"no-store"})
+        const {data:authData,error:authError}=await client.auth.getUser();
+        if(authError)throw authError;
+        if(!authData?.user)throw new Error("请先登录玩家账号。");
+        const [{data:profile,error:profileError},{data:inventory,error:inventoryError},rulesResponse]=await Promise.all([
+          client.from("profiles").select("id,username,player_number").eq("id",authData.user.id).maybeSingle(),
+          client.from("card_inventory").select("card_id,quantity").eq("user_id",authData.user.id).gt("quantity",0),
+          fetch("./data/deck_rules.json?refresh="+Date.now(),{cache:"no-store"})
         ]);
-        if (!collectionResponse.ok || !rulesResponse.ok) throw new Error("无法读取收藏或构筑规则文件。");
-        builderCollections = await collectionResponse.json();
-        deckRules = await rulesResponse.json();
-        if (!Array.isArray(builderCollections)) throw new Error("收藏数据格式不正确。");
-        builderPlayer = player; deckDraft = {};
-        rememberLastPlayerId(player.id);
+        if(profileError)throw profileError;if(inventoryError)throw inventoryError;
+        if(!profile)throw new Error("账号资料尚未建立，请联系管理员检查注册设置。");
+        if(!profile.player_number)throw new Error("你的账号尚未绑定玩家编号，请联系管理员分配编号后再构筑。");
+        if(!rulesResponse.ok)throw new Error("无法读取构筑规则文件。");
+        builderCollections=(inventory||[]).map(row=>({player_id:profile.player_number,card_id:row.card_id,quantity:Number(row.quantity)}));
+        deckRules=await rulesResponse.json();
+        builderPlayer={id:profile.player_number,name:profile.username,userId:authData.user.id};
+        deckDraft={};
         renderLocalSavedDecks();
-        document.getElementById("builder-player-name").textContent = player.id + " · " + player.name;
-        document.getElementById("builder-rules-text").textContent = "测试版规则：礼装卡 " + deckRules.relicDeck.min + "～" + deckRules.relicDeck.max + " 张；超越、调律、共鸣攻击卡合计最多 " + deckRules.specialAttackDeck.maxTotal + " 张；同名卡最多 " + deckRules.relicDeck.maxCopiesPerName + " 张。";
+        document.getElementById("builder-player-name").textContent=profile.player_number+" · "+profile.username;
+        document.getElementById("builder-rules-text").textContent="礼装卡 "+deckRules.relicDeck.min+"～"+deckRules.relicDeck.max+" 张；超越、调律、共鸣攻击卡合计最多 "+deckRules.specialAttackDeck.maxTotal+" 张；同名卡最多 "+deckRules.relicDeck.maxCopiesPerName+" 张。对战道具在确认生成分享链接时从收藏中永久扣除。";
         document.getElementById("builder-workspace").classList.remove("hidden");
-        document.getElementById("builder-card-search").value = "";
-        renderBuilder(); setStatus(status, "收藏读取成功，可以开始构筑草稿。", "good");
-      } catch (error) {
-        builderPlayer = null; document.getElementById("builder-workspace").classList.add("hidden");
-        setStatus(status, "读取失败：" + error.message, "bad");
-      } finally { button.disabled = false; }
+        document.getElementById("builder-card-search").value="";
+        renderBuilder();setStatus(status,"账号收藏读取成功，可以开始构筑。","good");
+      } catch(error) {
+        builderPlayer=null;document.getElementById("builder-workspace").classList.add("hidden");
+        setStatus(status,"读取失败："+(error.message||String(error)),"bad");
+      } finally { button.disabled=false; }
     }
 
     function updateDirtyStatus() {
@@ -1522,10 +1549,8 @@
     });
     // 玩家编号统一自动转为大写，避免输入 p001 时造成识别困扰。
     playerIdInput.addEventListener("input", () => { playerIdInput.value = playerIdInput.value.toUpperCase(); });
-    document.getElementById("builder-player-id").addEventListener("input", event => { event.target.value = event.target.value.toUpperCase(); });
-    document.getElementById("lookup-player").addEventListener("click", lookupPlayerCollection);
+        document.getElementById("lookup-player").addEventListener("click", lookupPlayerCollection);
     document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
-    document.getElementById("builder-player-id").addEventListener("keydown", event => { if (event.key === "Enter") loadBuilderPlayer(); });
     document.getElementById("builder-card-search").addEventListener("input", renderBuilder);
     document.getElementById("clear-builder").addEventListener("click", () => { deckDraft = {}; renderBuilder(); document.getElementById("deck-share-area").classList.add("hidden"); });
     document.getElementById("generate-deck-link").addEventListener("click", generateDeckLink);
