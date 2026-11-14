@@ -128,7 +128,7 @@
     <section id="player-view" class="hidden">
       <div class="panel">
         <h3>查询我的收藏</h3>
-        <p class="hint">输入管理员分配给你的玩家编号，例如 P001。这里只能查看收藏，不能修改数量。</p>
+        <p class="hint">输入管理员分配给你的玩家编号，例如 P001。网页会在本机记住上次使用的编号，方便下次填写；这不是身份验证。这里只能查看收藏，不能修改数量。</p>
         <div class="player-search" style="margin-top:14px">
           <div class="field">
             <label for="player-id-input">玩家编号</label>
@@ -151,7 +151,7 @@
     <section id="builder-view" class="hidden">
       <div class="panel">
         <h3>开始构筑</h3>
-        <p class="hint">输入玩家编号读取你的收藏。当前为测试版构筑草稿，修改只保存在当前页面，不会修改收藏数量。</p>
+        <p class="hint">输入玩家编号读取你的收藏。网页会在本机记住上次使用的编号，方便下次构筑；这不是身份验证。构筑草稿只保存在当前页面，不会修改收藏数量。</p>
         <div class="player-search" style="margin-top:14px">
           <div class="field">
             <label for="builder-player-id">玩家编号</label>
@@ -398,6 +398,7 @@
     let builderCollections = [];
     let deckDraft = {};
     const LOCAL_DECK_STORAGE_KEY = "acg_card_builder_saved_decks_v1";
+    const LAST_PLAYER_STORAGE_KEY = "acg_card_builder_last_player_v1";
     const playerSelect = document.getElementById("player-select");
     const adminSearch = document.getElementById("admin-search");
     const authStatus = document.getElementById("auth-status");
@@ -412,6 +413,22 @@
     let packDataDirty = false;
     let adminDataSha = { cards: null, packs: null };
 
+    function rememberLastPlayerId(id) {
+      const normalized = String(id || "").trim().toUpperCase();
+      if (!/^P\d{3}$/.test(normalized)) return;
+      try { localStorage.setItem(LAST_PLAYER_STORAGE_KEY, normalized); } catch (error) {}
+      document.getElementById("builder-player-id").value = normalized;
+      playerIdInput.value = normalized;
+    }
+    function restoreLastPlayerId() {
+      try {
+        const remembered = localStorage.getItem(LAST_PLAYER_STORAGE_KEY);
+        if (/^P\d{3}$/.test(remembered || "") && allPlayers.some(player => player.id === remembered)) {
+          document.getElementById("builder-player-id").value = remembered;
+          playerIdInput.value = remembered;
+        }
+      } catch (error) {}
+    }
     const apiHeaders = () => ({
       "Accept": "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
@@ -542,6 +559,7 @@
         if (!Array.isArray(data)) throw new Error("收藏数据格式不正确。");
         publicCollections = data;
         currentPublicPlayer = player;
+        rememberLastPlayerId(player.id);
         document.getElementById("player-collection-workspace").classList.remove("hidden");
         document.getElementById("player-card-search").value = "";
         renderPlayerCollection();
@@ -955,6 +973,7 @@
         deckRules = await rulesResponse.json();
         if (!Array.isArray(builderCollections)) throw new Error("收藏数据格式不正确。");
         builderPlayer = player; deckDraft = {};
+        rememberLastPlayerId(player.id);
         renderLocalSavedDecks();
         document.getElementById("builder-player-name").textContent = player.id + " · " + player.name;
         document.getElementById("builder-rules-text").textContent = "测试版规则：礼装卡 " + deckRules.relicDeck.min + "～" + deckRules.relicDeck.max + " 张；超越、调律、共鸣攻击卡合计最多 " + deckRules.specialAttackDeck.maxTotal + " 张；同名卡最多 " + deckRules.relicDeck.maxCopiesPerName + " 张。";
@@ -1425,6 +1444,7 @@
         allCards = await cardsResponse.json();
         allPacks = await packsResponse.json();
         allPlayers = await playersResponse.json();
+        restoreLastPlayerId();
         rebuildCatalogFilters();
         allPlayers.forEach(player => {
           const option = document.createElement("option"); option.value = player.id; option.textContent = player.id + " · " + player.name; playerSelect.appendChild(option);
