@@ -1,0 +1,13 @@
+{
+  "active_id": "theme_1794695231384",
+  "themes": [
+    {
+      "id": "theme_1794695231384",
+      "name": "本期主视觉",
+      "image": "./images/home_visual_1794695227916.jpg",
+      "x": 50,
+      "y": 28,
+      "scale": 112
+    }
+  ]
+}
