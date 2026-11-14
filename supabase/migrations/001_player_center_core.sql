@@ -235,12 +235,12 @@ begin
      or coalesce(array_length(p_red_players, 1), 0) <> 2 then
     raise exception '蓝队和红队必须各有两名玩家';
   end if;
-  if p_winning_team not in ('blue', 'red') then
+  if p_winning_team is null or p_winning_team not in ('blue', 'red') then
     raise exception '胜利队伍只能是 blue 或 red';
   end if;
 
   v_all_players := p_blue_players || p_red_players;
-  select count(distinct x)::integer into v_count from unnest(v_all_players) as x;
+  select count(distinct player_id)::integer into v_count from unnest(v_all_players) as u(player_id);
   if v_count <> 4 then
     raise exception '四名玩家不能重复';
   end if;
@@ -310,8 +310,8 @@ begin
   end if;
 
   v_all_players := v_old_blue || v_old_red || p_blue_players || p_red_players;
-  select count(distinct x)::integer into v_count
-  from unnest(p_blue_players || p_red_players) as x;
+  select count(distinct player_id)::integer into v_count
+  from unnest(p_blue_players || p_red_players) as u(player_id);
   if v_count <> 4 then raise exception '四名玩家不能重复'; end if;
   select count(*)::integer into v_count
   from public.profiles p where p.id = any(p_blue_players || p_red_players);
