@@ -267,7 +267,7 @@ begin
 
   return v_quantity;
 end;
-$$
+$;
 
 revoke all on function public.admin_list_player_accounts() from public, anon, authenticated;
 revoke all on function public.admin_list_player_registry() from public, anon, authenticated;
