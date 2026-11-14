@@ -1,18 +1,22 @@
 [
   {
     "id": "pack_001",
-    "name": "无限泡影"
+    "name": "无限泡影",
+    "cover_card_id": "card_001"
   },
   {
     "id": "pack_002",
-    "name": "梦幻"
+    "name": "梦幻",
+    "cover_card_id": "card_025"
   },
   {
     "id": "pack_003",
-    "name": "固拉多"
+    "name": "固拉多",
+    "cover_card_id": "card_034"
   },
   {
     "id": "pack_004",
-    "name": "盖欧卡"
+    "name": "盖欧卡",
+    "cover_card_id": "card_045"
   }
 ]
