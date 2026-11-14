@@ -10,7 +10,7 @@ returns table(card_id text, remaining_tokens bigint, duplicate_request boolean)
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_pool public.card_draw_pools%rowtype;
@@ -99,7 +99,7 @@ begin
 
   return query select v_card_id,v_balance,false;
 end;
-$;
+$$;
 
 
 
