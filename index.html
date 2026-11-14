@@ -1234,7 +1234,16 @@
       try {
         const sha = await githubSaveJson(path, data, isCards ? "Manage card catalog" : "Manage card packs", adminDataSha[kind]);
         adminDataSha[kind] = sha;
-        if (isCards) cardDataDirty = false; else packDataDirty = false;
+        if (isCards) {
+          const battleItems = allCards.filter(card => card.type === "对战道具").map(card => ({card_id:card.id,card_name:card.name}));
+          if (battleItems.length) {
+            const supabaseClient = window.acgSupabaseClient;
+            if (!supabaseClient) throw new Error("卡牌资料已保存到 GitHub，但对战道具目录尚未同步。请登录管理员账号后重新保存卡牌资料。");
+            const {error:syncError} = await supabaseClient.rpc("admin_sync_battle_item_catalog",{p_items:battleItems});
+            if (syncError) throw new Error("卡牌资料已保存到 GitHub，但对战道具目录同步失败："+syncError.message);
+          }
+          cardDataDirty = false;
+        } else packDataDirty = false;
         setStatus(status, "保存成功！网页资料已更新。", "good");
         rebuildCatalogFilters(); renderCatalogCards(); renderCatalogPacks(); renderCards();
       } catch (error) {
