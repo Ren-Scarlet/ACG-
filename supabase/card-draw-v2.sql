@@ -65,12 +65,12 @@ alter table public.card_draw_pools
   add column if not exists rate_alt numeric(5,2) not null default 0;
 
 alter table public.card_draw_pools
+  drop constraint if exists card_draw_pool_rates_check;
+
+alter table public.card_draw_pools
   alter column rate_3 type numeric(5,2) using rate_3::numeric(5,2),
   alter column rate_4 type numeric(5,2) using rate_4::numeric(5,2),
   alter column rate_5 type numeric(5,2) using rate_5::numeric(5,2);
-
-alter table public.card_draw_pools
-  drop constraint if exists card_draw_pool_rates_check;
 
 alter table public.card_draw_pools
   add constraint card_draw_pool_rates_v2_check check (
@@ -335,10 +335,14 @@ begin
     from jsonb_to_recordset(p_items) as x(card_id text,quantity integer)
     order by x.card_id
   loop
-    update public.card_inventory set quantity=quantity-v_item.quantity,updated_at=now()
-    where user_id=v_user_id and card_id=v_item.card_id and quantity>v_item.quantity;
-    delete from public.card_inventory
-    where user_id=v_user_id and card_id=v_item.card_id and quantity=v_item.quantity;
+    select quantity into v_current from public.card_inventory
+    where user_id=v_user_id and card_id=v_item.card_id for update;
+    if v_current > v_item.quantity then
+      update public.card_inventory set quantity=quantity-v_item.quantity,updated_at=now()
+      where user_id=v_user_id and card_id=v_item.card_id;
+    else
+      delete from public.card_inventory where user_id=v_user_id and card_id=v_item.card_id;
+    end if;
   end loop;
 
   update public.player_stats set tokens=tokens+v_reward,updated_at=now()
@@ -358,6 +362,7 @@ revoke all on function public.admin_set_draw_pool_v2(text,bigint,numeric,numeric
 revoke all on function public.draw_packages(text,uuid,integer) from public,anon,authenticated;
 revoke all on function public.dismantle_cards(jsonb,uuid) from public,anon,authenticated;
 revoke all on function public.draw_one_card(text,uuid) from public,anon,authenticated;
+revoke all on function public.admin_set_draw_pool(text,bigint,integer,integer,integer) from public,anon,authenticated;
 grant execute on function public.admin_set_draw_pool_v2(text,bigint,numeric,numeric,numeric,numeric) to authenticated;
 grant execute on function public.draw_packages(text,uuid,integer) to authenticated;
 grant execute on function public.dismantle_cards(jsonb,uuid) to authenticated;
