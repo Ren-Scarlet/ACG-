@@ -825,7 +825,6 @@
         }
         document.getElementById("shared-deck-summary").textContent = "礼装卡 " + relicCount + " 张 · 特殊攻击卡 " + specialCount + " 张 · 对战道具 " + battleItemCount + " 张" + (ruleIssues.length ? " · 预览：未通过构筑规则（" + [...new Set(ruleIssues)].join("、") + "）" : " · 符合当前构筑规则");
         document.getElementById("library-view").classList.add("hidden");
-        document.getElementById("player-view").classList.add("hidden");
         document.getElementById("builder-view").classList.add("hidden");
         document.getElementById("admin-view").classList.add("hidden");
         document.getElementById("shared-deck-view").classList.remove("hidden");
@@ -873,9 +872,6 @@
       } finally { button.disabled=false; }
     }
 
-    function updateDirtyStatus() {
-      setStatus(saveStatus, isDirty() ? "有未保存的修改。" : "尚无未保存修改。", isDirty() ? "bad" : "");
-    }
     async function githubGetJson(path) {
       const url = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`;
       const response = await fetch(url, { headers: apiHeaders(), cache: "no-store" });
@@ -884,7 +880,6 @@
       const decoded = new TextDecoder().decode(Uint8Array.from(atob(body.content.replace(/\n/g, "")), c => c.charCodeAt(0)));
       return { sha: body.sha, data: JSON.parse(decoded) };
     }
-    async function githubGetCollections() { return githubGetJson(COLLECTION_PATH); }
     async function githubSaveJson(path, data, message, expectedSha) {
       const latest = await githubGetJson(path);
       if (expectedSha && latest.sha !== expectedSha) throw new Error(path + " 已被其他操作更新。为避免覆盖新资料，请重新读取线上资料后再修改。");
@@ -986,10 +981,7 @@
         });
         const del = document.createElement("button"); del.type = "button"; del.textContent = "删除"; del.className = "danger-button";
         del.addEventListener("click", () => {
-          const used = collections.some(row => row.card_id === card.id && Number(row.quantity) > 0) ||
-            draftCollections.some(row => row.card_id === card.id && Number(row.quantity) > 0);
-          if (used) { alert("这张卡仍存在于玩家收藏中。请先在「玩家收藏」中清除所有玩家持有数量，再删除卡牌。"); return; }
-          if (!confirm("确定删除「" + card.name + "」？此操作需要保存卡牌资料后才会写入 GitHub。")) return;
+          if (!confirm("确定删除「" + card.name + "」？注意：删除图鉴资料不会自动清除玩家 Supabase 库存中的记录，已有库存将无法正常显示。建议先确认所有玩家均不再持有此卡。此操作需要保存卡牌资料后才会写入 GitHub。")) return;
           allCards = allCards.filter(item => item.id !== card.id);
           if (editingCardId === card.id) resetCardForm();
           markCardDataDirty(); rebuildCatalogFilters(); renderCatalogCards(); renderCards();
@@ -1278,7 +1270,6 @@
         document.getElementById("admin-workspace").classList.remove("hidden");
         rebuildCatalogFilters(); renderCatalogCards(); renderCatalogPacks();
         setStatus(authStatus, "授权成功，已读取卡牌和卡包资料。玩家库存请在玩家中心管理。", "good");
-        renderAdminCards(); updateDirtyStatus();
       } catch (error) {
         githubToken = ""; authorized = false;
         setStatus(authStatus, "授权失败：" + error.message + "。请确认密钥权限包含 Contents：Read and write。", "bad");
