@@ -109,7 +109,7 @@
     <p class="intro">浏览卡包中的卡牌，或进入管理员模式管理玩家收藏。</p>
     <nav class="tabs">
       <button id="tab-library" class="active" type="button">卡牌图鉴</button>
-      <button id="tab-player" type="button">我的收藏</button>
+      <button id="tab-player" type="button">旧版收藏快照</button>
       <button id="tab-builder" type="button">卡组构筑</button>
       <button id="tab-admin" type="button">管理员收藏管理</button>
       <button id="tab-account" type="button">玩家账号</button>
@@ -162,7 +162,7 @@
     <section id="player-view" class="hidden">
       <div class="panel">
         <h3>查询我的收藏</h3>
-        <p class="hint">输入管理员分配给你的玩家编号，例如 P001。网页会在本机记住上次使用的编号，方便下次填写；这不是身份验证。这里只能查看收藏，不能修改数量。</p>
+        <p class="hint">这是迁移前的历史收藏快照，仅供核对。当前账号收藏请登录后前往「玩家中心」查看。</p>
         <div class="player-search" style="margin-top:14px">
           <div class="field">
             <label for="player-id-input">玩家编号</label>
@@ -327,10 +327,10 @@
               <input id="admin-search" type="search" placeholder="输入卡牌名称……">
             </div>
           </div>
-          <p class="hint">点击加减只会暂存修改；点击「保存收藏」后才会写入 GitHub。</p>
+          <p class="hint">此处仅保留迁移前的 GitHub 收藏备份。当前正式库存已切换到 Supabase，请使用「玩家中心」中的管理员库存调整功能。</p>
           <div class="save-row">
-            <button id="save-collections" class="primary" type="button">保存收藏</button>
-            <button id="discard-changes" type="button">放弃未保存修改</button>
+            <button id="save-collections" class="primary" type="button" disabled>旧版备份已停用</button>
+            <button id="discard-changes" type="button" disabled>旧版备份已停用</button>
             <span id="save-status" class="status">尚无未保存修改。</span>
           </div>
         </div>
@@ -555,8 +555,8 @@
         const counter = document.createElement("div"); counter.className = "counter";
         const minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−"; minus.setAttribute("aria-label", "减少" + card.name);
         const count = document.createElement("span"); count.className = "count"; count.textContent = getCount(draftCollections, playerId, card.id);
-        const plus = document.createElement("button"); plus.type = "button"; plus.textContent = "+"; plus.setAttribute("aria-label", "增加" + card.name);
-        minus.disabled = Number(count.textContent) <= 0;
+        const plus = document.createElement("button"); plus.type = "button"; plus.textContent = "+"; plus.disabled = true; plus.setAttribute("aria-label", "增加" + card.name);
+        minus.disabled = true;
         minus.addEventListener("click", () => { setCount(draftCollections, playerId, card.id, getCount(draftCollections, playerId, card.id)-1); renderAdminCards(); updateDirtyStatus(); });
         plus.addEventListener("click", () => { setCount(draftCollections, playerId, card.id, getCount(draftCollections, playerId, card.id)+1); renderAdminCards(); updateDirtyStatus(); });
         counter.append(minus, count, plus); row.append(img, info, counter); adminCardList.appendChild(row);
