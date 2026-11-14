@@ -1,10 +1,18 @@
 {
-  "active_id": "theme_1794695231384",
+  "active_id": "theme_1794695314264",
   "themes": [
     {
       "id": "theme_1794695231384",
       "name": "本期主视觉",
       "image": "./images/home_visual_1794695227916.jpg",
+      "x": 50,
+      "y": 28,
+      "scale": 112
+    },
+    {
+      "id": "theme_1794695314264",
+      "name": "本期主视觉",
+      "image": "./images/home_visual_1794695311004.jpg",
       "x": 50,
       "y": 28,
       "scale": 112
