@@ -36,10 +36,12 @@
     if (!session) {
       formsEl.classList.remove("hidden");
       profileEl.classList.add("hidden");
+      window.acgHomeUpdatePlayerHUD?.(null);
       showStatus("尚未登录。可以注册新账号，或登录已有账号。", "");
       return;
     }
 
+    window.acgHomeUpdatePlayerHUD?.(session.user.id);
     formsEl.classList.add("hidden");
     profileEl.classList.remove("hidden");
     document.getElementById("account-username").textContent =
