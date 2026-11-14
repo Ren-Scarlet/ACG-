@@ -19,7 +19,7 @@
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家昵称</label><input id="pc-public-name" maxlength="20" placeholder="输入游戏昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
     '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">卡牌收藏</button><button type="button" data-page="draw">抽卡</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
-    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">价格和星级概率由管理员设置。卡池未设置并保存前不会开放。</p><div id="pc-admin-pool-list" class="pc-muted">正在读取卡池状态……</div><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="pack_001">无限泡影</option><option value="pack_002">梦幻</option></select></div><div class="field"><label for="pc-pool-price">单抽价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="1" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
+    '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 玩家管理</h3><p class="pc-muted">新玩家先注册账号，再由管理员把账号绑定到现有玩家编号。绑定后会自动导入该编号原有的收藏数据。</p><div class="pc-grid"><div class="field"><label for="pc-bind-number">待分配玩家编号</label><select id="pc-bind-number"></select></div><div class="field"><label for="pc-bind-user">绑定到已注册账号</label><select id="pc-bind-user"></select></div></div><button id="pc-bind-submit" type="button">绑定玩家编号并导入旧收藏</button><p id="pc-bind-status" class="status"></p><div id="pc-bind-list" class="pc-muted"></div><h3 style="margin-top:24px">管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">价格和星级概率由管理员设置。卡池未设置并保存前不会开放。</p><div id="pc-admin-pool-list" class="pc-muted">正在读取卡池状态……</div><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="pack_001">无限泡影</option><option value="pack_002">梦幻</option></select></div><div class="field"><label for="pc-pool-price">单抽价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="1" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币发放</h4><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
 
@@ -382,10 +382,11 @@
       if(error)throw error;
       if(!data?.is_admin){adminPanel.classList.add("hidden");return;}
       adminPanel.classList.remove("hidden");
-      const {data:players,error:playersError}=await client.from("profiles").select("id,username").order("username");
+      const {data:players,error:playersError}=await client.from("profiles").select("id,username,player_number").order("username");
       if(playersError)throw playersError;
       adminPlayers=players||[];
       fillPlayerSelects();
+      await loadAdminBindings();
       await loadAdminMatches();
       await loadAdminAchievements();
       await loadAdminPools();
@@ -394,6 +395,55 @@
       setStatus("管理员资料读取失败："+error.message,true);
     }
   }
+  async function loadAdminBindings(){
+    const numberSelect=view.querySelector("#pc-bind-number");
+    const userSelect=view.querySelector("#pc-bind-user");
+    const list=view.querySelector("#pc-bind-list");
+    const status=view.querySelector("#pc-bind-status");
+    const [{data:registry,error:re},{data:accounts,error:ae}]=await Promise.all([
+      client.rpc("admin_list_player_registry"),
+      client.rpc("admin_list_player_accounts")
+    ]);
+    if(re)throw re;if(ae)throw ae;
+    numberSelect.replaceChildren(new Option("请选择未绑定编号",""));
+    (registry||[]).filter(row=>!row.assigned_user_id).forEach(row=>{
+      numberSelect.add(new Option(row.player_number+" · "+row.display_name,row.player_number));
+    });
+    userSelect.replaceChildren(new Option("请选择尚未绑定编号的账号",""));
+    (accounts||[]).filter(row=>!row.player_number).forEach(row=>{
+      userSelect.add(new Option(row.username+" · "+row.user_id.slice(0,8),row.user_id));
+    });
+    list.replaceChildren();
+    (registry||[]).forEach(row=>{
+      const line=node("div","pc-row");
+      const account=(accounts||[]).find(item=>item.user_id===row.assigned_user_id);
+      line.append(node("span","",row.player_number+" · "+row.display_name),
+        node("strong","",account?("已绑定："+account.username):"尚未绑定"));
+      list.appendChild(line);
+    });
+    status.textContent="共 "+(registry||[]).length+" 个玩家编号，"+(accounts||[]).length+" 个注册账号。";
+    status.className="status";
+  }
+  view.querySelector("#pc-bind-submit").addEventListener("click",async()=>{
+    const userId=view.querySelector("#pc-bind-user").value;
+    const playerNumber=view.querySelector("#pc-bind-number").value;
+    const status=view.querySelector("#pc-bind-status");
+    const button=view.querySelector("#pc-bind-submit");
+    if(!userId||!playerNumber){status.textContent="请选择玩家编号和注册账号。";status.className="status bad";return;}
+    if(!confirm("确认将 "+playerNumber+" 绑定到所选账号？绑定后会把旧收藏导入该账号，不能在网页中自行更换。"))return;
+    button.disabled=true;status.textContent="正在绑定并导入收藏……";status.className="status";
+    try{
+      const {data,error}=await client.rpc("admin_assign_player_number",{p_user_id:userId,p_player_number:playerNumber});
+      if(error)throw error;
+      status.textContent="绑定成功，旧收藏导入 "+data+" 条。";status.className="status good";
+      await loadAdminBindings();
+      const {data:players,error:playersError}=await client.from("profiles").select("id,username,player_number").order("username");
+      if(playersError)throw playersError;
+      adminPlayers=players||[];fillPlayerSelects();
+    }catch(error){status.textContent="绑定失败："+error.message;status.className="status bad";}
+    finally{button.disabled=false;}
+  });
+
   const achievementForm=view.querySelector("#pc-achievement-form");
   const achievementType=view.querySelector("#pc-ach-type");
   const minGamesWrap=view.querySelector("#pc-ach-min-games-wrap");
