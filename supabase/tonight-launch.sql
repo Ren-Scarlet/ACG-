@@ -130,7 +130,6 @@ as $$
 declare
   v_existing_number text;
   v_assigned_user uuid;
-  v_imported boolean := false;
   v_rows integer := 0;
 begin
   if auth.uid() is null or not public.is_admin() then
@@ -191,8 +190,7 @@ begin
 
   insert into public.legacy_collection_imports(player_number)
   values (p_player_number)
-  on conflict (player_number) do nothing
-  returning true into v_imported;
+  on conflict (player_number) do nothing;
 
   return v_rows;
 end;
@@ -223,6 +221,7 @@ security definer
 set search_path = ''
 as $$
 declare
+  v_current integer;
   v_quantity integer;
 begin
   if auth.uid() is null or not public.is_admin() then
@@ -237,24 +236,38 @@ begin
     raise exception '卡牌、调整数量和原因均为必填项';
   end if;
 
-  insert into public.card_inventory(user_id, card_id, quantity, updated_at)
-  values (p_user_id, trim(p_card_id), p_delta, now())
-  on conflict (user_id, card_id) do update
-    set quantity = public.card_inventory.quantity + excluded.quantity,
-        updated_at = now()
-  where public.card_inventory.quantity + excluded.quantity >= 0
-  returning quantity into v_quantity;
+  select quantity into v_current
+  from public.card_inventory
+  where user_id=p_user_id and card_id=trim(p_card_id)
+  for update;
 
   if not found then
-    raise exception '库存不足，不能扣除这么多数量';
+    if p_delta < 0 then
+      raise exception '库存不足，不能扣除这么多数量';
+    end if;
+    insert into public.card_inventory(user_id,card_id,quantity,updated_at)
+    values(p_user_id,trim(p_card_id),p_delta,now());
+    v_quantity := p_delta;
+  else
+    v_quantity := v_current + p_delta;
+    if v_quantity < 0 then
+      raise exception '库存不足，不能扣除这么多数量';
+    elsif v_quantity = 0 then
+      delete from public.card_inventory
+      where user_id=p_user_id and card_id=trim(p_card_id);
+    else
+      update public.card_inventory
+      set quantity=v_quantity,updated_at=now()
+      where user_id=p_user_id and card_id=trim(p_card_id);
+    end if;
   end if;
 
   insert into public.card_inventory_adjustments(user_id,card_id,delta,reason,adjusted_by)
-  values (p_user_id,trim(p_card_id),p_delta,trim(p_reason),auth.uid());
+  values(p_user_id,trim(p_card_id),p_delta,trim(p_reason),auth.uid());
 
   return v_quantity;
 end;
-$$;
+$$
 
 revoke all on function public.admin_list_player_accounts() from public, anon, authenticated;
 revoke all on function public.admin_list_player_registry() from public, anon, authenticated;
@@ -345,7 +358,6 @@ declare
   v_old_items jsonb;
   v_item record;
   v_current integer;
-  v_result jsonb;
 begin
   if v_user_id is null then
     raise exception '请先登录';
@@ -360,7 +372,6 @@ begin
     raise exception '对战道具数量异常';
   end if;
 
-  -- Lock the player's inventory namespace before checking idempotency/inventory.
   perform 1 from public.profiles where id = v_user_id for update;
 
   select item_cards into v_old_items
@@ -374,7 +385,6 @@ begin
     return jsonb_build_object('committed', true, 'duplicate_request', true, 'items', v_old_items);
   end if;
 
-  -- Validate and aggregate duplicate IDs before changing anything.
   if exists (
     select 1
     from jsonb_to_recordset(p_item_cards) as x(card_id text, quantity integer)
@@ -418,13 +428,15 @@ begin
     from jsonb_to_recordset(p_item_cards) as x(card_id text, quantity integer)
     order by x.card_id
   loop
+    delete from public.card_inventory
+    where user_id = v_user_id and card_id = v_item.card_id
+      and quantity = v_item.quantity;
+
     update public.card_inventory
     set quantity = quantity - v_item.quantity,
         updated_at = now()
-    where user_id = v_user_id and card_id = v_item.card_id;
-
-    delete from public.card_inventory
-    where user_id = v_user_id and card_id = v_item.card_id and quantity <= 0;
+    where user_id = v_user_id and card_id = v_item.card_id
+      and quantity > v_item.quantity;
   end loop;
 
   insert into public.battle_item_deck_commits(user_id, request_id, item_cards)
@@ -432,7 +444,7 @@ begin
 
   return jsonb_build_object('committed', true, 'duplicate_request', false, 'items', p_item_cards);
 end;
-$$;
+$$
 
 revoke all on function public.admin_sync_battle_item_catalog(jsonb) from public, anon, authenticated;
 grant execute on function public.admin_sync_battle_item_catalog(jsonb) to authenticated;
