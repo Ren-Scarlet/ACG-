@@ -162,7 +162,7 @@ declare
 begin
   if v_user_id is null then raise exception '请先登录'; end if;
   if p_request_id is null then raise exception '抽卡请求编号缺失，请重新点击'; end if;
-  if p_pack_count not in (1,10) then raise exception '一次只能购买 1 包或 10 包'; end if;
+  if p_pack_count is null or p_pack_count not in (1,10) then raise exception '一次只能购买 1 包或 10 包'; end if;
 
   select tokens into v_balance
   from public.player_stats where user_id=v_user_id for update;
@@ -173,7 +173,9 @@ begin
   where user_id=v_user_id and request_id=p_request_id;
 
   if v_existing_count > 0 then
-    if v_existing_count <> p_pack_count * 5 then
+    if v_existing_count <> p_pack_count * 5
+       or exists(select 1 from public.card_draw_history
+                 where user_id=v_user_id and request_id=p_request_id and pack_id<>p_pack_id) then
       raise exception '抽卡请求编号已被其他抽卡操作使用，请刷新后重试';
     end if;
     select jsonb_agg(jsonb_build_object(
