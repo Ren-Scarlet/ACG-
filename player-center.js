@@ -524,7 +524,8 @@
     personalEl.classList.remove("hidden");
     loginHint.textContent="已登录。以下内容仅本人可查看。";
     view.querySelector("#pc-public-name").value=currentUser.user_metadata?.username||"";
-    await loadPage(currentPage);
+    // Auth token refreshes must never pull the user back into a previously opened page (especially the draw lobby).
+    if (!view.classList.contains("hidden")) await loadPage(currentPage);
     await checkAdmin();
   }
 
