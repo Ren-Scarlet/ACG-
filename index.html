@@ -590,40 +590,9 @@
       });
     }
     async function lookupPlayerCollection() {
-      const playerId = playerIdInput.value.trim().toUpperCase();
-      if (!/^P\d{3}$/.test(playerId)) {
-        currentPublicPlayer = null;
-        document.getElementById("player-collection-workspace").classList.add("hidden");
-        setStatus(playerStatus, "请输入正确的玩家编号，例如 P001。", "bad");
-        return;
-      }
-      const player = allPlayers.find(item => item.id === playerId);
-      if (!player) {
-        currentPublicPlayer = null;
-        document.getElementById("player-collection-workspace").classList.add("hidden");
-        setStatus(playerStatus, "没有找到这个玩家编号，请向管理员确认。", "bad");
-        return;
-      }
-      setStatus(playerStatus, "正在读取最新收藏……");
-      const lookupButton = document.getElementById("lookup-player");
-      lookupButton.disabled = true;
-      try {
-        const response = await fetch("./data/collections.json?refresh=" + Date.now(), { cache: "no-store" });
-        if (!response.ok) throw new Error("无法读取收藏数据（HTTP " + response.status + "）");
-        const data = await response.json();
-        if (!Array.isArray(data)) throw new Error("收藏数据格式不正确。");
-        publicCollections = data;
-        currentPublicPlayer = player;
-        rememberLastPlayerId(player.id);
-        document.getElementById("player-collection-workspace").classList.remove("hidden");
-        document.getElementById("player-card-search").value = "";
-        renderPlayerCollection();
-        setStatus(playerStatus, "查询成功，已读取最新收藏。", "good");
-      } catch (error) {
-        currentPublicPlayer = null;
-        document.getElementById("player-collection-workspace").classList.add("hidden");
-        setStatus(playerStatus, "查询失败：" + error.message, "bad");
-      } finally { lookupButton.disabled = false; }
+      currentPublicPlayer = null;
+      document.getElementById("player-collection-workspace").classList.add("hidden");
+      setStatus(playerStatus, "旧版公开收藏查询已停用。请登录账号后，在「玩家中心」查看正式收藏。", "bad");
     }
 
     function isSpecialAttack(card) {
