@@ -209,100 +209,123 @@
 
   let drawPools=[];
   let drawBusy=false;
-  // Persist uncertain draw request IDs so refreshing the page cannot accidentally charge twice.
   const pendingDrawRequests = new Map();
-  function drawRequestStorageKey(packId) {
-    return "acg-pending-draw:" + currentUser.id + ":" + packId;
+  function drawRequestStorageKey(packId,packCount) { return "acg-pending-draw:"+currentUser.id+":"+packId+":"+packCount; }
+  function getDrawRequestId(packId,packCount) {
+    const key=packId+":"+packCount;let requestId=pendingDrawRequests.get(key);if(requestId)return requestId;
+    try{requestId=localStorage.getItem(drawRequestStorageKey(packId,packCount));}catch(_){}
+    if(!requestId){requestId=crypto.randomUUID();try{localStorage.setItem(drawRequestStorageKey(packId,packCount),requestId);}catch(_){}}
+    pendingDrawRequests.set(key,requestId);return requestId;
   }
-  function getDrawRequestId(packId) {
-    let requestId = pendingDrawRequests.get(packId);
-    if (requestId) return requestId;
-    try { requestId = localStorage.getItem(drawRequestStorageKey(packId)); } catch (_) {}
-    if (!requestId) {
-      requestId = crypto.randomUUID();
-      try { localStorage.setItem(drawRequestStorageKey(packId), requestId); } catch (_) {}
-    }
-    pendingDrawRequests.set(packId, requestId);
-    return requestId;
-  }
-  function clearDrawRequestId(packId) {
-    pendingDrawRequests.delete(packId);
-    try { localStorage.removeItem(drawRequestStorageKey(packId)); } catch (_) {}
+  function clearDrawRequestId(packId,packCount) {
+    pendingDrawRequests.delete(packId+":"+packCount);try{localStorage.removeItem(drawRequestStorageKey(packId,packCount));}catch(_){}
   }
   async function loadDraw() {
-    const {data:pools,error}=await client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_3,rate_4,rate_5,enabled").eq("enabled",true).order("pack_id");
-    if(error)throw error;
-    drawPools=pools||[];
+    const {data:pools,error}=await client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled").eq("enabled",true).order("pack_id");
+    if(error)throw error;drawPools=pools||[];
     const {data:stats,error:statsError}=await client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle();
     if(statsError)throw statsError;
     const [{data:history,error:historyError,count:drawCount},{data:packRows,error:packError}]=await Promise.all([
-      client.from("card_draw_history").select("id,pack_id,card_id,cost_tokens,created_at",{count:"exact"}).eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(20),
+      client.from("card_draw_history").select("id,pack_id,card_id,cost_tokens,draw_index,created_at",{count:"exact"}).eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(30),
       client.from("card_draw_pools").select("pack_id,pack_name")
     ]);
-    if(historyError)throw historyError;
-    if(packError)throw packError;
+    if(historyError)throw historyError;if(packError)throw packError;
     const packNames=Object.fromEntries((packRows||[]).map(pack=>[pack.pack_id,pack.pack_name]));
-    contentEl.replaceChildren();
-    const balance=node("div","pc-stat","当前代币："+(stats?.tokens??0));
-    contentEl.appendChild(balance);
-    if(!drawPools.length){contentEl.appendChild(node("div","pc-empty","目前没有开放的卡池。请等待管理员完成卡池价格和概率设置。"));}
+    contentEl.replaceChildren();contentEl.appendChild(node("div","pc-stat","当前代币："+(stats?.tokens??0)));
+    if(!drawPools.length)contentEl.appendChild(node("div","pc-empty","目前没有开放的卡池。请等待管理员完成卡池设置。"));
     drawPools.forEach(pool=>{
       const card=node("div","pc-stat");
-      card.append(node("h3","",pool.pack_name),node("p","pc-muted","单抽："+pool.price_tokens+" 代币 · 三星 "+pool.rate_3+"% · 四星 "+pool.rate_4+"% · 五星 "+pool.rate_5+"%"));
-      const button=node("button","primary","单抽");
-      button.type="button";
-      button.addEventListener("click",()=>performDraw(pool));
-      card.appendChild(button);contentEl.appendChild(card);
+      card.append(node("h3","",pool.pack_name),node("p","pc-muted","每包 5 张 · 单包 "+pool.price_tokens+" 代币"),
+        node("p","pc-muted","异画 "+Number(pool.rate_alt||0)+"% · 五星 "+pool.rate_5+"% · 四星 "+pool.rate_4+"% · 三星 "+pool.rate_3+"%"));
+      const actions=node("div");actions.style.cssText="display:flex;gap:8px;flex-wrap:wrap";
+      [[1,"单抽（1包·5张）"],[10,"十连（10包·50张）"]].forEach(([count,label])=>{
+        const button=node("button",count===1?"primary":"",""+label);button.type="button";
+        button.addEventListener("click",()=>performDraw(pool,count));actions.appendChild(button);
+      });
+      card.appendChild(actions);contentEl.appendChild(card);
     });
-    contentEl.appendChild(node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 抽"));
+    contentEl.appendChild(node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张卡"));
     if(!history?.length){contentEl.appendChild(node("div","pc-empty","还没有抽卡记录。"));return;}
     history.forEach(item=>{
-      const info=cardsById[item.card_id]||{name:item.card_id};
-      const row=node("div","pc-row"),left=node("div"),details=node("div","pc-muted");
+      const info=cardsById[item.card_id]||{name:item.card_id};const line=node("div","pc-row"),left=node("div"),details=node("div","pc-muted");
       left.style.display="flex";left.style.alignItems="center";left.style.gap="12px";
-      if(info.image){
-        const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";
-        img.style.cssText="width:48px;height:66px;object-fit:contain;border-radius:5px";
-        left.appendChild(img);
-      }
-      details.append(node("strong","",info.name),node("div","pc-muted",(info.star||"")+" 星 · "+(packNames[item.pack_id]||item.pack_id)),node("div","pc-muted",new Date(item.created_at).toLocaleString("zh-CN")));
-      left.appendChild(details);
-      row.append(left,node("span","pc-muted","-"+item.cost_tokens+" 代币"));
-      contentEl.appendChild(row);
+      if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";img.style.cssText="width:48px;height:66px;object-fit:contain;border-radius:5px";left.appendChild(img);}
+      details.append(node("strong","",info.name),node("div","pc-muted",(info.star||"")+" 星 · "+(packNames[item.pack_id]||item.pack_id)),
+        node("div","pc-muted",new Date(item.created_at).toLocaleString("zh-CN")));
+      left.appendChild(details);line.append(left,node("span","pc-muted","已加入收藏"));contentEl.appendChild(line);
     });
   }
-  async function performDraw(pool) {
-    if(drawBusy)return;
-    drawBusy=true;
-    const buttons=[...contentEl.querySelectorAll("button")];buttons.forEach(button=>button.disabled=true);
-    const requestId=getDrawRequestId(pool.pack_id);
-    const loading=node("p","pc-muted","正在抽取，请稍候……");
-    contentEl.prepend(loading);
+  async function performDraw(pool,packCount) {
+    if(drawBusy)return;drawBusy=true;contentEl.querySelectorAll("button").forEach(button=>button.disabled=true);
+    const requestId=getDrawRequestId(pool.pack_id,packCount);const loading=node("p","pc-muted","正在抽取 "+(packCount*5)+" 张卡，请稍候……");contentEl.prepend(loading);
     try{
-      const {data,error}=await client.rpc("draw_one_card",{p_pack_id:pool.pack_id,p_request_id:requestId});
-      if(error)throw error;
-      const result=Array.isArray(data)?data[0]:data;
-      if(!result?.card_id)throw new Error("服务器没有返回有效的抽卡结果，请重试；系统会使用同一请求编号避免重复扣费。");
-      // The server has confirmed this draw. A future deliberate draw must use a fresh request ID.
-      clearDrawRequestId(pool.pack_id);
-      const info=cardsById[result.card_id]||{name:result.card_id};
-      loading.remove();
-      const box=node("div","pc-stat");
-      box.append(node("h3","","抽卡结果"),node("strong","",info.name),node("p","pc-muted",(info.star||"")+" 星 · 剩余代币："+result.remaining_tokens));
-      if(info.image){
-        const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";img.style.cssText="display:block;max-width:180px;max-height:250px;object-fit:contain;margin:12px auto";
-        box.appendChild(img);
-      }
-      if(result.duplicate_request)box.appendChild(node("p","pc-muted","本次请求已处理，已返回原抽卡结果，没有重复扣费。"));
-      contentEl.prepend(box);
-      await loadDraw();
-    }catch(error){
-      loading.textContent="抽卡失败："+error.message;
-      loading.className="pc-empty";
-    }finally{
-      drawBusy=false;
-      contentEl.querySelectorAll("button").forEach(button=>button.disabled=false);
+      const {data,error}=await client.rpc("draw_packages",{p_pack_id:pool.pack_id,p_request_id:requestId,p_pack_count:packCount});
+      if(error)throw error;const result=Array.isArray(data)?data[0]:data;
+      if(!result?.cards||result.cards.length!==packCount*5)throw new Error("服务器没有返回完整抽卡结果；请重试，系统会沿用同一请求编号避免重复扣费。");
+      clearDrawRequestId(pool.pack_id,packCount);loading.remove();
+      const box=node("div","pc-stat");box.append(node("h3","","抽卡结果 · "+packCount+" 包 / "+result.cards.length+" 张"),
+        node("p","pc-muted","本次消耗 "+(result.charged_tokens||pool.price_tokens*packCount)+" 代币 · 剩余 "+result.remaining_tokens+" 代币"));
+      const grid=node("div","pc-inventory-grid");
+      result.cards.forEach(card=>{
+        const info=cardsById[card.card_id]||{name:card.card_id};const tile=node("div","pc-inventory-card");
+        if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";tile.appendChild(img);}
+        const meta=node("div","pc-card-info");meta.append(node("strong","",info.name),node("small","",card.is_alt?"异画":(card.rarity||info.star)+" 星"));
+        tile.appendChild(meta);grid.appendChild(tile);
+      });
+      box.appendChild(grid);if(result.duplicate_request)box.appendChild(node("p","pc-muted","本次请求已处理，已返回原结果，没有重复扣费。"));
+      contentEl.prepend(box);await loadDraw();
+    }catch(error){loading.textContent="抽卡失败："+error.message;loading.className="pc-empty";}
+    finally{drawBusy=false;contentEl.querySelectorAll("button").forEach(button=>button.disabled=false);}
+  }
+  async function loadDismantle() {
+    const [{data:inventory,error:ie},{data:stats,error:se}]=await Promise.all([
+      client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id"),
+      client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle()
+    ]);
+    if(ie)throw ie;if(se)throw se;
+    contentEl.replaceChildren(node("div","pc-stat","当前代币："+(stats?.tokens??0)),
+      node("p","pc-muted","选择不需要的卡牌并填写分解数量。分解后卡牌会从收藏中扣除，代币立即到账。"),
+      node("p","pc-muted","三星 10 · 四星 15 · 五星 20 · 异画 30 代币 / 张"));
+    const selected=new Map(),rows=[];
+    (inventory||[]).forEach(item=>{
+      const info=cardsById[item.card_id]||{name:item.card_id,star:3};const alt=/异画/.test(info.name||"");
+      const reward=alt?30:(Number(info.star)===5?20:Number(info.star)===4?15:10);const row=node("div","pc-inventory-card");
+      if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";row.appendChild(img);}
+      const meta=node("div","pc-card-info");meta.append(node("strong","",info.name),
+        node("small","", "库存 "+item.quantity+" 张 · "+(alt?"异画":info.star+"星")+" · 分解返还 "+reward+" 代币/张"));
+      const controls=node("div","pc-quantity-controls"),input=node("input");input.type="number";input.min="0";input.max=String(item.quantity);input.step="1";input.value="0";input.style.width="76px";
+      input.addEventListener("input",()=>{
+        const q=Math.max(0,Math.min(item.quantity,Math.floor(Number(input.value)||0)));
+        if(q)selected.set(item.card_id,q);else selected.delete(item.card_id);input.value=String(q);updateEstimate();
+      });
+      controls.append(input,node("span","pc-muted","分解数量"));meta.appendChild(controls);row.appendChild(meta);contentEl.appendChild(row);
+      rows.push({id:item.card_id,input,quantity:item.quantity,reward});
+    });
+    if(!rows.length){contentEl.appendChild(node("div","pc-empty","当前没有可分解的卡牌。"));return;}
+    const summary=node("div","pc-stat","预计返还：0 代币");contentEl.appendChild(summary);
+    function updateEstimate(){
+      const total=[...selected.entries()].reduce((sum,[id,q])=>sum+q*(rows.find(r=>r.id===id)?.reward||0),0);
+      summary.textContent="已选择 "+[...selected.values()].reduce((a,b)=>a+b,0)+" 张 · 预计返还："+total+" 代币";
     }
+    const button=node("button","primary","确认分解所选卡牌");button.type="button";
+    button.addEventListener("click",async()=>{
+      if(!selected.size){summary.textContent="请先选择要分解的卡牌。";return;}
+      if(!confirm("确定分解所选 "+[...selected.values()].reduce((a,b)=>a+b,0)+" 张卡牌吗？此操作不可撤销。"))return;
+      button.disabled=true;
+      try{
+        const key="acg-pending-dismantle:"+currentUser.id;let requestId;
+        try{requestId=localStorage.getItem(key);}catch(_){}
+        if(!requestId){requestId=crypto.randomUUID();try{localStorage.setItem(key,requestId);}catch(_){}}
+        const items=[...selected.entries()].map(([card_id,quantity])=>({card_id,quantity}));
+        const {data,error}=await client.rpc("dismantle_cards",{p_items:items,p_request_id:requestId});
+        if(error)throw error;const result=Array.isArray(data)?data[0]:data;
+        try{localStorage.removeItem(key);}catch(_){}
+        contentEl.prepend(node("div","pc-stat pc-positive","分解成功！获得 "+result.reward_tokens+" 代币，当前余额 "+result.remaining_tokens+"。"));
+        await loadDismantle();
+      }catch(error){summary.textContent="分解失败："+error.message;}
+      finally{button.disabled=false;}
+    });
+    contentEl.appendChild(button);
   }
   async function loadAchievements() {
     const [{data:all,error:ae},{data:owned,error:oe}]=await Promise.all([
@@ -333,6 +356,7 @@
       else if(page==="tokens")await loadTokens();
       else if(page==="inventory")await loadInventory();
       else if(page==="draw")await loadDraw();
+      else if(page==="dismantle")await loadDismantle();
       else if(page==="achievements")await loadAchievements();
       await loadDisplayChoices();
       setStatus("玩家中心已连接。",false);
