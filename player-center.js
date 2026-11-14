@@ -68,7 +68,7 @@
     result.replaceChildren(node("p","pc-muted","正在查询……"));
     const {data,error} = await client.from("public_profiles")
       .select("username,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate")
-      .eq("username",username.toLowerCase()).maybeSingle();
+      .ilike("username",username).maybeSingle();
     result.replaceChildren();
     if (error) { result.appendChild(node("p","pc-empty","查询失败："+error.message)); return; }
     if (!data) { result.appendChild(node("p","pc-empty","没有找到这个玩家。请确认昵称是否正确。")); return; }
