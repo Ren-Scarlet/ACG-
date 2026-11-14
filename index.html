@@ -439,6 +439,24 @@
     function copyLimitFor(card) {
       return isSpecialAttack(card) ? deckRules.specialAttackDeck.maxCopiesPerName : deckRules.relicDeck.maxCopiesPerName;
     }
+    function getCount(collections, playerId, cardId) {
+      const row = (collections || []).find(item => item.player_id === playerId && item.card_id === cardId);
+      return row ? Math.max(0, Number(row.quantity) || 0) : 0;
+    }
+    function setCount(collections, playerId, cardId, quantity) {
+      const rows = collections || [];
+      const index = rows.findIndex(item => item.player_id === playerId && item.card_id === cardId);
+      const next = Math.max(0, Number(quantity) || 0);
+      if (index >= 0) {
+        if (next === 0) rows.splice(index, 1);
+        else rows[index].quantity = next;
+      } else if (next > 0) {
+        rows.push({ player_id: playerId, card_id: cardId, quantity: next });
+      }
+    }
+    function compareCardsByStar(a, b) {
+      return Number(b.star || 0) - Number(a.star || 0) || a.name.localeCompare(b.name, "zh-CN");
+    }
     function deckCardCount(cardId) { return Number(deckDraft[cardId] || 0); }
     function deckCountForName(name) {
       return allCards.filter(card => card.name === name).reduce((sum, card) => sum + deckCardCount(card.id), 0);
@@ -477,7 +495,7 @@
       const list = document.getElementById("current-deck-list");
       const summary = document.getElementById("deck-list-summary");
       list.replaceChildren();
-      const selected = allCards.filter(card => deckCardCount(card.id) > 0);
+      const selected = allCards.filter(card => deckCardCount(card.id) > 0).sort(compareCardsByStar);
       const counts = deckCounts();
       const total = counts.relic + counts.special + counts.battleItems;
       summary.textContent = "共 " + total + " 张：礼装卡 " + counts.relic + " 张 · 特殊攻击卡 " + counts.special + " 张 · 对战道具 " + counts.battleItems + " 张";
@@ -515,7 +533,7 @@
       const specialList = document.getElementById("special-builder-list");
       const battleItemList = document.getElementById("battle-item-builder-list");
       relicList.replaceChildren(); specialList.replaceChildren(); battleItemList.replaceChildren();
-      const ownedCards = allCards.filter(card => getCount(builderCollections, builderPlayer.id, card.id) > 0)
+      const ownedCards = allCards.filter(card => getCount(builderCollections, builderPlayer.id, card.id) > 0).sort(compareCardsByStar)
         .filter(card => {
           if (!keyword) return true;
           const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "";
