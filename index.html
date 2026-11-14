@@ -326,6 +326,28 @@
             </div>
           </div>
           <div class="panel">
+            <h3>批量导入卡牌资料（JSON）</h3>
+            <p class="hint">把一批卡牌资料粘贴到这里，系统会先统一检查卡牌名称、星级、类型和所属卡包。卡牌 ID 会自动生成。导入后只是暂存，最后仍需点击下方「保存卡牌资料到 GitHub」。</p>
+            <div class="field" style="margin-top:12px">
+              <label for="bulk-card-json">卡牌 JSON 数组</label>
+              <textarea id="bulk-card-json" rows="10" placeholder='[
+  {
+    "name": "卡牌名称",
+    "star": 3,
+    "type": "能力卡",
+    "pack_id": "pack_002",
+    "effect": "卡牌效果",
+    "image": "./images/card_022.jpg",
+    "tags": ["控制", "辅助"]
+  }
+]'></textarea>
+            </div>
+            <div class="save-row">
+              <button id="import-card-json" class="primary" type="button">检查并导入到暂存区</button>
+              <span id="bulk-card-import-status" class="status">支持一次导入多张；不会自动写入 GitHub。</span>
+            </div>
+          </div>
+          <div class="panel">
             <h3 id="card-editor-title">新增卡牌</h3>
             <p class="hint">卡牌 ID 由系统自动生成；编辑已有卡牌时 ID 不可修改。图片填写仓库中的相对路径，例如 ./images/卡牌.jpg。</p>
             <div class="admin-form-grid">
@@ -1245,6 +1267,80 @@
       } finally { button.disabled = false; }
     }
 
+    function importCardsFromJson() {
+      const status = document.getElementById("bulk-card-import-status");
+      if (!authorized || !githubToken) {
+        setStatus(status, "请先完成 GitHub 管理员授权。", "bad");
+        return;
+      }
+      const raw = document.getElementById("bulk-card-json").value.trim();
+      if (!raw) {
+        setStatus(status, "请先粘贴卡牌 JSON 数组。", "bad");
+        return;
+      }
+      let input;
+      try {
+        input = JSON.parse(raw);
+      } catch (error) {
+        setStatus(status, "JSON 格式错误：" + error.message, "bad");
+        return;
+      }
+      if (!Array.isArray(input) || input.length === 0) {
+        setStatus(status, "内容必须是至少包含一张卡牌的 JSON 数组。", "bad");
+        return;
+      }
+      const prepared = [];
+      const errors = [];
+      input.forEach((item, index) => {
+        const row = index + 1;
+        if (!item || typeof item !== "object" || Array.isArray(item)) {
+          errors.push("第 " + row + " 项不是有效的卡牌对象");
+          return;
+        }
+        const name = typeof item.name === "string" ? item.name.trim() : "";
+        const type = typeof item.type === "string" ? item.type.trim() : "";
+        const packId = typeof item.pack_id === "string" ? item.pack_id.trim() : "";
+        const star = item.star === undefined || item.star === null || item.star === "" ? 3 : Number(item.star);
+        if (!name) errors.push("第 " + row + " 项缺少卡牌名称");
+        if (!type) errors.push("第 " + row + " 项缺少卡牌类型");
+        if (!Number.isInteger(star) || star < 1 || star > 12) errors.push("第 " + row + " 项星级必须是 1～12 的整数");
+        if (!allPacks.some(pack => pack.id === packId)) errors.push("第 " + row + " 项所属卡包无效：" + (packId || "未填写"));
+        if (item.effect !== undefined && item.effect !== null && typeof item.effect !== "string") errors.push("第 " + row + " 项效果必须是文字");
+        if (item.image !== undefined && item.image !== null && typeof item.image !== "string") errors.push("第 " + row + " 项图片路径必须是文字");
+        if (item.tags !== undefined && item.tags !== null && !Array.isArray(item.tags) && typeof item.tags !== "string") errors.push("第 " + row + " 项标签必须是数组或逗号分隔文字");
+        if (!name || !type || !Number.isInteger(star) || star < 1 || star > 12 || !allPacks.some(pack => pack.id === packId)) return;
+        const tags = Array.isArray(item.tags)
+          ? item.tags.map(tag => String(tag).trim()).filter(Boolean)
+          : String(item.tags || "").split(/[,，]/).map(tag => tag.trim()).filter(Boolean);
+        prepared.push({
+          id: nextDataId(allCards.concat(prepared), "card"),
+          name,
+          star,
+          type,
+          tags,
+          pack_id: packId,
+          effect: item.effect || "",
+          image: item.image || ""
+        });
+      });
+      if (errors.length) {
+        setStatus(status, "检查未通过，尚未导入。\n" + errors.slice(0, 8).join("；") + (errors.length > 8 ? "；另有 " + (errors.length - 8) + " 项问题" : ""), "bad");
+        return;
+      }
+      if (!prepared.length) {
+        setStatus(status, "没有可导入的卡牌。", "bad");
+        return;
+      }
+      if (!confirm("检查通过，共 " + prepared.length + " 张卡牌。将生成新 ID 并加入暂存区，不会立即写入 GitHub。继续吗？")) return;
+      allCards.push(...prepared);
+      markCardDataDirty();
+      rebuildCatalogFilters();
+      renderCatalogCards();
+      renderCards();
+      document.getElementById("bulk-card-json").value = "";
+      setStatus(status, "已导入 " + prepared.length + " 张卡牌到暂存区。请确认列表无误，再点击「保存卡牌资料到 GitHub」。", "good");
+    }
+
     function submitCardForm() {
       const name = document.getElementById("edit-card-name").value.trim();
       const star = Number(document.getElementById("edit-card-star").value);
@@ -1412,6 +1508,7 @@
     document.getElementById("admin-tab-cards").addEventListener("click", () => switchAdminPanel("cards"));
     document.getElementById("admin-tab-packs").addEventListener("click", () => switchAdminPanel("packs"));
     document.getElementById("upload-card-images").addEventListener("click", uploadCardImages);
+    document.getElementById("import-card-json").addEventListener("click", importCardsFromJson);
     document.getElementById("save-card").addEventListener("click", submitCardForm);
     document.getElementById("cancel-card-edit").addEventListener("click", resetCardForm);
     document.getElementById("save-pack").addEventListener("click", submitPackForm);
