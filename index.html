@@ -112,7 +112,40 @@
       <button id="tab-player" type="button">我的收藏</button>
       <button id="tab-builder" type="button">卡组构筑</button>
       <button id="tab-admin" type="button">管理员收藏管理</button>
+      <button id="tab-account" type="button">玩家账号</button>
     </nav>
+
+    <section id="account-view" class="hidden">
+      <div class="panel">
+        <h3>玩家账号</h3>
+        <p class="hint">使用用户名和密码注册或登录。用户名为 3～20 位英文字母、数字或下划线；密码至少 8 位。请妥善保管密码，目前暂不提供自助找回功能。</p>
+        <p id="account-status" class="status" style="margin-top:12px">正在连接账号服务……</p>
+      </div>
+      <div id="account-forms">
+        <div class="panel">
+          <h3>注册新账号</h3>
+          <form id="account-signup-form" class="admin-form-grid">
+            <div class="field"><label for="signup-username">用户名</label><input id="signup-username" type="text" minlength="3" maxlength="20" autocomplete="username" required></div>
+            <div class="field"><label for="signup-password">密码</label><input id="signup-password" type="password" minlength="8" autocomplete="new-password" required></div>
+            <div class="field"><label for="signup-password-confirm">确认密码</label><input id="signup-password-confirm" type="password" minlength="8" autocomplete="new-password" required></div>
+            <div class="field" style="display:flex;align-items:end"><button class="primary" type="submit">注册账号</button></div>
+          </form>
+        </div>
+        <div class="panel">
+          <h3>已有账号？登录</h3>
+          <form id="account-login-form" class="admin-form-grid">
+            <div class="field"><label for="login-username">用户名</label><input id="login-username" type="text" autocomplete="username" required></div>
+            <div class="field"><label for="login-password">密码</label><input id="login-password" type="password" autocomplete="current-password" required></div>
+            <div class="field"><button class="primary" type="submit">登录</button></div>
+          </form>
+        </div>
+      </div>
+      <div id="account-profile" class="panel hidden">
+        <h3>欢迎回来，<span id="account-username"></span></h3>
+        <p id="account-created" class="hint"></p>
+        <button id="account-logout" type="button">退出登录</button>
+      </div>
+    </section>
 
     <section id="library-view">
       <section class="toolbar" aria-label="卡牌筛选">
@@ -399,6 +432,7 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const OWNER = "ren-scarlet";
     const REPO = "ACG-";
@@ -1478,6 +1512,13 @@
       document.getElementById("tab-builder").classList.remove("active");
       packName.textContent = "管理员收藏管理";
     });
+    document.getElementById("tab-account").addEventListener("click", () => {
+      ["library-view","player-view","builder-view","admin-view","shared-deck-view"].forEach(id => document.getElementById(id).classList.add("hidden"));
+      document.getElementById("account-view").classList.remove("hidden");
+      ["tab-library","tab-player","tab-builder","tab-admin"].forEach(id => document.getElementById(id).classList.remove("active"));
+      document.getElementById("tab-account").classList.add("active");
+      packName.textContent = "玩家账号";
+    });
     // 玩家编号统一自动转为大写，避免输入 p001 时造成识别困扰。
     playerIdInput.addEventListener("input", () => { playerIdInput.value = playerIdInput.value.toUpperCase(); });
     document.getElementById("builder-player-id").addEventListener("input", event => { event.target.value = event.target.value.toUpperCase(); });
@@ -1555,5 +1596,6 @@
     }
     loadData();
   </script>
+  <script src="./auth.js"></script>
 </body>
 </html>
