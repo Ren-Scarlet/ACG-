@@ -81,31 +81,31 @@
     body.acg-home-active>header,body.acg-home-active>main{visibility:hidden}
     #acg-home{position:fixed;inset:0;z-index:10000;overflow:auto;background:#061a45;color:#fff;font-family:Arial,"Microsoft YaHei",sans-serif}
     #acg-home *{box-sizing:border-box}
-    #acg-home .home-stage{position:relative;min-height:min(760px,82vh);height:82vh;max-height:850px;display:grid;grid-template-columns:36% 64%;overflow:hidden;background:linear-gradient(135deg,#16c9e9,#0875df 45%,#071b80)}
-    #acg-home .home-left{position:relative;background:#f7f8fa;color:#080b12;overflow:visible;z-index:2}
-    #acg-home .home-wordmark{position:absolute;left:-18px;top:-4%;height:110%;writing-mode:vertical-rl;transform:rotate(180deg);font-size:clamp(54px,8vw,112px);font-weight:1000;letter-spacing:-.11em;line-height:.8;white-space:nowrap;z-index:1}
-    #acg-home .home-art{position:absolute;z-index:3;left:17%;top:-2%;width:125%;height:104%;pointer-events:none}
+    #acg-home .home-stage{position:relative;min-height:560px;height:min(82vh,820px);max-height:850px;display:grid;grid-template-columns:36% 64%;overflow:hidden;background:linear-gradient(135deg,#16c9e9,#0875df 45%,#071b80)}
+    #acg-home .home-left{position:relative;background:#f7f8fa;color:#080b12;overflow:visible;z-index:4;isolation:isolate}
+    #acg-home .home-wordmark{position:absolute;left:0;top:0;width:12%;height:100%;display:flex;align-items:center;justify-content:center;background:#f7f8fa;writing-mode:vertical-rl;transform:rotate(180deg);font-size:clamp(43px,6.2vw,88px);font-weight:1000;letter-spacing:-.11em;line-height:.8;white-space:nowrap;z-index:4}
+    #acg-home .home-art{position:absolute;z-index:3;left:12%;top:0;width:103%;height:100%;pointer-events:none;overflow:hidden}
     #acg-home .home-art img{width:100%;height:100%;object-fit:cover;object-position:var(--home-x,50%) var(--home-y,50%);transform:scale(var(--home-scale,1.12));transform-origin:var(--home-x,50%) var(--home-y,50%)}
     #acg-home .home-art-placeholder{position:absolute;inset:0;background:linear-gradient(135deg,#fff 0 30%,#c8f9ff 31% 36%,#11bce9 37% 42%,transparent 43%);overflow:hidden}
     #acg-home .home-art-placeholder:before{content:"";position:absolute;left:25%;top:-10%;width:75%;height:120%;background:linear-gradient(135deg,#fff 0 30%,#b7f6ff 31% 40%,#0cb9e8 41% 51%,#1539b8 52% 68%,#fff 69%);clip-path:polygon(48% 0,100% 0,76% 100%,0 80%,35% 38%);transform:rotate(8deg)}
-    #acg-home .home-art-label{position:absolute;z-index:5;left:12px;top:14px;padding:5px 8px;background:#fff;color:#111;font-size:9px;font-weight:900;letter-spacing:.16em}
+    #acg-home .home-art-label{position:absolute;z-index:5;left:calc(12% + 12px);top:14px;padding:5px 8px;background:#fff;color:#111;font-size:9px;font-weight:900;letter-spacing:.16em}
     #acg-home .home-right{position:relative;overflow:hidden;background:linear-gradient(145deg,#1bc9e4 0%,#0789e8 36%,#0752c9 68%,#09186d 100%)}
     #acg-home .home-right:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 54% 8%,#c5ffff55,transparent 36%),repeating-linear-gradient(90deg,transparent 0 95px,#ffffff0b 96px 98px),linear-gradient(0deg,#07145e88,transparent 55%)}
     #acg-home .home-brand{position:absolute;right:22px;top:20px;z-index:4;font-size:clamp(11px,1.5vw,17px);font-weight:1000;font-style:italic;letter-spacing:.15em}
     #acg-home .home-brand b{color:#ffe23e}
-    #acg-home .home-token{position:absolute;top:18px;left:18px;z-index:5;padding:6px 10px;background:#08162cbb;border:1px solid #c8faff88;color:#fff;font-size:11px;display:none}
-    #acg-home .home-token strong{font-family:Georgia,serif;font-size:16px;font-weight:500;margin-right:6px}
+    #acg-home .home-token{position:absolute;top:18px;left:22px;z-index:5;padding:5px 9px;background:#071b45aa;border:1px solid #c8faff55;border-radius:2px;color:#e9fbff;font-size:9px;letter-spacing:.1em;display:none;align-items:center;gap:7px;box-shadow:0 3px 12px #00123b33}
+    #acg-home .home-token strong{font-family:Georgia,serif;font-size:17px;font-weight:600;margin:0;color:#fff}
     #acg-home .home-menu-label{position:relative;z-index:2;margin:76px 0 7px 12%;font-size:9px;letter-spacing:.42em;font-weight:900;color:#e6ffff}
     #acg-home .home-menu{position:relative;z-index:3;width:86%;height:calc(100% - 145px);margin-left:8%;display:block}
     #acg-home .home-menu button{position:absolute;border:0;background:transparent;color:#9bffff;padding:2px 8px;text-align:left;cursor:pointer;font-style:italic;font-weight:1000;text-shadow:2px 4px 0 #0752ad,0 0 16px #08caff66;transition:filter .18s,transform .18s}
     #acg-home .home-menu button .en{display:block;font-size:clamp(23px,3.5vw,43px);line-height:.96;letter-spacing:-.055em;white-space:nowrap}
     #acg-home .home-menu button .cn{display:block;margin:5px 0 0 9px;font-size:10px;font-style:normal;letter-spacing:.12em;color:#efffff;text-shadow:1px 2px 3px #064b9c;white-space:nowrap}
-    #acg-home .home-menu button:nth-child(1){left:5%;top:3%;transform:rotate(-4deg)}
-    #acg-home .home-menu button:nth-child(2){left:19%;top:17%;transform:rotate(-1deg)}
-    #acg-home .home-menu button:nth-child(3){left:34%;top:31%;transform:rotate(-5deg)}
-    #acg-home .home-menu button:nth-child(4){left:25%;top:46%;transform:rotate(1deg)}
-    #acg-home .home-menu button:nth-child(5){left:48%;top:61%;transform:rotate(-3deg)}
-    #acg-home .home-menu button:nth-child(6){left:39%;top:76%;transform:rotate(2deg)}
+    #acg-home .home-menu button:nth-child(1){left:8%;top:3%;transform:rotate(-4deg)}
+    #acg-home .home-menu button:nth-child(2){left:23%;top:17%;transform:rotate(-1deg)}
+    #acg-home .home-menu button:nth-child(3){left:17%;top:31%;transform:rotate(-5deg)}
+    #acg-home .home-menu button:nth-child(4){left:32%;top:46%;transform:rotate(1deg)}
+    #acg-home .home-menu button:nth-child(5){left:43%;top:61%;transform:rotate(-3deg)}
+    #acg-home .home-menu button:nth-child(6){left:30%;top:76%;transform:rotate(2deg)}
     #acg-home .home-menu button.active{color:#fff;filter:drop-shadow(0 0 11px #baffff);transform:scale(1.06) rotate(-1deg);transform-origin:left center}
     #acg-home .home-menu button.active:before{content:"";position:absolute;left:-13px;top:2px;width:7px;height:80%;background:#fff000;transform:skewX(-12deg)}
     #acg-home .home-menu button:hover{color:#fff;filter:drop-shadow(0 0 12px #d8ffff);transform:translateX(8px) rotate(0deg)}
@@ -128,7 +128,7 @@
     #acg-home .home-theme-list button.active{border-color:#16c5e8}
     #acg-home .home-exit{position:fixed;right:14px;bottom:14px;z-index:10001;display:none;padding:9px 13px;background:#0b1b39;border:1px solid #7bc9e8;color:#fff;font-size:11px}
     body:not(.acg-home-active) #acg-home{display:none}
-    @media(max-width:700px){#acg-home .home-stage{height:76vh;min-height:540px;grid-template-columns:32% 68%}#acg-home .home-menu{margin-left:2%;width:97%}#acg-home .home-menu button .en{font-size:clamp(18px,4.6vw,28px)}#acg-home .home-menu button .cn{font-size:8px}#acg-home .home-brand{right:8px;top:10px;font-size:9px}#acg-home .home-token{left:7px;top:9px;padding:4px 6px;font-size:9px}#acg-home .home-token strong{font-size:13px}#acg-home .home-wordmark{font-size:clamp(43px,11vw,70px)}#acg-home .home-menu-label{margin-top:63px;font-size:7px}#acg-home .home-player{left:7px;font-size:6px}#acg-home .home-current{right:7px;font-size:12px}#acg-home .home-menu button:nth-child(1){left:0}#acg-home .home-menu button:nth-child(2){left:7%}#acg-home .home-menu button:nth-child(3){left:13%}#acg-home .home-menu button:nth-child(4){left:8%}#acg-home .home-menu button:nth-child(5){left:18%}#acg-home .home-menu button:nth-child(6){left:12%}}
+    @media(max-width:700px){#acg-home .home-stage{height:76vh;min-height:540px;grid-template-columns:32% 68%}#acg-home .home-menu{margin-left:2%;width:97%}#acg-home .home-menu button .en{font-size:clamp(18px,4.6vw,28px)}#acg-home .home-menu button .cn{font-size:8px}#acg-home .home-brand{right:8px;top:10px;font-size:9px}#acg-home .home-token{left:7px;top:9px;padding:4px 6px;font-size:9px}#acg-home .home-token strong{font-size:13px}#acg-home .home-wordmark{font-size:clamp(36px,9vw,60px);width:14%}#acg-home .home-menu-label{margin-top:63px;font-size:7px}#acg-home .home-player{left:7px;font-size:6px}#acg-home .home-current{right:7px;font-size:12px}#acg-home .home-menu button:nth-child(1){left:8%}#acg-home .home-menu button:nth-child(2){left:7%}#acg-home .home-menu button:nth-child(3){left:13%}#acg-home .home-menu button:nth-child(4){left:8%}#acg-home .home-menu button:nth-child(5){left:18%}#acg-home .home-menu button:nth-child(6){left:12%}}
 
     .status { color:#a6abc0; font-size:13px; }
     .status.good { color:#8bd5a7; } .status.bad { color:#ff9b9b; }
@@ -152,7 +152,7 @@
    <div class="home-art-label">SEASON VISUAL / 主视觉</div>
   </div>
   <div class="home-right">
-   <div class="home-token" id="acg-home-token"><strong>✦ --</strong>PLAYER TOKENS</div>
+   <div class="home-token" id="acg-home-token"><strong>¥ --</strong><span>PLAYER TOKENS / 代币余额</span></div>
    <div class="home-brand">ACG CARD HUB <b>✦</b></div>
    <div class="home-menu-label">MAIN MENU / 主菜单</div>
    <div class="home-menu" id="acg-home-menu">
@@ -164,10 +164,10 @@
     <button data-target="system" data-en="SYSTEM" data-title="SYSTEM / 系统管理" data-desc="进入账号与系统管理功能。"><span class="en">SYSTEM</span><span class="cn">系统管理 / 账号与管理</span></button>
    </div>
    <div class="home-player">PLAYER ONLINE / ACG CARD HUB</div>
-   <div class="home-current" id="acg-home-current">CARD INDEX<small>↑↓ 选择菜单<br>ENTER 前往选项</small></div>
+   <div class="home-current" id="acg-home-current">HOME<small>↑↓ 选择菜单<br>ENTER 前往选项</small></div>
   </div>
  </div>
- <div class="home-intro"><h2 id="acg-home-intro-title">CARD INDEX / 卡牌图鉴</h2><p id="acg-home-intro-desc">浏览卡牌资料，查看星级、编号与个人收藏。</p></div>
+ <div class="home-intro"><h2 id="acg-home-intro-title">HOME / 首页</h2><p id="acg-home-intro-desc">欢迎回来。选择一个目的地，开始你的 ACG 卡牌之旅。</p></div>
  <div class="home-footer"><span>ACG CARD HUB / MAIN TERMINAL</span><span>PERSONA 3 RELOAD INSPIRED UI</span></div>
  <section class="home-admin">
   <button class="home-admin-toggle" id="acg-home-admin-toggle">管理员主视觉管理　⌄</button>
@@ -1488,6 +1488,18 @@
     let acgHomePreviewUrl = null;
     let acgHomeThemeSha = null;
     const acgHomeManifestPath = "data/home-theme.json";
+    window.acgHomeUpdatePlayerHUD = async function(userId) {
+      const el=document.getElementById("acg-home-token");
+      if(!userId){el.style.display="none";return;}
+      const client=window.acgSupabaseClient;
+      if(!client){el.style.display="none";return;}
+      try{
+        const {data,error}=await client.from("player_stats").select("tokens").eq("user_id",userId).maybeSingle();
+        if(error)throw error;
+        el.querySelector("strong").textContent="¥ "+Number(data?.tokens??0).toLocaleString("zh-CN");
+        el.style.display="inline-flex";
+      }catch(error){console.warn("读取首页代币余额失败：",error);el.style.display="none";}
+    };
     function acgHomeSetVisible(show) {
       document.body.classList.toggle("acg-home-active", show);
       document.getElementById("acg-home-exit").style.display = show ? "none" : "block";
