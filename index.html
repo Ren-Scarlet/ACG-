@@ -287,6 +287,28 @@
       #acg-home .home-menu button .cn{font-size:6px!important}
       #acg-home .home-menu button{min-height:54px!important}
     }
+
+/* P3R-inspired unified subpage system */
+:root{--acg-ice:#d9f3fa;--acg-ice2:#eefaff;--acg-navy:#09213d;--acg-blue:#12628d;--acg-red:#e83c63;--acg-line:#7cb8cc}
+body:not(.acg-home-active){background:linear-gradient(135deg,#071a31 0%,#0b3150 48%,#061326 100%)!important;color:#09243d!important}
+body:not(.acg-home-active) main{max-width:1500px!important;width:calc(100% - 34px)!important;margin:20px auto 50px!important;padding:0!important;display:grid!important;grid-template-columns:230px minmax(0,1fr)!important;gap:0 18px!important;align-items:start!important}
+body:not(.acg-home-active) main>nav.tabs{grid-column:1!important;grid-row:1 / span 12!important;position:sticky!important;top:18px!important;display:flex!important;flex-direction:column!important;gap:8px!important;padding:18px 12px!important;background:linear-gradient(160deg,#030b17,#092442 72%,#061326)!important;border:1px solid #2c6b89!important;border-left:5px solid #e83c63!important;box-shadow:8px 8px 0 #020914!important}
+body:not(.acg-home-active) main>nav.tabs:before{content:"ACG / MAIN SYSTEM";display:block;padding:0 8px 14px;margin-bottom:8px;border-bottom:1px solid #2e607c;color:#a9e8f6;font-size:11px;font-weight:900;letter-spacing:.18em}
+body:not(.acg-home-active) main>nav.tabs button{width:100%!important;min-height:48px!important;text-align:left!important;padding:11px 12px!important;border:0!important;border-left:5px solid #21c6e2!important;border-bottom:1px solid #244c68!important;border-radius:0!important;background:linear-gradient(100deg,#07182d,#0b2d4b)!important;color:#eafaff!important;font-weight:900!important;clip-path:polygon(0 0,100% 0,94% 100%,0 100%)!important}
+body:not(.acg-home-active) main>nav.tabs button:nth-child(2){border-left-color:#e83c63!important}
+body:not(.acg-home-active) main>nav.tabs button:nth-child(3){border-left-color:#e6c84b!important}
+body:not(.acg-home-active) main>nav.tabs button:nth-child(4){border-left-color:#9e83ee!important}
+body:not(.acg-home-active) main>nav.tabs button.active{background:linear-gradient(100deg,#f0fcff,#bcebf5)!important;color:#082c4a!important;box-shadow:4px 4px 0 #e83c63!important}
+body:not(.acg-home-active) main>section{grid-column:2!important;min-width:0!important;padding:clamp(16px,2.5vw,30px)!important;background:linear-gradient(145deg,#eafaff 0%,#d4edf5 58%,#c5e5f0 100%)!important;color:#09243d!important;border:1px solid #8bc5d8!important;border-top:5px solid #e83c63!important;box-shadow:9px 9px 0 #020914!important;min-height:65vh}
+body:not(.acg-home-active) main>section:before{content:"ACG / "+attr(id);display:block;margin:0 0 18px;padding:0 0 12px;border-bottom:1px solid #78afc3;color:#176185;font-size:10px;font-weight:900;letter-spacing:.22em}
+body:not(.acg-home-active) main .panel{background:linear-gradient(145deg,#f8fdff,#d9f1f8)!important;color:#0a2945!important;border:1px solid #9ac8d8!important;border-radius:0!important;box-shadow:3px 4px 0 #a9d4e1!important}
+body:not(.acg-home-active) main h1,body:not(.acg-home-active) main h2,body:not(.acg-home-active) main h3,body:not(.acg-home-active) main h4{color:#092f50!important;font-weight:950!important;letter-spacing:.025em}
+body:not(.acg-home-active) main p,body:not(.acg-home-active) main label,body:not(.acg-home-active) main .hint,body:not(.acg-home-active) main .summary{color:#315d76!important}
+body:not(.acg-home-active) main input,body:not(.acg-home-active) main select,body:not(.acg-home-active) main textarea{background:#f7fdff!important;color:#09243d!important;border:1px solid #83b7ca!important;border-radius:0!important}
+body:not(.acg-home-active) main button:not(.tabs button){border-radius:0!important;border:1px solid #24769b!important;background:linear-gradient(110deg,#0b4269,#147ba0)!important;color:#f4fdff!important;font-weight:800!important;clip-path:polygon(0 0,100% 0,96% 100%,0 100%)}
+body:not(.acg-home-active) main .grid{gap:14px!important}
+body:not(.acg-home-active) main .card,body:not(.acg-home-active) main .builder-stat{border-radius:0!important;border:1px solid #8ebfd0!important;box-shadow:3px 4px 0 #b5dce7!important}
+@media(max-width:820px){body:not(.acg-home-active) main{grid-template-columns:1fr!important;width:calc(100% - 18px)!important;gap:12px!important}body:not(.acg-home-active) main>nav.tabs{position:relative!important;grid-column:1!important;grid-row:auto!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}body:not(.acg-home-active) main>section{grid-column:1!important;min-height:50vh}}
 </style>
 </head>
 <body>
