@@ -7,7 +7,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "若你没有打出攻击卡，此卡可以从手牌发动。选择与你交战的一名敌方目标的一张攻击卡才能发动：那张卡失去文字效果。暗置的这张卡发动效果时，那名目标本回合与此卡放置同一位置的非攻击礼装效果无效。",
-    "image": "./images/5星无限泡影 拷贝.jpg"
+    "image": "./images/card_001.jpg"
   },
   {
     "id": "card_002",
@@ -17,7 +17,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "宣言一张卡的名字，若与你交战的目标牌库有那张卡，目标将那张卡加入手牌。",
-    "image": "./images/3暗之指名者.jpg"
+    "image": "./images/card_002.jpg"
   },
   {
     "id": "card_003",
@@ -27,7 +27,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "永续：自己投掷硬币时，可以重新投掷一次，每回合限制一次。",
-    "image": "./images/3第二次机会.jpg"
+    "image": "./images/card_003.jpg"
   },
   {
     "id": "card_004",
@@ -37,7 +37,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "使你受到的非攻击伤害变为0。",
-    "image": "./images/3防御轮.jpg"
+    "image": "./images/card_004.jpg"
   },
   {
     "id": "card_005",
@@ -47,7 +47,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "与你交战的一名敌方目标将牌库顶三张卡展示。你选择一张回到目标卡组最下面。剩下的卡用任意顺序放回牌库上方。",
-    "image": "./images/3哥布林偷窥者 拷贝.jpg"
+    "image": "./images/card_005.jpg"
   },
   {
     "id": "card_006",
@@ -57,7 +57,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "此卡持续一回合。只要此卡在场，自己或敌方目标掷骰子的场合：1、3、5的场合当做6使用；2、4、6的场合当做1使用。",
-    "image": "./images/3胡出乱目 拷贝.jpg"
+    "image": "./images/card_006.jpg"
   },
   {
     "id": "card_007",
@@ -67,7 +67,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择场上一张攻击卡才能发动，那张卡基础伤害+1，失去效果。",
-    "image": "./images/3禁忌的圣杯 拷贝.jpg"
+    "image": "./images/card_007.jpg"
   },
   {
     "id": "card_008",
@@ -77,7 +77,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择手牌中一张攻击卡展示才能发动。那张卡本回合基础伤害-1，不会受到妨害效果影响，在手牌时不会被其他效果弃除。",
-    "image": "./images/3禁忌的圣衣 拷贝.jpg"
+    "image": "./images/card_008.jpg"
   },
   {
     "id": "card_009",
@@ -87,7 +87,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择一名生命值比你低的敌方目标，你与该目标交换位置。",
-    "image": "./images/3身份转换.jpg"
+    "image": "./images/card_009.jpg"
   },
   {
     "id": "card_010",
@@ -97,7 +97,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择你打出的5张专属攻击卡才能发动。那5张卡洗回牌库，你抽2张牌。",
-    "image": "./images/3贪欲之壶.jpg"
+    "image": "./images/card_010.jpg"
   },
   {
     "id": "card_011",
@@ -107,7 +107,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择任意数量的手牌洗回牌库，之后抽取等量的卡牌。",
-    "image": "./images/3万宝槌.jpg"
+    "image": "./images/card_011.jpg"
   },
   {
     "id": "card_012",
@@ -117,7 +117,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "投掷一个硬币。正面：抽2张牌。反面：一名敌方目标抽2张牌。",
-    "image": "./images/3星圣杯.jpg"
+    "image": "./images/card_012.jpg"
   },
   {
     "id": "card_013",
@@ -127,7 +127,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "抽一张牌，恢复2点能量。结算后，选择一名敌方目标恢复2点生命值。",
-    "image": "./images/4成金哥布林 拷贝.jpg"
+    "image": "./images/card_013.jpg"
   },
   {
     "id": "card_014",
@@ -137,7 +137,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "当一名敌方目标对你打出攻击卡时才能发动：你后退1-3格，目标那张卡回到手牌，不返还能量消耗。",
-    "image": "./images/4强制脱出装置 拷贝.jpg"
+    "image": "./images/card_014.jpg"
   },
   {
     "id": "card_015",
@@ -147,7 +147,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择你牌库中一张伤害不高于3的近战物理攻击卡发动，将那张卡加入手牌。",
-    "image": "./images/4增援 拷贝.jpg"
+    "image": "./images/card_015.jpg"
   },
   {
     "id": "card_016",
@@ -157,7 +157,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "这张卡回到礼装牌库时，混洗礼装牌库。这张卡因敌方目标送去弃牌堆时，将这张卡移除游戏。通过该效果移除自己的「头奖壶7」三张时，获得游戏胜利。",
-    "image": "./images/4头奖壶7 拷贝.jpg"
+    "image": "./images/card_016.jpg"
   },
   {
     "id": "card_017",
@@ -167,7 +167,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择目标场上一张暗置的礼装卡弃除。",
-    "image": "./images/4旋风 拷贝.jpg"
+    "image": "./images/card_017.jpg"
   },
   {
     "id": "card_018",
@@ -177,7 +177,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "当你的一张攻击卡或防御卡在伤害结算时发动，这张卡的伤害或抵挡值变为目标那张卡的伤害值+1。与究极技结算期间无法发动此卡。",
-    "image": "./images/4月镜盾 拷贝.jpg"
+    "image": "./images/card_018.jpg"
   },
   {
     "id": "card_019",
@@ -187,7 +187,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "选择弃牌堆、额外弃牌堆一张攻击卡特殊打出。当友方目标被击败时，此卡可以发动：取消这次击败，那名目标恢复3点生命值。该效果每局游戏限制一次。",
-    "image": "./images/5星死者苏生 拷贝.jpg"
+    "image": "./images/card_019.jpg"
   },
   {
     "id": "card_020",
@@ -197,7 +197,7 @@
     "tags": [],
     "pack_id": "pack_001",
     "effect": "此卡每回合限制一次。当一名敌方目标的手牌比你多至少3张时，将这张卡弃除发动：本回合当该目标主动对你打出攻击卡时，你抽一张牌。最多抽取3张。",
-    "image": "./images/5欢聚友伴·茸茸长尾山雀.jpg"
+    "image": "./images/card_020.jpg"
   },
   {
     "id": "card_021",
