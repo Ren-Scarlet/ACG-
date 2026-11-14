@@ -247,6 +247,9 @@
       const {data,error}=await client.rpc("draw_one_card",{p_pack_id:pool.pack_id,p_request_id:requestId});
       if(error)throw error;
       const result=Array.isArray(data)?data[0]:data;
+      if(!result?.card_id)throw new Error("服务器没有返回有效的抽卡结果，请重试；系统会使用同一请求编号避免重复扣费。");
+      // The server has confirmed this draw. A future deliberate draw must use a fresh request ID.
+      pendingDrawRequests.delete(pool.pack_id);
       const info=cardsById[result.card_id]||{name:result.card_id};
       loading.remove();
       const box=node("div","pc-stat");
