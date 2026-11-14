@@ -21,6 +21,7 @@
   const client = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
+  window.acgSupabaseClient = client;
 
   function showStatus(message, kind) {
     statusEl.textContent = message;
@@ -151,4 +152,9 @@
     if (error) showStatus("读取登录状态失败：" + error.message, "bad");
     renderSession(data?.session || null);
   });
+
+  const playerCenterScript = document.createElement("script");
+  playerCenterScript.src = "./player-center.js?v=1";
+  playerCenterScript.defer = true;
+  document.body.appendChild(playerCenterScript);
 })();
