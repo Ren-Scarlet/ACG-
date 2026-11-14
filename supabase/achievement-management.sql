@@ -170,8 +170,9 @@ begin
     raise exception '不支持的成就条件类型';
   end if;
   if p_threshold is null or p_threshold <= 0 or
-     (p_condition_type='win_rate' and p_threshold > 100) then
-    raise exception '目标值必须大于 0；胜率目标不能超过 100';
+     (p_condition_type='win_rate' and p_threshold > 100) or
+     (p_condition_type <> 'win_rate' and p_threshold <> trunc(p_threshold)) then
+    raise exception '目标值必须大于 0；非胜率目标必须为整数，胜率目标不能超过 100';
   end if;
   if p_min_games is null or p_min_games < 0 or
      (p_condition_type='win_rate' and p_min_games < 1) then
