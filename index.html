@@ -216,33 +216,105 @@
     #acg-home .home-menu button .cn{font-size:9px!important}
     @media(max-width:700px){body:not(.acg-home-active)>main{padding:14px 10px 35px}#acg-home .home-menu{width:92%!important;margin-left:5%!important}#acg-home .home-wordmark{font-size:clamp(36px,11vw,64px)!important;left:5%!important}}
 
-  </style>
+   
+    /* Main terminal redesign: black diagonal menu on the left, replaceable full-bleed season art on the right */
+    #acg-home .home-stage{grid-template-columns:minmax(300px,34%) minmax(0,66%)!important;min-height:min(650px,calc(100dvh - 150px))!important;height:calc(100dvh - 150px)!important;max-height:850px!important;flex:0 0 auto!important;background:#050b18!important}
+    #acg-home .home-left{position:relative!important;z-index:5!important;overflow:hidden!important;isolation:isolate;background:linear-gradient(155deg,#050912 0%,#07152c 60%,#02060d 100%)!important;color:#f4fbff!important;padding:26px clamp(14px,2vw,30px) 58px!important;border-right:3px solid #13d6ee}
+    #acg-home .home-left:before{content:"";position:absolute;z-index:-1;left:-25%;bottom:-25%;width:115%;height:48%;background:linear-gradient(145deg,#061b43,#0a3675 48%,#031020);clip-path:polygon(0 0,100% 40%,82% 100%,0 100%);opacity:.8}
+    #acg-home .home-left:after{content:"";position:absolute;z-index:-1;right:-20%;top:17%;width:55%;height:36%;background:linear-gradient(145deg,#0b315d,#071020);clip-path:polygon(28% 0,100% 0,72% 100%,0 75%);opacity:.55}
+    #acg-home .home-nav-head{display:flex;align-items:center;gap:12px;padding:0 4px 19px;border-bottom:1px solid #31516d}
+    #acg-home .home-mark{font-size:clamp(34px,4vw,54px);line-height:.8;font-weight:1000;font-style:italic;letter-spacing:-.11em;color:#fff;text-shadow:3px 3px #087bb8,6px 6px #020711}
+    #acg-home .home-nav-caption{font-size:9px;line-height:1.6;letter-spacing:.2em;color:#8edff2;font-weight:900}
+    #acg-home .home-menu-label{margin:19px 0 12px 4px!important;font-size:9px!important;letter-spacing:.2em!important;color:#91d9eb!important}
+    #acg-home .home-menu{position:relative!important;width:100%!important;height:auto!important;margin:0!important;display:flex!important;flex-direction:column!important;gap:9px!important;z-index:4}
+    #acg-home .home-menu button{position:relative!important;inset:auto!important;display:flex!important;align-items:stretch!important;gap:0!important;width:100%!important;min-height:62px!important;padding:0!important;overflow:hidden!important;text-align:left!important;border:0!important;border-bottom:1px solid #23405c!important;background:linear-gradient(100deg,#020711 0%,#071b34 76%,#0a2844 100%)!important;color:#effaff!important;clip-path:polygon(0 0,100% 0,95% 100%,0 100%)!important;transform:none!important;box-shadow:3px 4px 0 #020711!important;text-shadow:none!important}
+    #acg-home .home-menu button:nth-child(2n){margin-left:10px!important;width:calc(100% - 10px)!important}
+    #acg-home .home-menu button:nth-child(3n){margin-left:3px!important;width:calc(100% - 3px)!important}
+    #acg-home .home-menu button .menu-marker{display:block!important;position:relative!important;flex:0 0 13px!important;align-self:stretch!important;background:#12d9ef!important;clip-path:polygon(0 0,100% 0,60% 100%,0 100%)!important}
+    #acg-home .home-menu button:nth-child(2) .menu-marker{background:#f12d70!important}
+    #acg-home .home-menu button:nth-child(3) .menu-marker{background:#287df5!important}
+    #acg-home .home-menu button:nth-child(4) .menu-marker{background:#f4d331!important}
+    #acg-home .home-menu button:nth-child(5) .menu-marker{background:#b77bff!important}
+    #acg-home .home-menu button:nth-child(6) .menu-marker{background:#55db91!important}
+    #acg-home .home-menu button .menu-copy{display:flex!important;flex-direction:column!important;justify-content:center!important;padding:8px 12px 8px 10px!important;min-width:0!important}
+    #acg-home .home-menu button .en{font-size:clamp(19px,2.1vw,27px)!important;line-height:1!important;letter-spacing:-.045em!important;color:#f2fbff!important;text-shadow:2px 2px 0 #063b76!important}
+    #acg-home .home-menu button .cn{font-size:9px!important;margin:5px 0 0 2px!important;letter-spacing:.08em!important;color:#9ec9df!important;text-shadow:none!important}
+    #acg-home .home-menu button.active{background:linear-gradient(100deg,#f2fcff 0%,#b8f5ff 78%,#81dced 100%)!important;box-shadow:4px 4px 0 #f12d70!important;filter:none!important}
+    #acg-home .home-menu button.active .menu-marker{width:16px!important;flex-basis:16px!important;filter:brightness(1.1)}
+    #acg-home .home-menu button.active .en{color:#062d59!important;text-shadow:none!important}
+    #acg-home .home-menu button.active .cn{color:#245a7c!important}
+    #acg-home .home-menu button:hover{transform:translateX(5px)!important;filter:brightness(1.12)!important}
+    #acg-home .home-menu button.active:before{display:none!important}
+    #acg-home .home-player{left:20px!important;bottom:15px!important;font-size:8px!important;line-height:1.6!important;color:#76c9e4!important}
+    #acg-home .home-current{right:17px!important;bottom:16px!important;font-size:15px!important;color:#dffaff!important}
+    #acg-home .home-right{position:relative!important;isolation:isolate!important;overflow:hidden!important;background:linear-gradient(145deg,#05c9e9 0%,#0878d8 48%,#08266e 100%)!important}
+    #acg-home .home-right:before{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,#02142b22,transparent 35%),radial-gradient(ellipse at 65% 22%,#b5fbff33,transparent 42%),linear-gradient(0deg,#06123b88,transparent 55%),repeating-linear-gradient(90deg,transparent 0 95px,#ffffff0b 96px 98px);pointer-events:none}
+    #acg-home .home-right .home-art{position:absolute!important;z-index:0!important;left:0!important;top:0!important;width:100%!important;height:100%!important;overflow:hidden!important;pointer-events:none!important}
+    #acg-home .home-right .home-art img{width:100%!important;height:100%!important;object-fit:cover!important;object-position:var(--home-x,50%) var(--home-y,50%)!important;transform:scale(var(--home-scale,1.12))!important;transform-origin:var(--home-x,50%) var(--home-y,50%)!important}
+    #acg-home .home-right .home-art-placeholder{position:absolute!important;z-index:0!important;inset:0!important;background:linear-gradient(140deg,#10d7ed 0%,#08a5e4 43%,#0755c5 100%)!important}
+    #acg-home .home-right .home-art-placeholder:before{content:"";position:absolute;right:-8%;bottom:-20%;width:76%;height:75%;background:linear-gradient(135deg,#06112b 0 23%,#082b87 24% 38%,#08c6eb 39% 50%,#efffff 51% 55%,#173fba 56% 78%,#07143f 79%);clip-path:polygon(100% 0,100% 100%,0 100%,22% 45%);transform:rotate(-7deg)}
+    #acg-home .home-right .home-art-label{left:22px!important;top:18px!important;background:#030b19!important;color:#bafaff!important;border-left:4px solid #f12d70!important;z-index:4!important}
+    #acg-home .home-visual-title{position:absolute;z-index:2;left:7%;bottom:9%;font-size:clamp(70px,13vw,180px);line-height:.78;font-weight:1000;font-style:italic;letter-spacing:-.12em;color:#f5fdff;text-shadow:6px 7px 0 #0755b5,12px 13px 0 #03132f;pointer-events:none;mix-blend-mode:screen}
+    #acg-home .home-visual-title span{display:block;margin:17px 0 0 10px;font-size:10px;letter-spacing:.28em;line-height:1.3;color:#e8ffff;text-shadow:1px 2px 4px #063e82}
+    #acg-home .home-token{left:auto!important;right:18px!important;top:16px!important;z-index:5!important;background:#031329b8!important}
+    #acg-home .home-player-visual{position:absolute;z-index:3;right:20px;bottom:18px;font-size:9px;letter-spacing:.2em;font-weight:900;color:#e5fbff;text-shadow:1px 2px 5px #031b52}
+    #acg-home .home-intro{background:#080d18!important}
+    @media(max-width:760px){
+      #acg-home .home-stage{grid-template-columns:minmax(205px,39%) minmax(0,61%)!important;min-height:610px!important;height:calc(100dvh - 150px)!important}
+      #acg-home .home-left{padding:18px 10px 54px!important}
+      #acg-home .home-nav-head{gap:7px;padding-bottom:14px}
+      #acg-home .home-mark{font-size:36px}
+      #acg-home .home-nav-caption{font-size:7px}
+      #acg-home .home-menu-label{font-size:7px!important;letter-spacing:.08em!important}
+      #acg-home .home-menu{gap:7px!important}
+      #acg-home .home-menu button{min-height:57px!important}
+      #acg-home .home-menu button:nth-child(n){margin-left:0!important;width:100%!important}
+      #acg-home .home-menu button .en{font-size:clamp(15px,3.4vw,21px)!important}
+      #acg-home .home-menu button .cn{font-size:7px!important;white-space:normal!important}
+      #acg-home .home-menu button .menu-marker{flex-basis:9px!important}
+      #acg-home .home-current{font-size:12px!important;right:8px!important}
+      #acg-home .home-player{left:10px!important;font-size:6px!important}
+      #acg-home .home-visual-title{font-size:clamp(48px,12vw,90px)!important;left:5%!important}
+      #acg-home .home-visual-title span{font-size:7px!important;letter-spacing:.12em!important}
+      #acg-home .home-right .home-art-label{left:8px!important;top:8px!important;font-size:7px!important}
+      #acg-home .home-player-visual{right:8px!important;bottom:8px!important;font-size:6px!important}
+      #acg-home .home-token{right:7px!important;top:7px!important;padding:4px 6px!important}
+    }
+    @media(max-width:430px){
+      #acg-home .home-stage{grid-template-columns:minmax(180px,44%) minmax(0,56%)!important}
+      #acg-home .home-left{padding-left:8px!important;padding-right:7px!important}
+      #acg-home .home-menu button .en{font-size:15px!important}
+      #acg-home .home-menu button .cn{font-size:6px!important}
+      #acg-home .home-menu button{min-height:54px!important}
+    }
+</style>
 </head>
 <body>
 
 <div id="acg-home" aria-label="ACG CARD HUB 主界面">
  <div class="home-stage">
-  <div class="home-left" id="acg-home-left">
-   <div class="home-wordmark">ACG CARD HUB</div>
+  <aside class="home-left" id="acg-home-left">
+   <div class="home-nav-head"><span class="home-mark">ACG</span><span class="home-nav-caption">CARD HUB<br>MAIN MENU</span></div>
+   <div class="home-menu-label">SELECT DESTINATION / 选择功能</div>
+   <nav class="home-menu" id="acg-home-menu">
+    <button class="active" data-target="home" data-en="HOME" data-title="HOME / 首页" data-desc="欢迎回来。选择一个目的地，开始你的 ACG 卡牌之旅。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">HOME</span><span class="cn">首页 / 返回主界面</span></span></button>
+    <button data-target="library" data-en="CARD INDEX" data-title="CARD INDEX / 卡牌图鉴" data-desc="浏览卡牌资料，查看星级、编号与个人收藏。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">CARD INDEX</span><span class="cn">卡牌图鉴 / 浏览与收藏</span></span></button>
+    <button data-target="builder" data-en="DECK EDIT" data-title="DECK EDIT / 卡组构筑" data-desc="编辑卡组，整理你的专属对战配置。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">DECK EDIT</span><span class="cn">卡组构筑 / 编辑专属卡组</span></span></button>
+    <button data-target="draw" data-en="PACK GACHA" data-title="PACK GACHA / 卡包抽卡" data-desc="进入卡包抽卡大厅，收集全新卡牌。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">PACK GACHA</span><span class="cn">卡包抽卡 / 收集全新卡牌</span></span></button>
+    <button data-target="room" data-en="MY ROOM" data-title="MY ROOM / 玩家中心" data-desc="查看玩家资料、收藏、代币、抽卡与成就。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">MY ROOM</span><span class="cn">玩家中心 / 个人资料与收藏</span></span></button>
+    <button data-target="system" data-en="SYSTEM" data-title="SYSTEM / 系统管理" data-desc="进入账号与系统管理功能。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">SYSTEM</span><span class="cn">系统管理 / 账号与管理</span></span></button>
+   </nav>
+   <div class="home-player">PLAYER ONLINE<br>ACG CARD HUB</div>
+   <div class="home-current" id="acg-home-current">HOME<small>↑↓ 选择菜单<br>ENTER 前往选项</small></div>
+  </aside>
+  <section class="home-right" id="acg-home-right">
    <div class="home-art-placeholder" id="acg-home-placeholder"></div>
    <div class="home-art"><img id="acg-home-image" alt="本期首页主视觉" style="display:none"></div>
    <div class="home-art-label">SEASON VISUAL / 主视觉</div>
-  </div>
-  <div class="home-right">
+   <div class="home-visual-title">ACG<span>PLAY • COLLECT • ENJOY</span></div>
    <div class="home-token" id="acg-home-token"><strong>¥ --</strong><span>PLAYER TOKENS / 代币余额</span></div>
-   <div class="home-brand">ACG CARD HUB <b>✦</b></div>
-   <div class="home-menu-label">MAIN MENU / 主菜单</div>
-   <div class="home-menu" id="acg-home-menu">
-    <button class="active" data-target="home" data-en="HOME" data-title="HOME / 首页" data-desc="欢迎回来。选择一个目的地，开始你的 ACG 卡牌之旅。"><span class="en">HOME</span><span class="cn">首页 / 返回主界面</span></button>
-    <button data-target="library" data-en="CARD INDEX" data-title="CARD INDEX / 卡牌图鉴" data-desc="浏览卡牌资料，查看星级、编号与个人收藏。"><span class="en">CARD INDEX</span><span class="cn">卡牌图鉴 / 浏览与收藏</span></button>
-    <button data-target="builder" data-en="DECK EDIT" data-title="DECK EDIT / 卡组构筑" data-desc="编辑卡组，整理你的专属对战配置。"><span class="en">DECK EDIT</span><span class="cn">卡组构筑 / 编辑专属卡组</span></button>
-    <button data-target="draw" data-en="PACK GACHA" data-title="PACK GACHA / 卡包抽卡" data-desc="进入卡包抽卡大厅，收集全新卡牌。"><span class="en">PACK GACHA</span><span class="cn">卡包抽卡 / 收集全新卡牌</span></button>
-    <button data-target="room" data-en="MY ROOM" data-title="MY ROOM / 玩家中心" data-desc="查看玩家资料、收藏、代币、抽卡与成就。"><span class="en">MY ROOM</span><span class="cn">玩家中心 / 个人资料与收藏</span></button>
-    <button data-target="system" data-en="SYSTEM" data-title="SYSTEM / 系统管理" data-desc="进入账号与系统管理功能。"><span class="en">SYSTEM</span><span class="cn">系统管理 / 账号与管理</span></button>
-   </div>
-   <div class="home-player">PLAYER ONLINE / ACG CARD HUB</div>
-   <div class="home-current" id="acg-home-current">HOME<small>↑↓ 选择菜单<br>ENTER 前往选项</small></div>
-  </div>
+   <div class="home-player-visual">ACG CARD HUB / SEASON VISUAL</div>
+  </section>
  </div>
  <div class="home-intro"><h2 id="acg-home-intro-title">HOME / 首页</h2><p id="acg-home-intro-desc">欢迎回来。选择一个目的地，开始你的 ACG 卡牌之旅。</p></div>
  <div class="home-footer"><span>ACG CARD HUB / MAIN TERMINAL</span><span>PERSONA 3 RELOAD INSPIRED UI</span></div>
@@ -1596,9 +1668,9 @@
       const img=document.getElementById("acg-home-image"), placeholder=document.getElementById("acg-home-placeholder");
       if(theme && theme.image){img.src=theme.image;img.style.display="block";placeholder.style.display="none";}
       else{img.removeAttribute("src");img.style.display="none";placeholder.style.display="block";}
-      document.getElementById("acg-home-left").style.setProperty("--home-x",(theme?.x ?? 50)+"%");
-      document.getElementById("acg-home-left").style.setProperty("--home-y",(theme?.y ?? 50)+"%");
-      document.getElementById("acg-home-left").style.setProperty("--home-scale",((theme?.scale ?? 112)/100));
+      document.getElementById("acg-home-right").style.setProperty("--home-x",(theme?.x ?? 50)+"%");
+      document.getElementById("acg-home-right").style.setProperty("--home-y",(theme?.y ?? 50)+"%");
+      document.getElementById("acg-home-right").style.setProperty("--home-scale",((theme?.scale ?? 112)/100));
       document.getElementById("acg-home-name").value=theme?.name || "本期主视觉";
       document.getElementById("acg-home-x").value=theme?.x ?? 50;
       document.getElementById("acg-home-y").value=theme?.y ?? 50;
@@ -1607,7 +1679,7 @@
     }
     function acgHomeUpdateCropLabels(){
       ["x","y","scale"].forEach(k=>document.getElementById("acg-home-"+k+"-label").textContent=document.getElementById("acg-home-"+k).value+(k==="scale"?"%":"%"));
-      const left=document.getElementById("acg-home-left");
+      const left=document.getElementById("acg-home-right");
       left.style.setProperty("--home-x",document.getElementById("acg-home-x").value+"%");
       left.style.setProperty("--home-y",document.getElementById("acg-home-y").value+"%");
       left.style.setProperty("--home-scale",document.getElementById("acg-home-scale").value/100);
