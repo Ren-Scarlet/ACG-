@@ -470,14 +470,16 @@
       const normalized = String(id || "").trim().toUpperCase();
       if (!/^P\d{3}$/.test(normalized)) return;
       try { localStorage.setItem(LAST_PLAYER_STORAGE_KEY, normalized); } catch (error) {}
-      document.getElementById("builder-player-id").value = normalized;
+      const builderId = document.getElementById("builder-player-id");
+      if (builderId) builderId.value = normalized;
       playerIdInput.value = normalized;
     }
     function restoreLastPlayerId() {
       try {
         const remembered = localStorage.getItem(LAST_PLAYER_STORAGE_KEY);
         if (/^P\d{3}$/.test(remembered || "") && allPlayers.some(player => player.id === remembered)) {
-          document.getElementById("builder-player-id").value = remembered;
+          const builderId = document.getElementById("builder-player-id");
+          if (builderId) builderId.value = remembered;
           playerIdInput.value = remembered;
         }
       } catch (error) {}
