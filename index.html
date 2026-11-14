@@ -407,7 +407,7 @@
           .some(value => String(value).toLowerCase().includes(keyword));
         return matchesKeyword && (!pack || card.pack_id === pack) &&
           (!star || String(card.star) === star) && (!type || card.type === type);
-      });
+      }).sort(compareCardsByStar);
       summary.textContent = `显示 ${filtered.length} / ${allCards.length} 张卡牌`;
       cardList.replaceChildren();
       if (!filtered.length) { cardList.innerHTML = '<div class="empty">没有找到符合条件的卡牌。</div>'; return; }
@@ -819,7 +819,12 @@
         const battleItemList = document.getElementById("shared-battle-item-list");
         relicList.replaceChildren(); specialList.replaceChildren(); battleItemList.replaceChildren();
         let relicCount = 0, specialCount = 0, battleItemCount = 0;
-        for (const entry of payload.cards) {
+        const orderedEntries = payload.cards.slice().sort((a, b) => {
+          const cardA = allCards.find(item => item.id === a.id);
+          const cardB = allCards.find(item => item.id === b.id);
+          return compareCardsByStar(cardA || {star:0,name:""}, cardB || {star:0,name:""});
+        });
+        for (const entry of orderedEntries) {
           if (!entry || typeof entry.id !== "string" || !Number.isInteger(entry.quantity) || entry.quantity < 1) throw new Error("卡组中包含无效卡牌数据。");
           const card = allCards.find(item => item.id === entry.id);
           if (!card) throw new Error("分享卡组中存在无法识别的卡牌：" + entry.id);
@@ -968,7 +973,8 @@
       const keyword = document.getElementById("catalog-card-search").value.trim().toLowerCase();
       const packId = document.getElementById("catalog-card-pack-filter").value;
       const filtered = allCards.filter(card => (!packId || card.pack_id === packId) &&
-        (!keyword || [card.id, card.name, card.effect, card.type].some(value => String(value || "").toLowerCase().includes(keyword))));
+        (!keyword || [card.id, card.name, card.effect, card.type].some(value => String(value || "").toLowerCase().includes(keyword))))
+        .sort(compareCardsByStar);
       const list = document.getElementById("catalog-card-list");
       list.replaceChildren();
       document.getElementById("catalog-card-summary").textContent = "共 " + allCards.length + " 张卡牌，当前显示 " + filtered.length + " 张。";
