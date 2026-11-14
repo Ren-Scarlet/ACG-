@@ -53,7 +53,7 @@ auth_trigger_report as (
   select
     'AUTH_TRIGGER'::text as section,
     t.tgname as object_name,
-    pg_get_triggerdef(t.oid) as details
+    pg_get_triggerdef(t.oid)||E'\\nFUNCTION: '||pg_get_functiondef(t.tgfoid) as details
   from pg_trigger t
   join pg_class c on c.oid=t.tgrelid
   join pg_namespace n on n.oid=c.relnamespace
@@ -62,15 +62,29 @@ auth_trigger_report as (
 policy_report as (
   select
     'POLICY'::text as section,
-    tablename as object_name,
-    count(*)::text||' policies: '||string_agg(policyname,', ' order by policyname) as details
+    tablename||'.'||policyname as object_name,
+    'command='||cmd||'; roles='||array_to_string(roles,',')||
+      '; using='||coalesce(qual,'<none>')||
+      '; check='||coalesce(with_check,'<none>') as details
   from pg_policies
   where schemaname='public'
-  group by tablename
+),
+constraint_report as (
+  select
+    'CONSTRAINT'::text as section,
+    conrelid::regclass::text||'.'||conname as object_name,
+    pg_get_constraintdef(oid) as details
+  from pg_constraint
+  where connamespace='public'::regnamespace
+    and conrelid::regclass::text in (
+      'profiles','card_inventory','player_stats','token_transactions',
+      'matches','match_results','achievements','player_achievements'
+    )
 )
 select * from table_report
 union all select * from column_report
 union all select * from function_report
 union all select * from auth_trigger_report
 union all select * from policy_report
+union all select * from constraint_report
 order by section, object_name;
