@@ -302,7 +302,7 @@
           </div>
           <div class="field">
             <label>授权操作</label>
-            <button id="verify-token" class="primary" type="button">验证授权并读取收藏</button>
+            <button id="verify-token" class="primary" type="button">验证授权并读取卡牌资料</button>
             <p class="hint"><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer" style="color:#aebcff">前往 GitHub 创建访问密钥</a></p>
           </div>
         </div>
@@ -1466,19 +1466,19 @@
       githubToken = tokenInput;
       setStatus(authStatus, "正在验证权限并读取收藏……");
       try {
-        const [result, cardsResult, packsResult] = await Promise.all([
-          githubGetCollections(), githubGetJson("data/cards.json"), githubGetJson("data/packs.json")
+        const [cardsResult, packsResult] = await Promise.all([
+          githubGetJson("data/cards.json"), githubGetJson("data/packs.json")
         ]);
-        if (!Array.isArray(result.data)) throw new Error("collections.json 格式不正确，当前版本要求使用数组格式。");
         if (!Array.isArray(cardsResult.data) || !Array.isArray(packsResult.data)) throw new Error("cards.json 或 packs.json 格式不正确，预期为 JSON 数组。");
-        collections = result.data; draftCollections = cloneData(collections);
+        // The legacy GitHub collection file is no longer part of the live admin workflow.
+        collections = []; draftCollections = [];
         allCards = cardsResult.data; allPacks = packsResult.data;
         adminDataSha = { cards: cardsResult.sha, packs: packsResult.sha };
         cardDataDirty = false; packDataDirty = false;
         authorized = true;
         document.getElementById("admin-workspace").classList.remove("hidden");
         rebuildCatalogFilters(); renderCatalogCards(); renderCatalogPacks();
-        setStatus(authStatus, "授权成功，已读取收藏、卡牌和卡包资料。", "good");
+        setStatus(authStatus, "授权成功，已读取卡牌和卡包资料。玩家库存请在玩家中心管理。", "good");
         renderAdminCards(); updateDirtyStatus();
       } catch (error) {
         githubToken = ""; authorized = false;
