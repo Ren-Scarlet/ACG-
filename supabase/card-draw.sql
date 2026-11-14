@@ -153,7 +153,6 @@ declare
   v_roll integer;
   v_card_id text;
   v_history_id bigint;
-  v_draw_count bigint;
 begin
   if v_user_id is null then
     raise exception '请先登录';
@@ -230,18 +229,6 @@ begin
   returning id into v_history_id;
 
   perform public.refresh_player_achievements(v_user_id);
-
-  select count(*) into v_draw_count
-  from public.card_draw_history
-  where user_id=v_user_id;
-
-  insert into public.player_achievements(user_id,achievement_id)
-  select v_user_id,a.id
-  from public.achievements a
-  where (a.id='first_draw' and v_draw_count>=1)
-     or (a.id='draws_50' and v_draw_count>=50)
-     or (a.id='draws_100' and v_draw_count>=100)
-  on conflict(user_id,achievement_id) do nothing;
 
   return query select v_card_id,v_balance,false;
 end;
