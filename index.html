@@ -76,6 +76,32 @@
     @media(max-width:700px) { .builder-stats { grid-template-columns:1fr 1fr 1fr; gap:6px; } .builder-stat { padding:9px; font-size:12px; } .builder-stat strong { font-size:17px; } .builder-card { gap:7px; padding:7px; } .builder-card img { width:46px; } .builder-count { gap:4px; } .builder-count button { width:29px; height:29px; } }
     @media(max-width:700px) { .player-search { grid-template-columns:1fr; } .player-card { gap:8px; padding:8px; } .player-card img { width:54px; } }
 
+    /* Builder contrast fix: keep text readable on dark deck/card surfaces. */
+    #builder-view .builder-stat,
+    #builder-view .builder-card,
+    #builder-view .shared-card,
+    #builder-view .panel {
+      color:#f2f6ff !important;
+    }
+    #builder-view .builder-stat strong,
+    #builder-view .builder-stat small,
+    #builder-view .builder-card-main strong,
+    #builder-view .builder-card-main small,
+    #builder-view .shared-card-main strong,
+    #builder-view .shared-card-main small,
+    #builder-view .panel h3,
+    #builder-view .panel p,
+    #builder-view .panel label {
+      color:#f2f6ff !important;
+    }
+    #builder-view .builder-stat small,
+    #builder-view .builder-card-main small,
+    #builder-view .shared-card-main small,
+    #builder-view .hint { color:#c3cbe0 !important; }
+    #builder-view button { color:#ffffff !important; }
+    #builder-view .builder-count button { background:#5967a5 !important; border-color:#8290d0 !important; color:#ffffff !important; }
+    #builder-view input,#builder-view select { color:#f5f5f5 !important; }
+
     /* ACG HUB Persona-style home */
     body.acg-home-active{background:#071b43;overflow:hidden}
     body.acg-home-active>header,body.acg-home-active>main{visibility:hidden}
@@ -1853,8 +1879,10 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       else if(target==="system")document.getElementById("tab-account").click();
       else{
         const pcTab=document.getElementById("tab-player-center");
-        if(pcTab){pcTab.click();if(target==="draw"){const drawTab=document.querySelector('#player-center-view [data-page="draw"]');drawTab?.click();}}
-        else{document.getElementById("tab-account").click();document.getElementById("account-status").textContent="玩家中心正在加载，请稍后点击菜单入口。";}
+        if(pcTab){
+          if(target==="draw"&&typeof window.acgOpenPlayerCenterPage==="function")window.acgOpenPlayerCenterPage("draw");
+          else pcTab.click();
+        }else{document.getElementById("tab-account").click();document.getElementById("account-status").textContent="玩家中心正在加载，请稍后点击菜单入口。";}
       }
     });
     document.getElementById("acg-home-exit").addEventListener("click",()=>acgHomeSetVisible(true));
