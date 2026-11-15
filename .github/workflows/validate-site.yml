@@ -21,6 +21,7 @@ jobs:
         run: |
           node --check auth.js
           node --check player-center.js
+          node --check item-mail.js
           python - <<'PY'
           from html.parser import HTMLParser
           from pathlib import Path
