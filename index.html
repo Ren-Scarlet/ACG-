@@ -465,6 +465,22 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         <p id="account-created" class="hint"></p>
         <button id="account-logout" type="button">退出登录</button>
       </div>
+      <section id="account-interface-settings" class="panel">
+        <h3>界面与主题</h3>
+        <p class="hint">首页主视觉、主题预览和发布由管理员在首页的「管理员主视觉管理」中维护。需要先在「卡牌资料管理」完成 GitHub 仓库授权。</p>
+        <button id="settings-open-theme" type="button">打开首页主题管理</button>
+      </section>
+      <section id="account-music-settings" class="panel">
+        <h3>背景音乐</h3>
+        <p class="hint">可以使用页面右上角的音乐控制器播放、暂停和调节音量。替换全站 MP3 文件需要 GitHub 仓库授权。</p>
+        <button id="settings-focus-bgm" type="button">定位背景音乐控制器</button>
+        <button id="settings-open-bgm-admin" type="button">打开背景音乐上传管理</button>
+      </section>
+      <section id="account-help-settings" class="panel">
+        <h3>帮助与说明</h3>
+        <p class="hint">玩家账号使用 Supabase 邮箱登录；GitHub 访问密钥只用于管理员维护卡牌、卡包、首页主题和背景音乐，不会替代玩家登录。</p>
+        <p class="hint">卡组草稿保存在当前浏览器；玩家收藏、代币、抽卡记录和成就保存在 Supabase。遇到数据读取问题时，请先确认网络和登录状态，不要重复提交抽卡或分解请求。</p>
+      </section>
     </section>
 
     <section id="library-view">
@@ -1925,7 +1941,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 
     loadData();
   </script>
-  <script src="./auth.js?v=30"></script>
+  <script src="./auth.js?v=31"></script>
 
 <script>
 (()=> {
@@ -1959,7 +1975,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   else if(key.startsWith('deck')){const sel=document.getElementById('saved-deck-select');if(sel&&sel.options.length>1){const ix=Number(key.slice(4))+1;if(sel.options[ix]){sel.selectedIndex=ix;document.getElementById('load-local-deck')?.click()}}}
   else if(current==='account-view'){
    if(key==='admin-auth'){document.getElementById('tab-admin')?.click();return;}
-   const ids={account:'account-forms',interface:'account-profile',music:'account-profile',help:'account-status'};
+   const ids={account:'account-forms',interface:'account-interface-settings',music:'account-music-settings',help:'account-help-settings'};
    const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
   }else if(current==='admin-view'){
    if(key==='account'){document.getElementById('tab-account')?.click();return;}
@@ -1977,6 +1993,23 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
  }
  const observer=new MutationObserver(update);sections.forEach(x=>observer.observe(x,{attributes:true,attributeFilter:['class']}));
  document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>setTimeout(update,0)));
+ const openHomeAdmin=()=>{
+  const exit=document.getElementById('acg-home-exit');
+  if(!document.body.classList.contains('acg-home-active'))exit?.click();
+  setTimeout(()=>{
+   const panel=document.getElementById('acg-home-admin-panel');
+   const toggle=document.getElementById('acg-home-admin-toggle');
+   if(panel&&panel.style.display==='none')toggle?.click();
+   panel?.scrollIntoView({behavior:'smooth',block:'center'});
+  },80);
+ };
+ document.getElementById('settings-open-theme')?.addEventListener('click',openHomeAdmin);
+ document.getElementById('settings-open-bgm-admin')?.addEventListener('click',openHomeAdmin);
+ document.getElementById('settings-focus-bgm')?.addEventListener('click',()=>{
+  const bgm=document.getElementById('acg-bgm');
+  bgm?.scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('acg-bgm-toggle')?.focus({preventScroll:true});
+ });
  update();
 })();
 </script></body>
