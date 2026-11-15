@@ -1566,10 +1566,19 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       for (const file of files) {
         const match = file.name.match(/^(card_\d+)\.(jpg|jpeg|png|webp|gif)$/i);
         if (!match) { errors.push(file.name + "：请按 card_021.jpg 格式命名"); continue; }
-        const cardId = match[1].toLowerCase();
-        const card = allCards.find(item => String(item.id).toLowerCase() === cardId);
-        if (!card) { errors.push(file.name + "：找不到卡牌 " + cardId); continue; }
-        if (seen.has(cardId)) { errors.push(file.name + "：同一批次重复选择了 " + cardId); continue; }
+        const fileCardId = match[1].toLowerCase();
+        // Accept zero-padded filenames (for example card_0100.jpg) while the catalog ID is card_100.
+        const exactCard = allCards.find(item => String(item.id).toLowerCase() === fileCardId);
+        const numericSuffix = fileCardId.match(/^card_(\\d+)$/)?.[1];
+        const matchingCards = exactCard ? [exactCard] : allCards.filter(item => {
+          const itemMatch = String(item.id).toLowerCase().match(/^card_(\\d+)$/);
+          return itemMatch && Number(itemMatch[1]) === Number(numericSuffix);
+        });
+        if (matchingCards.length > 1) { errors.push(file.name + "：编号存在歧义，请使用卡牌资料中的原始 ID 命名"); continue; }
+        const card = matchingCards[0];
+        if (!card) { errors.push(file.name + "：找不到卡牌 " + fileCardId + "（请核对卡牌 ID）"); continue; }
+        const cardId = String(card.id).toLowerCase();
+        if (seen.has(cardId)) { errors.push(file.name + "：同一批次重复对应卡牌 " + cardId); continue; }
         seen.add(cardId);
         if (file.size > 8 * 1024 * 1024) { errors.push(file.name + "：超过 8 MB"); continue; }
         prepared.push({ file, card });
