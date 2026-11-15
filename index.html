@@ -806,6 +806,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     let catalogCardPage = 1;
     let selectedDeckPage = 1;
     const builderPages = { relic:1, special:1, battleItem:1 };
+    let builderCategory = "all";
 
     const apiHeaders = () => ({
       "Accept": "application/vnd.github+json",
@@ -1009,20 +1010,47 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       });
       renderListPagination("current-deck-pagination",selected.length,selectedDeckPage,CARD_PAGE_SIZE,next=>{selectedDeckPage=next;renderCurrentDeckList();});
     }
+    function initializeBuilderFilters(){
+      const packSelect=document.getElementById("builder-pack-filter");
+      const starSelect=document.getElementById("builder-star-filter");
+      const typeSelect=document.getElementById("builder-type-filter");
+      if(!packSelect||!starSelect||!typeSelect)return;
+      packSelect.replaceChildren(new Option("全部卡包",""));
+      allPacks.forEach(pack=>packSelect.add(new Option(pack.name,pack.id)));
+      starSelect.replaceChildren(new Option("全部星级",""));
+      [...new Set(allCards.map(card=>Number(card.star)).filter(star=>Number.isFinite(star)&&star>0))]
+        .sort((a,b)=>b-a).forEach(star=>starSelect.add(new Option(star+" 星",String(star))));
+      if(allCards.some(card=>!Number(card.star)))starSelect.add(new Option("无星级／树果","none"));
+      typeSelect.replaceChildren(new Option("全部类型",""));
+      [...new Set(allCards.map(card=>card.type).filter(Boolean))]
+        .sort((a,b)=>a.localeCompare(b,"zh-CN")).forEach(type=>typeSelect.add(new Option(type,type)));
+    }
     function renderBuilder() {
       if (!builderPlayer) return;
       const keyword = document.getElementById("builder-card-search").value.trim().toLowerCase();
+      const packFilter=document.getElementById("builder-pack-filter").value;
+      const starFilter=document.getElementById("builder-star-filter").value;
+      const typeFilter=document.getElementById("builder-type-filter").value;
+      const sortMode=document.getElementById("builder-sort-filter").value;
+      const relicSection=document.getElementById("relic-builder-section");
+      const specialSection=document.getElementById("special-builder-section");
+      const battleSection=document.getElementById("battleItem-builder-section");
+      relicSection.hidden=builderCategory!=="all"&&builderCategory!=="relic";
+      specialSection.hidden=builderCategory!=="all"&&builderCategory!=="special";
+      battleSection.hidden=builderCategory!=="all"&&builderCategory!=="battleItem";
       const relicList = document.getElementById("relic-builder-list");
       const specialList = document.getElementById("special-builder-list");
       const battleItemList = document.getElementById("battle-item-builder-list");
       relicList.replaceChildren(); specialList.replaceChildren(); battleItemList.replaceChildren();
-      const ownedCards = allCards.filter(card => getCount(builderCollections, builderPlayer.id, card.id) > 0).sort(compareCardsByStar)
-        .filter(card => {
-          if (!keyword) return true;
-          const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "";
-          return [card.name, card.effect, card.type, packName, ...(card.tags || [])]
-            .some(value => String(value).toLowerCase().includes(keyword));
-        });
+      const ownedCards = allCards.filter(card => getCount(builderCollections, builderPlayer.id, card.id) > 0)
+        .filter(card=>{
+          const packName=allPacks.find(pack=>pack.id===card.pack_id)?.name||"";
+          return (!keyword||[card.name,card.effect,card.type,packName,...(card.tags||[])].some(value=>String(value||"").toLowerCase().includes(keyword)))&&
+            (!packFilter||card.pack_id===packFilter)&&
+            (!starFilter||(starFilter==="none"?!Number(card.star):String(card.star)===starFilter))&&
+            (!typeFilter||card.type===typeFilter);
+        })
+        .sort((a,b)=>sortMode==="name"?a.name.localeCompare(b.name,"zh-CN"):sortMode==="id"?compareCardsById(a,b):compareCardsByStar(a,b));
       const makeCard = card => {
         const row = document.createElement("article"); row.className = "builder-card";
         const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
@@ -1050,9 +1078,13 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         cards.slice((builderPages[key]-1)*CARD_PAGE_SIZE,builderPages[key]*CARD_PAGE_SIZE).forEach(card=>list.appendChild(makeCard(card)));
         renderListPagination(list.id+"-pagination",cards.length,builderPages[key],CARD_PAGE_SIZE,next=>{builderPages[key]=next;renderBuilder();});
       };
-      renderOwnedCategory(ownedCards.filter(isRelicCard),relicList,"relic","你目前没有可构筑的礼装卡，或搜索无匹配结果。");
-      renderOwnedCategory(ownedCards.filter(isSpecialAttack),specialList,"special","你目前没有超越、调律或共鸣攻击卡。");
-      renderOwnedCategory(ownedCards.filter(isBattleItem),battleItemList,"battleItem","你目前没有对战道具。");
+      const relicCards=ownedCards.filter(isRelicCard);
+      const specialCards=ownedCards.filter(isSpecialAttack);
+      const battleCards=ownedCards.filter(isBattleItem);
+      renderOwnedCategory(relicCards,relicList,"relic","你目前没有可构筑的礼装卡，或筛选条件下没有匹配结果。");
+      renderOwnedCategory(specialCards,specialList,"special","你目前没有超越、调律或共鸣攻击卡，或筛选条件下没有匹配结果。");
+      renderOwnedCategory(battleCards,battleItemList,"battleItem","你目前没有对战道具，或筛选条件下没有匹配结果。");
+      document.getElementById("builder-filter-summary").textContent="当前筛选找到 "+ownedCards.length+" 张已拥有卡牌：礼装 "+relicCards.length+" 张 · 特殊攻击 "+specialCards.length+" 张 · 对战道具 "+battleCards.length+" 张。";
 
       const counts = deckCounts(), issues = builderIssues();
       document.getElementById("relic-count").textContent = counts.relic;
@@ -1377,6 +1409,11 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         document.getElementById("builder-rules-text").textContent="礼装卡 "+deckRules.relicDeck.min+"～"+deckRules.relicDeck.max+" 张；超越、调律、共鸣攻击卡合计最多 "+deckRules.specialAttackDeck.maxTotal+" 张；同名卡最多 "+deckRules.relicDeck.maxCopiesPerName+" 张。对战道具在确认生成分享链接时从收藏中永久扣除。";
         document.getElementById("builder-workspace").classList.remove("hidden");
         document.getElementById("builder-card-search").value="";
+        builderCategory="all";
+        document.querySelectorAll("[data-builder-category]").forEach(button=>button.classList.toggle("active",button.dataset.builderCategory==="all"));
+        ["builder-pack-filter","builder-star-filter","builder-type-filter"].forEach(id=>document.getElementById(id).value="");
+        document.getElementById("builder-sort-filter").value="star";
+        initializeBuilderFilters();
         renderBuilder();setStatus(status,"账号收藏读取成功，可以开始构筑。","good");
       } catch(error) {
         builderPlayer=null;document.getElementById("builder-workspace").classList.add("hidden");
@@ -1890,7 +1927,23 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     document.getElementById("tab-admin").addEventListener("click", () => showMainView("admin-view","tab-admin","卡牌资料管理"));
     document.getElementById("tab-account").addEventListener("click", () => showMainView("account-view","tab-account","玩家账号"));
     document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
-    document.getElementById("builder-card-search").addEventListener("input", () => { builderPages.relic=builderPages.special=builderPages.battleItem=1; renderBuilder(); });
+    function resetBuilderPages(){builderPages.relic=builderPages.special=builderPages.battleItem=1;}
+    function applyBuilderFilter(){resetBuilderPages();renderBuilder();}
+    document.getElementById("builder-card-search").addEventListener("input",applyBuilderFilter);
+    ["builder-pack-filter","builder-star-filter","builder-type-filter","builder-sort-filter"].forEach(id=>document.getElementById(id).addEventListener("change",applyBuilderFilter));
+    document.querySelectorAll("[data-builder-category]").forEach(button=>button.addEventListener("click",()=>{
+      builderCategory=button.dataset.builderCategory;
+      document.querySelectorAll("[data-builder-category]").forEach(item=>item.classList.toggle("active",item===button));
+      applyBuilderFilter();
+    }));
+    document.getElementById("builder-filter-reset").addEventListener("click",()=>{
+      document.getElementById("builder-card-search").value="";
+      ["builder-pack-filter","builder-star-filter","builder-type-filter"].forEach(id=>document.getElementById(id).value="");
+      document.getElementById("builder-sort-filter").value="star";
+      builderCategory="all";
+      document.querySelectorAll("[data-builder-category]").forEach(button=>button.classList.toggle("active",button.dataset.builderCategory==="all"));
+      applyBuilderFilter();
+    });
     document.getElementById("clear-builder").addEventListener("click", () => { deckDraft = {}; renderBuilder(); document.getElementById("deck-share-area").classList.add("hidden"); });
     document.getElementById("generate-deck-link").addEventListener("click", generateDeckLink);
     document.getElementById("copy-deck-link").addEventListener("click", copyDeckLink);
