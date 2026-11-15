@@ -162,7 +162,7 @@ begin
 
   return jsonb_build_object('committed', true, 'duplicate_request', false, 'items', p_item_cards);
 end;
-$$
+$;
 
 revoke all on function public.admin_sync_battle_item_catalog(jsonb) from public, anon, authenticated;
 grant execute on function public.admin_sync_battle_item_catalog(jsonb) to authenticated;
