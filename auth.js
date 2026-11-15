@@ -170,11 +170,11 @@
   });
 
   const playerCenterScript = document.createElement("script");
-  playerCenterScript.src = "./player-center.js?v=62";
+  playerCenterScript.src = "./player-center.js?v=63";
   playerCenterScript.defer = true;
   playerCenterScript.onload = () => {
     const itemMailScript = document.createElement("script");
-    itemMailScript.src = "./item-mail.js?v=4";
+    itemMailScript.src = "./item-mail.js?v=5";
     itemMailScript.defer = true;
     document.body.appendChild(itemMailScript);
   };
