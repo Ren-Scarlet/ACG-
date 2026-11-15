@@ -939,5 +939,35 @@
     "pack_id": "pack_009",
     "effect": "弃除一张手牌发动：使你的一张1-2级近战攻击卡基础伤害-1，结算后可以重复一次。",
     "image": "./images/card_086.jpg"
+  },
+  {
+    "id": "card_087",
+    "name": "领家割草",
+    "star": 5,
+    "type": "能力卡",
+    "tags": [],
+    "pack_id": "pack_009",
+    "effect": "自己的牌库比一名敌方目标多的场合才能发动。\n直到牌库数量与目标相同为止，从牌库上方弃除卡牌。",
+    "image": "./images/card_087.jpg"
+  },
+  {
+    "id": "card_088",
+    "name": "闪电风暴",
+    "star": 5,
+    "type": "能力卡",
+    "tags": [],
+    "pack_id": "pack_009",
+    "effect": "每回合限制一次。\n①自己没有打出攻击卡的场合，选择以下一项发动。\n·对一名敌方目标造成目标打出攻击卡数量的效果伤害。\n·对方暗置的礼装卡全部弃除。",
+    "image": "./images/card_088.jpg"
+  },
+  {
+    "id": "card_089",
+    "name": "鹰身女妖的羽毛扫",
+    "star": 5,
+    "type": "能力卡",
+    "tags": [],
+    "pack_id": "pack_009",
+    "effect": "使敌方目标场上暗置的礼装卡全部弃除。",
+    "image": "./images/card_089.jpg"
   }
 ]
