@@ -7,6 +7,79 @@
     const style=document.createElement("style");
     style.id="acg-item-mail-contrast-style";
     style.textContent=`
+      /* Full-width admin work areas: prevent the workshop and mail forms collapsing into narrow columns */
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"],
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"]{
+        grid-column:1 / -1!important;
+        width:100%!important;
+        min-width:0!important;
+        max-width:none!important;
+        box-sizing:border-box!important;
+        display:block!important;
+        overflow:visible!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form{
+        display:grid!important;
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+        gap:14px 18px!important;
+        width:100%!important;
+        min-width:0!important;
+        align-items:start!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form > .field,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form > .field{
+        min-width:0!important;
+        width:100%!important;
+        margin:0!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form > :is(h3,h4,p),
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form > :is(h3,h4,p),
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form > .status,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form > .status,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form > div:has(> .field),
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form > div:has(> .field){
+        grid-column:1 / -1!important;
+        min-width:0!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form input,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form select,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form textarea,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form input,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form select,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form textarea{
+        width:100%!important;
+        min-width:0!important;
+        max-width:100%!important;
+        box-sizing:border-box!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form .pc-grid,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form .pc-grid{
+        display:grid!important;
+        grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.55fr) auto!important;
+        gap:10px!important;
+        align-items:end!important;
+        width:100%!important;
+        min-width:0!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form button,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form button{
+        min-width:112px!important;
+        min-height:42px!important;
+        padding:10px 18px!important;
+        white-space:normal!important;
+        line-height:1.35!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form > button,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form > button{
+        justify-self:start!important;
+      }
+      @media(max-width:760px){
+        #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form,
+        #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form{grid-template-columns:minmax(0,1fr)!important}
+        #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] form .pc-grid,
+        #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] form .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+      }
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"],
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"]{
         color:#17324b!important;
