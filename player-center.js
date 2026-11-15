@@ -102,11 +102,16 @@
       drawSessionGatePending = true;
       renderDrawNotice("正在确认玩家登录状态……");
       (async()=>{
-        await initialSessionReady;
-        if (currentPage!=="draw") { drawSessionGatePending=false; return; }
-        drawSessionGatePending = false;
-        if (currentUser) await loadPage("draw");
-        else renderDrawNotice("抽卡功能需要先登录当前 ACG 卡牌网站账号。",false);
+        try {
+          await withTimeout(initialSessionReady,12000,"登录状态读取超时，请刷新页面后重试。");
+          if (currentPage!=="draw") { drawSessionGatePending=false; return; }
+          drawSessionGatePending = false;
+          if (currentUser) await loadPage("draw");
+          else renderDrawNotice("抽卡功能需要先登录当前 ACG 卡牌网站账号。",false);
+        } catch(error) {
+          drawSessionGatePending = false;
+          renderDrawNotice("无法确认登录状态："+error.message,true);
+        }
       })();
       return;
     }
@@ -121,6 +126,14 @@
   tab.addEventListener("click",()=>showCenter("overview"));
   // Direct entry from the homepage avoids showing the overview before the requested page.
   window.acgOpenPlayerCenterPage = page => showCenter(page==="draw"?"draw":"overview");
+  window.acgOpenPlayerAdminPanel = () => {
+    showCenter("overview");
+    setTimeout(()=>{
+      const panel=view.querySelector("#pc-admin-panel");
+      if(panel&&!panel.classList.contains("hidden"))panel.scrollIntoView({behavior:"smooth",block:"start"});
+      else setStatus("当前账号没有玩家管理权限。",true);
+    },120);
+  };
   if(window.acgPendingPlayerCenterPage){const pendingPage=window.acgPendingPlayerCenterPage;delete window.acgPendingPlayerCenterPage;showCenter(pendingPage);}
   knownTabs.forEach(id => document.getElementById(id)?.addEventListener("click", () => {
     view.classList.add("hidden");
@@ -586,7 +599,8 @@
     if(page==="draw"&&!initialSessionResolved){
       drawSessionGatePending = true;
       renderDrawNotice("正在确认玩家登录状态……");
-      await initialSessionReady;
+      try { await withTimeout(initialSessionReady,12000,"登录状态读取超时，请刷新页面后重试。"); }
+      catch(error) { drawSessionGatePending=false; renderDrawNotice("无法确认登录状态："+error.message,true); return; }
       drawSessionGatePending = false;
       if(currentPage!=="draw")return;
     }
