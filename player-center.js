@@ -75,14 +75,19 @@
     statusEl.className = "status" + (bad ? " bad" : " good");
   }
   function showCenter(page="overview") {
-    // A normal visit starts at the overview; deep links can request a specific page.
     currentPage = page;
     knownViews.forEach(id => document.getElementById(id)?.classList.add("hidden"));
-    view.classList.remove("hidden");
     [...knownTabs,"tab-player-center"].forEach(id => document.getElementById(id)?.classList.remove("active"));
     tab.classList.add("active");
     const title = document.getElementById("page-title");
     if (title) title.textContent = "玩家中心";
+    // The draw lobby is standalone. Keep the player-center overview hidden while data loads.
+    if (page==="draw" && currentUser) {
+      view.classList.add("hidden");
+      loadPage("draw");
+      return;
+    }
+    view.classList.remove("hidden");
     if (currentUser) loadPage(page);
     else {
       contentEl.replaceChildren(node("div","pc-empty","请先登录账号，再使用抽卡和个人资料功能。"));
@@ -309,7 +314,7 @@
       const info=node("div","adl-poolinfo");info.append(node("h3","",pool.pack_name),node("p","",pool.description||"ACG 卡牌卡池"),node("strong","","单包 "+pool.price_tokens+" 代币 · 5 张卡"));
       tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;grid.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
     });
-    const config=node("section","adl-config"),configInfo=node("div"),configTitle=node("h3","",selectedPool?.pack_name||"暂无开放卡池"),configDesc=node("p","","每包 5 张卡 · 经典卡池");
+    const config=node("div","adl-config"),configInfo=node("div"),configTitle=node("h3","",selectedPool?.pack_name||"暂无开放卡池"),configDesc=node("p","","每包 5 张卡 · 经典卡池");
     forceStyle(config,{display:"flex",gridColumn:"auto",gridRow:"auto",alignItems:"center",justifyContent:"space-between",gap:"16px",margin:"30px 0 0",padding:"17px 18px",background:"linear-gradient(100deg,#141e2d,#0e1521)",border:"1px solid #283449",borderRadius:"7px",boxShadow:"none",color:"#edf2fa",minHeight:"0"});
     configInfo.append(configTitle,configDesc);const actions=node("div","adl-actions"),single=node("button","adl-btn primary","开启 1 包 · 5 张"),ten=node("button","adl-btn","开启 10 包 · 50 张");
     single.type=ten.type="button";actions.append(single,ten);config.append(configInfo,actions);
@@ -320,7 +325,7 @@
       rates.innerHTML='<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
     }
     updateConfig();
-    const historySection=node("section","adl-history"),historyTitle=node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张");
+    const historySection=node("div","adl-history"),historyTitle=node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张");
     forceStyle(historySection,{display:"block",gridColumn:"auto",gridRow:"auto",margin:"28px 0 0",padding:"16px 0 0",background:"transparent",border:"0",borderTop:"1px solid #34445c",boxShadow:"none",color:"#edf2fa",minHeight:"0"});
     historySection.appendChild(historyTitle);
     if(!history?.length)historySection.appendChild(node("p","adl-muted","还没有抽卡记录。"));
