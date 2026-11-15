@@ -2,7 +2,7 @@
 -- Safe/idempotent: only upserts this pack's catalog entries and its pool metadata.
 -- Existing prices, rates, enabled state, player balances, inventory and history are preserved.
 
-insert into public.draw_card_catalog(card_id,pack_id,rarity,is_alt,enabled)
+insert into public.draw_card_catalog(card_id,pack_id,rarity,is_alt)
 values
   ('card_048','pack_005',3,false),
   ('card_049','pack_005',3,true),
