@@ -119,7 +119,7 @@ begin
   elsif p_effect_type in ('random_reward','choose_reward') then
     if coalesce(jsonb_typeof(v_config->'options'),'')<>'array'
        or coalesce(jsonb_array_length(v_config->'options'),0)<2
-       or coalesce(jsonb_array_length(v_config->'options'),0)>case when p_effect_type='random_reward' then 20 else 10 end then
+       or coalesce(jsonb_array_length(v_config->'options'),0)>(case when p_effect_type='random_reward' then 20 else 10 end) then
       raise exception '奖励选项数量不正确';
     end if;
     if exists (
