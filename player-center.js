@@ -1073,6 +1073,7 @@
         adminPlayers=players||[];
         fillPlayerSelects();
         await loadCardNames();
+        initializeAdminInventoryFilters();
         fillInventoryAdminSelects();
         await loadAdminBindings();
         await loadAdminMatches();
