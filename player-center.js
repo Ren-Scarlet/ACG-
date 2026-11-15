@@ -525,7 +525,9 @@
     function updateConfig(){
       if(!selectedPool)return;
       configTitle.textContent=selectedPool.pack_name;configDesc.textContent="每包 5 张 · 单包 "+selectedPool.price_tokens+" 代币";
-      rates.innerHTML='<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
+      rates.innerHTML=selectedPool.draw_mode==="uniform"
+        ? '<span>🍃 树果等概率</span><span class="adl-muted">每张树果卡被抽中的概率相同 · 不设星级与异画概率</span>'
+        : '<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
     }
     updateConfig();
     const historySection=node("div","adl-history"),historyTitle=node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张");
@@ -1285,12 +1287,13 @@
       status.textContent="当前卡包没有可同步的卡牌，请先在卡牌资料中添加卡牌并保存。";
       status.className="status bad";return;
     }
+    const isBerryPack=pack.category==="berry";
     const payload=cards.map(card=>({
       card_id:card.id,
-      rarity:Number(card.star),
-      is_alt:/（异画）|\(异画\)/.test(card.name||"")
+      rarity:isBerryPack?1:Number(card.star),
+      is_alt:isBerryPack?false:/（异画）|\(异画\)/.test(card.name||"")
     }));
-    if(payload.some(card=>!card.card_id||!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)){
+    if(payload.some(card=>!card.card_id||(!isBerryPack&&(!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)))){
       status.textContent="同步中止：卡牌编号或星级资料不完整，请先检查卡牌资料。";
       status.className="status bad";return;
     }
@@ -1299,10 +1302,10 @@
     status.className="status";
     try{
       const {data,error}=await client.rpc("admin_sync_draw_pack_catalog",{
-        p_pack_id:packId,p_pack_name:pack.name,p_cards:payload
+        p_pack_id:packId,p_pack_name:pack.name,p_cards:payload,p_category:pack.category||"normal"
       });
       if(error)throw error;
-      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。现在可以设置价格、概率并开放卡池。";
+      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。"+(isBerryPack?"树果将以 1 星存储并采用全卡等概率抽取。":"现在可以设置价格、概率并开放卡池。");
       status.className="status good";
       await loadAdminPools();
       view.querySelector("#pc-pool-id").value=packId;
@@ -1352,9 +1355,9 @@
     syncAltProbabilityControl(selectedPool.pack_id);
     data.forEach(pool=>{
       const row=node("div","pc-row"),info=node("div"),actions=node("div");
-      const ready=pool.price_tokens!==null&&pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null;
+      const ready=pool.price_tokens!==null&&(pool.draw_mode==="uniform"||(pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null));
       const config=ready
-        ? "每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%"
+        ? (pool.draw_mode==="uniform"?"每包 "+pool.price_tokens+" 代币 · 树果等概率":"每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%")
         : "尚未设置价格和概率";
       info.append(node("strong","",pool.pack_name),node("div","pc-muted",config),
         node("div",pool.enabled?"pc-positive":"pc-muted",pool.enabled?"开放中":"未开放"));
@@ -1397,18 +1400,20 @@
   view.querySelector("#pc-pool-form").addEventListener("submit",async event=>{
     event.preventDefault();
     const form=event.currentTarget,button=form.querySelector("button[type=submit]"),status=view.querySelector("#pc-pool-status");
+    const selectedPack=packCatalog.find(item=>item.id===view.querySelector("#pc-pool-id").value);
+    const isUniformPool=selectedPack?.category==="berry";
     const values={
       p_pack_id:view.querySelector("#pc-pool-id").value,
       p_price_tokens:Number(view.querySelector("#pc-pool-price").value),
-      p_rate_alt:Number(view.querySelector("#pc-pool-alt").value),
-      p_rate_3:Number(view.querySelector("#pc-pool-r3").value),
-      p_rate_4:Number(view.querySelector("#pc-pool-r4").value),
-      p_rate_5:Number(view.querySelector("#pc-pool-r5").value)
+      p_rate_alt:isUniformPool?0:Number(view.querySelector("#pc-pool-alt").value),
+      p_rate_3:isUniformPool?100:Number(view.querySelector("#pc-pool-r3").value),
+      p_rate_4:isUniformPool?0:Number(view.querySelector("#pc-pool-r4").value),
+      p_rate_5:isUniformPool?0:Number(view.querySelector("#pc-pool-r5").value)
     };
     if(!Number.isSafeInteger(values.p_price_tokens)||values.p_price_tokens<=0||
-       [values.p_rate_alt,values.p_rate_3,values.p_rate_4,values.p_rate_5].some(x=>!Number.isFinite(x)||x<0||x>100||Math.round(x*100)!==x*100)||
-       Math.round((values.p_rate_alt+values.p_rate_3+values.p_rate_4+values.p_rate_5)*100)!==10000){
-      status.textContent="每包价格必须为正整数；异画、五星、四星、三星概率须为 0–100 的数字（最多两位小数），总和必须为 100%。";status.className="status bad";return;
+       (!isUniformPool&&([values.p_rate_alt,values.p_rate_3,values.p_rate_4,values.p_rate_5].some(x=>!Number.isFinite(x)||x<0||x>100||Math.round(x*100)!==x*100)||
+       Math.round((values.p_rate_alt+values.p_rate_3+values.p_rate_4+values.p_rate_5)*100)!==10000))){
+      status.textContent=isUniformPool?"每包价格必须为正整数。":"每包价格必须为正整数；异画、五星、四星、三星概率须为 0–100 的数字（最多两位小数），总和必须为 100%。";status.className="status bad";return;
     }
     button.disabled=true;status.textContent="正在保存卡池……";status.className="status";
     try{
@@ -1416,7 +1421,7 @@
       if(error)throw error;
       const {error:coverError}=await client.rpc("admin_set_draw_pool_cover",{p_pack_id:values.p_pack_id,p_cover_card_id:view.querySelector("#pc-pool-cover").value||null});
       if(coverError)throw new Error("价格和概率已保存，但封面保存失败："+coverError.message+"。请确认已执行卡包封面 SQL。");
-      status.textContent="卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
+      status.textContent=isUniformPool?"树果卡池已开放：每张树果等概率抽取。":"卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
       await loadAdminPools();
     }catch(error){status.textContent="保存失败："+error.message;status.className="status bad";}
     finally{button.disabled=false;}
