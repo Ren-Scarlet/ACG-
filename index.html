@@ -1879,10 +1879,12 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       else if(target==="system")document.getElementById("tab-account").click();
       else{
         const pcTab=document.getElementById("tab-player-center");
-        if(pcTab){
-          if(target==="draw"&&typeof window.acgOpenPlayerCenterPage==="function")window.acgOpenPlayerCenterPage("draw");
-          else pcTab.click();
-        }else{document.getElementById("tab-account").click();document.getElementById("account-status").textContent="玩家中心正在加载，请稍后点击菜单入口。";}
+        if(target==="draw"){
+          // Never fall back to opening the player-center overview while its module is still loading.
+          if(typeof window.acgOpenPlayerCenterPage==="function")window.acgOpenPlayerCenterPage("draw");
+          else window.acgPendingPlayerCenterPage="draw";
+        }else if(pcTab)pcTab.click();
+        else{document.getElementById("tab-account").click();document.getElementById("account-status").textContent="玩家中心正在加载，请稍后点击菜单入口。";}
       }
     });
     document.getElementById("acg-home-exit").addEventListener("click",()=>acgHomeSetVisible(true));
@@ -1917,7 +1919,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 
     loadData();
   </script>
-  <script src="./auth.js?v=25"></script>
+  <script src="./auth.js?v=26"></script>
 
 <script>
 (()=> {
