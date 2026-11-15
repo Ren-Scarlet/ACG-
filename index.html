@@ -1981,12 +1981,12 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   else if(current==='account-view'){
    if(key==='admin-auth'){document.getElementById('tab-admin')?.click();return;}
    const accountTargets={
-    account:['account-forms','account-profile'],
+    account:['account-forms'],
     interface:['account-interface-settings'],
     music:['account-music-settings'],
     help:['account-help-settings']
    };
-   const allAccountTargets=['account-forms','account-profile','account-interface-settings','account-music-settings','account-help-settings'];
+   const allAccountTargets=['account-forms','account-interface-settings','account-music-settings','account-help-settings'];
    const visibleTargets=accountTargets[key]||accountTargets.account;
    allAccountTargets.forEach(id=>{
     const el=document.getElementById(id);
