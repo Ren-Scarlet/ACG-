@@ -114,8 +114,8 @@
     pcListPages[key]=page;
     if(total<=pageSize)return {start:0,end:total,page,pageCount};
     const nav=node("div","pc-pagination");
-    nav.style.cssText="display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:center!important;gap:8px!important;width:100%!important;box-sizing:border-box!important;padding:12px!important;margin:16px 0!important;";
-    const add=(label,target,disabled=false,active=false)=>{const button=node("button",active?"active":"",label);button.type="button";button.style.cssText="flex:0 0 auto!important;min-width:40px!important;min-height:36px!important;height:auto!important;padding:7px 12px!important;margin:0!important;white-space:nowrap!important;";button.disabled=disabled;button.addEventListener("click",()=>{pcListPages[key]=target;onChange();});nav.appendChild(button);};
+    nav.style.cssText="display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;width:max-content!important;max-width:100%!important;overflow-x:auto!important;box-sizing:border-box!important;padding:12px!important;margin:16px 0!important;white-space:nowrap!important;";
+    const add=(label,target,disabled=false,active=false)=>{const button=node("button",active?"active":"",label);button.type="button";button.style.cssText="display:inline-flex!important;flex:0 0 auto!important;min-width:40px!important;min-height:36px!important;height:36px!important;align-items:center!important;justify-content:center!important;padding:7px 12px!important;margin:0!important;white-space:nowrap!important;";button.disabled=disabled;button.addEventListener("click",()=>{pcListPages[key]=target;onChange();});nav.appendChild(button);};
     add("上一页",page-1,page===1);
     const first=Math.max(1,page-2),last=Math.min(pageCount,page+2);
     if(first>1){add("1",1,false,page===1);if(first>2)nav.appendChild(node("span","pc-muted","…"));}
