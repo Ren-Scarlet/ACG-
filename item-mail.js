@@ -6,15 +6,189 @@
   if(!document.getElementById("acg-item-mail-contrast-style")){
     const style=document.createElement("style");
     style.id="acg-item-mail-contrast-style";
-    style.textContent=`/* Full-width host is the single column parent for every admin work area */
-
+    style.textContent=`
+/* Admin workspaces: full-width shell and stable category navigation */
+#player-center-view #pc-admin-panel{
+  display:block!important;
+  grid-column:1 / -1!important;
+  justify-self:stretch!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
 #player-center-view #pc-admin-panel.hidden{display:none!important}
-#player-center-view #pc-admin-panel:not(.hidden){display:block!important;width:100%!important;min-width:0!important}
+#player-center-view #pc-admin-panel .pc-admin-category-nav{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:16px 0 20px!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-nav button{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:48px!important;
+  margin:0!important;
+  padding:10px 12px!important;
+  white-space:normal!important;
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+  text-align:center!important;
+  line-height:1.35!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  color:#17334b!important;
+  background:linear-gradient(180deg,#f8fcff,#e5f1f7)!important;
+  border:1px solid #91b4c7!important;
+  border-radius:8px!important;
+  box-shadow:0 2px 4px #17334b18!important;
+  clip-path:none!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-nav button.active{
+  color:#fff!important;
+  background:linear-gradient(135deg,#174d70,#0b3552)!important;
+  border-color:#0b3552!important;
+  box-shadow:0 3px 8px #0b355244!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-pane-host{
+  display:block!important;
+  grid-column:1 / -1!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane{
+  display:block!important;
+  float:none!important;
+  clear:both!important;
+  grid-column:1 / -1!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:12px 0 20px!important;
+  padding:clamp(14px,2vw,22px)!important;
+  box-sizing:border-box!important;
+  background:#f7fbfe!important;
+  color:#17334b!important;
+  border:1px solid #b5cedb!important;
+  border-radius:10px!important;
+}
 #player-center-view #pc-admin-panel .pc-admin-category-pane.hidden{display:none!important}
-#player-center-view #pc-admin-panel .pc-admin-category-pane:not(.hidden){display:block!important;width:100%!important;min-width:0!important;max-width:none!important;float:none!important;clear:both!important;box-sizing:border-box!important}
-
-/* Admin panel is a vertical stack; panes must not become narrow grid columns */\n#player-center-view #pc-admin-panel:not(.hidden){display:block!important;width:100%!important;min-width:0!important;box-sizing:border-box!important}\n#player-center-view #pc-admin-panel .pc-admin-category-nav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;width:100%!important;box-sizing:border-box!important}\n#player-center-view #pc-admin-panel .pc-admin-category-pane{display:block!important;float:none!important;clear:both!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;margin:12px 0 18px!important;grid-column:1/-1!important}\n#player-center-view #pc-admin-panel .pc-admin-category-pane.hidden{display:none!important}\n#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 18px!important;width:100%!important;min-width:0!important;align-items:start!important}\n#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form>.field,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form>.field{min-width:0!important;width:100%!important;margin:0!important}\n#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form input,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form select,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form textarea,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form input,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form select,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form textarea{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important}\n#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form .pc-grid,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form .pc-grid{display:grid!important;grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.55fr) auto!important;gap:10px!important;align-items:end!important;width:100%!important;min-width:0!important}\n#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form button,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form button{min-width:112px!important;min-height:42px!important;padding:10px 18px!important;white-space:normal!important;line-height:1.35!important}\n@media(max-width:760px){#player-center-view #pc-admin-panel .pc-admin-category-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form{grid-template-columns:minmax(0,1fr)!important}#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"items\"] form .pc-grid,#player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category=\"mail\"] form .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}`;
-
+#player-center-view #pc-admin-panel .pc-admin-category-pane h3,
+#player-center-view #pc-admin-panel .pc-admin-category-pane h4{
+  color:#123f60!important;
+  margin:8px 0 14px!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-muted,
+#player-center-view #pc-admin-panel .pc-admin-category-pane p{
+  color:#49677b!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px 18px!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:14px 0!important;
+  align-items:start!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form>.field{
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form>h4,
+#player-center-view #pc-admin-panel .pc-admin-category-pane form>p,
+#player-center-view #pc-admin-panel .pc-admin-category-pane form>div:not(.field),
+#player-center-view #pc-admin-panel .pc-admin-category-pane form>label,
+#player-center-view #pc-admin-panel .pc-admin-category-pane form>.pc-grid{
+  grid-column:1 / -1!important;
+  min-width:0!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form input:not([type=checkbox]),
+#player-center-view #pc-admin-panel .pc-admin-category-pane form select,
+#player-center-view #pc-admin-panel .pc-admin-category-pane form textarea{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  min-height:42px!important;
+  padding:9px 11px!important;
+  box-sizing:border-box!important;
+  color:#17334b!important;
+  background:#fff!important;
+  border:1px solid #9bb9c9!important;
+  border-radius:6px!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form textarea{min-height:86px!important}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form input::placeholder,
+#player-center-view #pc-admin-panel .pc-admin-category-pane form textarea::placeholder{color:#71899a!important;opacity:1!important}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form label{
+  display:block!important;
+  color:#23465f!important;
+  font-weight:700!important;
+  line-height:1.5!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form button{
+  min-width:112px!important;
+  min-height:42px!important;
+  margin:0!important;
+  padding:10px 16px!important;
+  white-space:normal!important;
+  line-height:1.35!important;
+  border-radius:7px!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form button.primary{
+  color:#fff!important;
+  background:#155579!important;
+  border:1px solid #0d4565!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid{
+  display:grid!important;
+  grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.55fr) auto!important;
+  gap:10px!important;
+  align-items:end!important;
+  width:100%!important;
+  min-width:0!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid>.field{min-width:0!important}
+#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-row{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:16px!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:14px 8px!important;
+  color:#17334b!important;
+  border-bottom:1px solid #d1e0e8!important;
+}
+@media(max-width:760px){
+  #player-center-view #pc-admin-panel .pc-admin-category-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form{grid-template-columns:minmax(0,1fr)!important}
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form>.field,
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form>h4,
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form>p,
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form>div:not(.field),
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form>label,
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form>.pc-grid{grid-column:1!important}
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:420px){
+  #player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid{grid-template-columns:minmax(0,1fr)!important}
+}
+    `;
     document.head.appendChild(style);
   }
   const $=(s,r=view)=>r.querySelector(s);
