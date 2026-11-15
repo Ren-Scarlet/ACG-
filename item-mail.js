@@ -48,7 +48,7 @@
     try{
       const {data,error}=await client.rpc("use_inventory_item",{p_item_id:item.item_id,p_request_id:request});if(error)throw error;pendingUse.delete(item.item_id);
       const result=Array.isArray(data)?data[0]:data;
-      if(result?.cards?.length){const pack=packs.find(x=>x.id===result.result?.pack_id)||{id:result.result?.pack_id||"pack_010",name:result.result?.pack_name||"奖励卡包"};msg.textContent="使用成功，获得："+result.cards.map(x=>cardName(x.card_id)).join("、");window.acgShowItemPackOpening?.(pack,result);}
+      if(result?.cards?.length){const pack=packs.find(x=>x.id===result.result?.pack_id)||{id:result.result?.pack_id||"pack_010",name:result.result?.pack_name||"奖励卡包"};msg.textContent="使用成功，获得："+result.cards.map(x=>cardName(x.card_id)).join("、");window.acgShowItemPackOpening?.({...pack,pack_name:pack.name,draw_mode:pack.category==="berry"?"uniform":"rarity",price_tokens:0},result);}
       else if(result?.result?.kind==="tokens")msg.textContent="使用成功，获得 "+result.result.amount+" 代币。";
       else msg.textContent="使用成功，奖励已放入仓库。";
       status(msg,msg.textContent);await loadItemBox();
