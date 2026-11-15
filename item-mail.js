@@ -3,194 +3,54 @@
   const client=window.acgSupabaseClient,view=document.getElementById("player-center-view");
   if(!client||!view||view.dataset.itemMailReady==="1")return;
   view.dataset.itemMailReady="1";
-  if(!document.getElementById("acg-item-mail-contrast-style")){
+
+  if(!document.getElementById("acg-item-mail-clean-style")){
     const style=document.createElement("style");
-    style.id="acg-item-mail-contrast-style";
+    style.id="acg-item-mail-clean-style";
     style.textContent=`
-/* Admin workspaces: full-width shell and stable category navigation */
-#player-center-view #pc-admin-panel{
-  display:block!important;
-  grid-column:1 / -1!important;
-  justify-self:stretch!important;
-  width:100%!important;
-  max-width:none!important;
-  min-width:0!important;
-  box-sizing:border-box!important;
-}
-#player-center-view #pc-admin-panel.hidden{display:none!important}
-#player-center-view #pc-admin-panel .pc-admin-category-nav{
-  display:grid!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  gap:10px!important;
-  width:100%!important;
-  max-width:none!important;
-  min-width:0!important;
-  margin:16px 0 20px!important;
-  padding:0!important;
-  box-sizing:border-box!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-nav button{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  width:100%!important;
-  min-width:0!important;
-  min-height:48px!important;
-  margin:0!important;
-  padding:10px 12px!important;
-  white-space:normal!important;
-  overflow-wrap:break-word!important;
-  word-break:normal!important;
-  text-align:center!important;
-  line-height:1.35!important;
-  font-size:14px!important;
-  font-weight:800!important;
-  color:#17334b!important;
-  background:linear-gradient(180deg,#f8fcff,#e5f1f7)!important;
-  border:1px solid #91b4c7!important;
-  border-radius:8px!important;
-  box-shadow:0 2px 4px #17334b18!important;
-  clip-path:none!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-nav button.active{
-  color:#fff!important;
-  background:linear-gradient(135deg,#174d70,#0b3552)!important;
-  border-color:#0b3552!important;
-  box-shadow:0 3px 8px #0b355244!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-pane-host{
-  display:block!important;
-  grid-column:1 / -1!important;
-  width:100%!important;
-  max-width:none!important;
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-  box-sizing:border-box!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane{
-  display:block!important;
-  float:none!important;
-  clear:both!important;
-  grid-column:1 / -1!important;
-  width:100%!important;
-  max-width:none!important;
-  min-width:0!important;
-  margin:12px 0 20px!important;
-  padding:clamp(14px,2vw,22px)!important;
-  box-sizing:border-box!important;
-  background:#f7fbfe!important;
-  color:#17334b!important;
-  border:1px solid #b5cedb!important;
-  border-radius:10px!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane.hidden{display:none!important}
-#player-center-view #pc-admin-panel .pc-admin-category-pane h3,
-#player-center-view #pc-admin-panel .pc-admin-category-pane h4{
-  color:#123f60!important;
-  margin:8px 0 14px!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-muted,
-#player-center-view #pc-admin-panel .pc-admin-category-pane p{
-  color:#49677b!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  gap:14px 18px!important;
-  width:100%!important;
-  min-width:0!important;
-  margin:14px 0!important;
-  align-items:start!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form>.field{
-  width:100%!important;
-  min-width:0!important;
-  margin:0!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form>h4,
-#player-center-view #pc-admin-panel .pc-admin-category-pane form>p,
-#player-center-view #pc-admin-panel .pc-admin-category-pane form>div:not(.field),
-#player-center-view #pc-admin-panel .pc-admin-category-pane form>label,
-#player-center-view #pc-admin-panel .pc-admin-category-pane form>.pc-grid{
-  grid-column:1 / -1!important;
-  min-width:0!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form input:not([type=checkbox]),
-#player-center-view #pc-admin-panel .pc-admin-category-pane form select,
-#player-center-view #pc-admin-panel .pc-admin-category-pane form textarea{
-  display:block!important;
-  width:100%!important;
-  min-width:0!important;
-  max-width:100%!important;
-  min-height:42px!important;
-  padding:9px 11px!important;
-  box-sizing:border-box!important;
-  color:#17334b!important;
-  background:#fff!important;
-  border:1px solid #9bb9c9!important;
-  border-radius:6px!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form textarea{min-height:86px!important}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form input::placeholder,
-#player-center-view #pc-admin-panel .pc-admin-category-pane form textarea::placeholder{color:#71899a!important;opacity:1!important}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form label{
-  display:block!important;
-  color:#23465f!important;
-  font-weight:700!important;
-  line-height:1.5!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form button{
-  min-width:112px!important;
-  min-height:42px!important;
-  margin:0!important;
-  padding:10px 16px!important;
-  white-space:normal!important;
-  line-height:1.35!important;
-  border-radius:7px!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form button.primary{
-  color:#fff!important;
-  background:#155579!important;
-  border:1px solid #0d4565!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid{
-  display:grid!important;
-  grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.55fr) auto!important;
-  gap:10px!important;
-  align-items:end!important;
-  width:100%!important;
-  min-width:0!important;
-}
-#player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid>.field{min-width:0!important}
-#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-row{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:16px!important;
-  width:100%!important;
-  min-width:0!important;
-  padding:14px 8px!important;
-  color:#17334b!important;
-  border-bottom:1px solid #d1e0e8!important;
-}
-@media(max-width:760px){
-  #player-center-view #pc-admin-panel .pc-admin-category-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form{grid-template-columns:minmax(0,1fr)!important}
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form>.field,
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form>h4,
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form>p,
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form>div:not(.field),
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form>label,
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form>.pc-grid{grid-column:1!important}
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-}
-@media(max-width:420px){
-  #player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid{grid-template-columns:minmax(0,1fr)!important}
-}
+      .acg-admin-workspace{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#f3f8fb;color:#173b56;font-family:inherit}
+      .acg-admin-workspace *{box-sizing:border-box}
+      .acg-admin-workspace-top{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(16px,3vw,36px);background:#e7f4f8;border-bottom:1px solid #a9cbd8}
+      .acg-admin-workspace-heading h2{margin:0;color:#123d5a;font-size:clamp(22px,3vw,30px);font-weight:900}
+      .acg-admin-workspace-kicker{display:none}
+      .acg-admin-workspace-back{min-height:40px;padding:9px 16px;border:1px solid #7faec1;border-radius:5px;background:#fff;color:#164663;font-weight:800;cursor:pointer}
+      .acg-admin-workspace-content{flex:1;min-height:0;overflow:auto;width:100%;padding:clamp(14px,2vw,26px)}
+      .acg-admin-workspace-pane{display:block!important;width:min(1120px,100%);max-width:1120px;min-width:0;margin:0 auto;padding:clamp(16px,2vw,26px);background:#f8fcfd;color:#173b56;border:1px solid #a9cbd8;border-radius:7px;box-shadow:0 3px 0 #d4e9ef}
+      .acg-admin-workspace-pane h3{margin:0 0 7px;color:#123d5a;font-size:20px;font-weight:900}
+      .acg-admin-workspace-pane h4{margin:24px 0 12px;padding:10px 12px;background:#e4f4f8;border-left:4px solid #19b8d0;color:#164663;font-size:15px;font-weight:900}
+      .acg-admin-workspace-pane>p{margin:0 0 18px;color:#4d6d80;font-size:13px;line-height:1.65}
+      .acg-admin-workspace-pane form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;width:100%;margin:14px 0;align-items:start}
+      .acg-admin-workspace-pane .field{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0;width:100%;margin:0}
+      .acg-admin-workspace-pane .field>label{display:block;width:100%;color:#244d66;font-size:13px;font-weight:800;line-height:1.4;white-space:normal}
+      .acg-admin-workspace-pane input:not([type=checkbox]),.acg-admin-workspace-pane select,.acg-admin-workspace-pane textarea{display:block;width:100%;min-width:0;max-width:100%;min-height:42px;padding:9px 11px;border:1px solid #9bbdcb;border-radius:4px;background:#fff;color:#173b56;font:inherit;font-size:14px}
+      .acg-admin-workspace-pane textarea{min-height:88px;resize:vertical}
+      .acg-admin-workspace-pane input::placeholder,.acg-admin-workspace-pane textarea::placeholder{color:#718b9b;opacity:1}
+      .acg-admin-workspace-pane form>.acg-form-grid,.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>.status,.acg-admin-workspace-pane form>label{grid-column:1/-1}
+      .acg-admin-workspace-pane .acg-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;width:100%;min-width:0}
+      .acg-admin-workspace-pane form>label{display:flex;align-items:center;gap:9px;color:#244d66;font-weight:800}
+      .acg-admin-workspace-pane form>label input{width:18px;height:18px}
+      .acg-admin-workspace-pane button{min-height:40px;padding:9px 16px;border:1px solid #8db5c6;border-radius:5px;background:#eaf5f8;color:#164663;font-weight:800;cursor:pointer}
+      .acg-admin-workspace-pane button.primary{border-color:#124866;background:#164f70;color:#fff}
+      .acg-admin-workspace-pane button:disabled{opacity:.55;cursor:not-allowed}
+      .acg-admin-workspace-pane .status{margin:0;color:#176b57;font-size:13px;line-height:1.5}
+      .acg-admin-workspace-pane .status.bad{color:#b42345}
+      .acg-admin-workspace-pane .pc-row{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:13px 8px;border-bottom:1px solid #c9dfe7;color:#173b56}
+      .acg-admin-workspace-pane .pc-row>div{min-width:0;overflow-wrap:anywhere}
+      .acg-admin-workspace-pane .pc-muted{color:#557589;font-size:12px;line-height:1.55}
+      .acg-admin-workspace-pane .pc-empty{padding:18px;text-align:center;color:#557589;background:#edf7fa;border:1px solid #c7e0e8}
+      .acg-admin-workspace-pane .acg-attachment-list{display:grid;gap:10px;width:100%;grid-column:1/-1}
+      .acg-admin-workspace-pane .pc-grid{display:grid;grid-template-columns:minmax(140px,1fr) minmax(180px,1.5fr) minmax(90px,.6fr) auto;gap:10px;align-items:end;width:100%;padding:12px;background:#edf7fa;border:1px solid #c8e0e8}
+      .acg-admin-workspace-pane .pc-grid>.field{min-width:0}
+      @media(max-width:720px){
+        .acg-admin-workspace-top{align-items:flex-start}
+        .acg-admin-workspace-pane form,.acg-admin-workspace-pane .acg-form-grid{grid-template-columns:minmax(0,1fr)}
+        .acg-admin-workspace-pane .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      }
+      @media(max-width:460px){
+        .acg-admin-workspace-top{flex-direction:column}
+        .acg-admin-workspace-pane .pc-grid{grid-template-columns:minmax(0,1fr)}
+      }
     `;
-    style.textContent += "\n/* Independent full-screen admin workspaces */\n.acg-admin-workspace{position:fixed!important;inset:0!important;z-index:100000!important;display:flex!important;flex-direction:column!important;width:100vw!important;height:100vh!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#eef4f8!important;color:#18364b!important;box-sizing:border-box!important;font-family:inherit!important}\n.acg-admin-workspace *{box-sizing:border-box!important}\n.acg-admin-workspace-top{flex:0 0 auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important;width:100%!important;padding:18px 4vw!important;background:linear-gradient(120deg,#123d5a,#1b6381)!important;color:#fff!important;border-bottom:1px solid #0b3149!important;box-shadow:0 3px 14px #102f4430!important}\n.acg-admin-workspace-kicker{display:block!important;font-size:11px!important;letter-spacing:.16em!important;font-weight:800!important;color:#c5e6f3!important}\n.acg-admin-workspace-heading h2{margin:4px 0 0!important;font-size:28px!important;line-height:1.2!important;color:#fff!important}\n.acg-admin-workspace-back{flex:0 0 auto!important;min-height:42px!important;padding:10px 18px!important;color:#123d5a!important;background:#fff!important;border:1px solid #c5dce8!important;border-radius:8px!important;font-weight:800!important;cursor:pointer!important}\n.acg-admin-workspace-content{flex:1 1 auto!important;width:100%!important;min-height:0!important;overflow:auto!important;padding:clamp(16px,3vw,36px)!important}\n.acg-admin-workspace-pane{display:block!important;width:min(1200px,100%)!important;max-width:1200px!important;min-width:0!important;margin:0 auto!important;padding:clamp(18px,3vw,34px)!important;background:#fff!important;color:#18364b!important;border:1px solid #c9d9e2!important;border-radius:14px!important;box-shadow:0 8px 28px #193b5014!important}\n.acg-admin-workspace-pane h3{font-size:22px!important;color:#123d5a!important;margin:0 0 8px!important}\n.acg-admin-workspace-pane p{color:#506b7d!important}\n.acg-admin-workspace-pane form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px 22px!important;width:100%!important;align-items:start!important}\n.acg-admin-workspace-pane form>.field{min-width:0!important;width:100%!important;margin:0!important}\n.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>p,.acg-admin-workspace-pane form>div:not(.field),.acg-admin-workspace-pane form>label,.acg-admin-workspace-pane form>.pc-grid{grid-column:1/-1!important;min-width:0!important}\n.acg-admin-workspace-pane input:not([type=checkbox]),.acg-admin-workspace-pane select,.acg-admin-workspace-pane textarea{width:100%!important;min-width:0!important;max-width:100%!important;min-height:44px!important;padding:10px 12px!important;color:#18364b!important;background:#fff!important;border:1px solid #a9c0ce!important;border-radius:7px!important}\n.acg-admin-workspace-pane textarea{min-height:96px!important}\n.acg-admin-workspace-pane label{color:#254a63!important;font-weight:750!important}\n.acg-admin-workspace-pane button{min-height:42px!important;padding:10px 16px!important;border-radius:7px!important}\n.acg-admin-workspace-pane .pc-grid{display:grid!important;grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.55fr) auto!important;gap:12px!important;align-items:end!important;width:100%!important}\n.acg-admin-workspace-pane .pc-row{display:flex!important;justify-content:space-between!important;gap:18px!important;padding:16px 8px!important;border-bottom:1px solid #d8e4eb!important;color:#18364b!important}\n@media(max-width:760px){.acg-admin-workspace-top{align-items:flex-start!important;flex-direction:column!important}.acg-admin-workspace-pane form{grid-template-columns:minmax(0,1fr)!important}.acg-admin-workspace-pane form>.field,.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>p,.acg-admin-workspace-pane form>div:not(.field),.acg-admin-workspace-pane form>label,.acg-admin-workspace-pane form>.pc-grid{grid-column:1!important}.acg-admin-workspace-pane .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}\n@media(max-width:460px){.acg-admin-workspace-pane .pc-grid{grid-template-columns:minmax(0,1fr)!important}}\n";
-    style.textContent += "\n.acg-admin-workspace-content>section.acg-admin-workspace-pane{display:block!important;position:relative!important;float:none!important;grid-column:auto!important;justify-self:auto!important;flex:none!important;width:min(1120px,100%)!important;max-width:1120px!important;min-width:0!important;margin:0 auto!important;overflow:visible!important}\n.acg-admin-workspace-pane form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:start!important;justify-items:stretch!important}\n.acg-admin-workspace-pane form>.field{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;width:100%!important;min-width:0!important;max-width:none!important}\n.acg-admin-workspace-pane form>.field>label{display:block!important;width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:left!important;line-height:1.45!important}\n.acg-admin-workspace-pane form>.field>input,.acg-admin-workspace-pane form>.field>select,.acg-admin-workspace-pane form>.field>textarea{display:block!important;width:100%!important;max-width:100%!important}\n.acg-admin-workspace-pane form>div:not(.field),.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>p,.acg-admin-workspace-pane form>.pc-grid{grid-column:1/-1!important}\n.acg-admin-workspace-pane form>button{justify-self:start!important;min-width:150px!important}\n.acg-admin-workspace-pane .pc-row{align-items:center!important;flex-wrap:wrap!important}\n.acg-admin-workspace-pane .pc-row>div{min-width:0!important;overflow-wrap:anywhere!important}\n@media(max-width:720px){.acg-admin-workspace-content{padding:12px!important}.acg-admin-workspace-content>section.acg-admin-workspace-pane{width:100%!important;padding:16px!important}.acg-admin-workspace-pane form{grid-template-columns:minmax(0,1fr)!important}.acg-admin-workspace-pane form>.field,.acg-admin-workspace-pane form>div:not(.field),.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>p,.acg-admin-workspace-pane form>.pc-grid{grid-column:1!important}}\n";
     document.head.appendChild(style);
   }
   const $=(s,r=view)=>r.querySelector(s);
@@ -298,7 +158,7 @@
     const desc=el("textarea");desc.rows=2;desc.maxLength=500;desc.placeholder="玩家可见说明";
     const category=select([["消耗品","consumable"],["重要道具","important"]]);
     const effect=select([["无效果（仅收藏）","none"],["抽取指定卡包","draw_pack"],["增加代币","grant_tokens"],["发放指定卡牌","grant_card"],["发放指定道具","grant_item"],["随机奖励（高级配置）","random_reward"],["选择奖励","choose_reward"]]);
-    const config=el("div",""),cf={};
+    const config=el("div","acg-form-grid"),cf={};
     function buildConfig(){
       config.replaceChildren();
       const add=(k,l,c)=>{cf[k]=c;config.appendChild(field(l,c));};
@@ -356,7 +216,7 @@
     const body=el("textarea");body.rows=4;body.maxLength=3000;body.placeholder="邮件正文（可选）";
     const target=select([["全体玩家","all"],["指定玩家","selected"]]),recipient=select([]);recipient.multiple=true;recipient.size=6;players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));
     const recipientWrap=field("指定收件人（按住 Ctrl / Command 多选）",recipient);recipientWrap.hidden=true;target.addEventListener("change",()=>recipientWrap.hidden=target.value!=="selected");
-    const expires=input("datetime-local"),attachments=el("div",""),add=button("＋ 添加奖励附件");
+    const expires=input("datetime-local"),attachments=el("div","acg-attachment-list"),add=button("＋ 添加奖励附件");
     function addRow(){
       const row=el("div","pc-grid"),type=select([["代币","tokens"],["卡牌","card"],["道具","item"]]),reward=select([["无需选择",""]]),amount=input("number");
       amount.min="1";amount.step="1";amount.value="1";const remove=button("移除");
