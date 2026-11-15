@@ -81,10 +81,11 @@
     tab.classList.add("active");
     const title = document.getElementById("page-title");
     if (title) title.textContent = "玩家中心";
-    // The draw lobby is standalone. Keep the player-center overview hidden while data loads.
-    if (page==="draw" && currentUser) {
+    // Draw is always a standalone page. Never reveal the player-center shell,
+    // even while Supabase is still restoring the existing login session.
+    if (page==="draw") {
       view.classList.add("hidden");
-      loadPage("draw");
+      if (currentUser) loadPage("draw");
       return;
     }
     view.classList.remove("hidden");
@@ -315,10 +316,12 @@
       tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;grid.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
     });
     const config=node("div","adl-config"),configInfo=node("div"),configTitle=node("h3","",selectedPool?.pack_name||"暂无开放卡池"),configDesc=node("p","","每包 5 张卡 · 经典卡池");
-    forceStyle(config,{display:"flex",gridColumn:"auto",gridRow:"auto",alignItems:"center",justifyContent:"space-between",gap:"16px",margin:"30px 0 0",padding:"17px 18px",background:"linear-gradient(100deg,#141e2d,#0e1521)",border:"1px solid #283449",borderRadius:"7px",boxShadow:"none",color:"#edf2fa",minHeight:"0"});
+    forceStyle(config,{display:"flex",position:"relative",width:"100%",height:"auto",minHeight:"0",maxHeight:"none",flex:"0 0 auto",flexDirection:"row",flexWrap:"nowrap",alignSelf:"auto",gridColumn:"1 / -1",gridRow:"auto",alignItems:"center",justifyContent:"space-between",gap:"16px",margin:"30px 0 0",padding:"17px 18px",overflow:"visible",background:"linear-gradient(100deg,#141e2d,#0e1521)",border:"1px solid #283449",borderRadius:"7px",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
     configInfo.append(configTitle,configDesc);const actions=node("div","adl-actions"),single=node("button","adl-btn primary","开启 1 包 · 5 张"),ten=node("button","adl-btn","开启 10 包 · 50 张");
     single.type=ten.type="button";actions.append(single,ten);config.append(configInfo,actions);
     const rates=node("div","adl-rates"),status=node("div","adl-status","");
+     forceStyle(rates,{height:"auto",minHeight:"0",maxHeight:"none",flex:"0 0 auto",gridColumn:"1 / -1"});
+     forceStyle(status,{height:"auto",minHeight:"18px",maxHeight:"none",flex:"0 0 auto",gridColumn:"1 / -1"});
     function updateConfig(){
       if(!selectedPool)return;
       configTitle.textContent=selectedPool.pack_name;configDesc.textContent="每包 5 张 · 单包 "+selectedPool.price_tokens+" 代币";
@@ -326,7 +329,7 @@
     }
     updateConfig();
     const historySection=node("div","adl-history"),historyTitle=node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张");
-    forceStyle(historySection,{display:"block",gridColumn:"auto",gridRow:"auto",margin:"28px 0 0",padding:"16px 0 0",background:"transparent",border:"0",borderTop:"1px solid #34445c",boxShadow:"none",color:"#edf2fa",minHeight:"0"});
+    forceStyle(historySection,{display:"block",position:"relative",width:"100%",height:"auto",minHeight:"0",maxHeight:"none",flex:"0 0 auto",alignSelf:"auto",gridColumn:"1 / -1",gridRow:"auto",margin:"28px 0 0",padding:"16px 0 0",overflow:"visible",background:"transparent",border:"0",borderTop:"1px solid #34445c",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
     historySection.appendChild(historyTitle);
     if(!history?.length)historySection.appendChild(node("p","adl-muted","还没有抽卡记录。"));
     else history.forEach(item=>{
@@ -582,7 +585,7 @@
     loginHint.textContent="已登录。以下内容仅本人可查看。";
     view.querySelector("#pc-public-name").value=currentUser.user_metadata?.username||"";
     // Only a real sign-in / account switch initializes data. Token refreshes must not reopen the last page.
-    if (userChanged && !view.classList.contains("hidden")) await loadPage(currentPage);
+    if (userChanged && (currentPage==="draw" || !view.classList.contains("hidden"))) await loadPage(currentPage);
     if (userChanged) await checkAdmin();
   }
 
