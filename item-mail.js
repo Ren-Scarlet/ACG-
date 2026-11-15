@@ -116,7 +116,7 @@
     }
     effect.addEventListener("change",buildConfig);category.addEventListener("change",()=>{const important=category.value==="important";effect.disabled=important;if(important)effect.value="none";buildConfig();});buildConfig();
     const active=el("input");active.type="checkbox";active.checked=true;const activeLabel=el("label","");activeLabel.style.display="flex";activeLabel.style.gap="8px";activeLabel.append(active,el("span","","启用道具"));
-    const save=button("保存道具","primary");save.type="submit";const reset=button("新建道具");reset.addEventListener("click",()=>{form.reset();id.readOnly=false;active.checked=true;buildConfig();});
+    const save=button("保存道具","primary");save.type="submit";const reset=button("新建道具");reset.addEventListener("click",()=>{form.reset();id.readOnly=false;active.checked=true;effect.disabled=false;buildConfig();});
     const msg=el("p","status","");
     form.append(field("道具编号（创建后建议保持不变）",id),field("道具名称",name),field("图标 / Emoji",icon),field("玩家可见说明",desc),field("道具类别",category),field("效果模板",effect),config,activeLabel,save,reset,msg);
     form.addEventListener("submit",async e=>{
@@ -138,7 +138,7 @@
       list.replaceChildren();if(!items.length){list.appendChild(el("div","pc-empty","还没有道具。"));return;}
       items.forEach(item=>{
         const row=el("div","pc-row"),info=el("div","");info.append(el("strong","",(item.icon||"🎁")+" "+item.name),el("div","pc-muted",item.item_id+" · "+item.category+" · "+item.effect_type+" · "+(item.is_active?"启用":"停用")),el("div","pc-muted",item.description||""));
-        const edit=button("编辑");edit.addEventListener("click",()=>{id.value=item.item_id;id.readOnly=true;name.value=item.name;icon.value=item.icon||"🎁";desc.value=item.description||"";category.value=item.category;effect.value=item.effect_type;active.checked=item.is_active!==false;buildConfig();Object.entries(item.effect_config||{}).forEach(([k,v])=>{if(cf[k])cf[k].value=String(v);});if(cf.json)cf.json.value=JSON.stringify(item.effect_config,null,2);form.scrollIntoView({behavior:"smooth",block:"center"});});
+        const edit=button("编辑");edit.addEventListener("click",()=>{id.value=item.item_id;id.readOnly=true;name.value=item.name;icon.value=item.icon||"🎁";desc.value=item.description||"";category.value=item.category;effect.value=item.effect_type;effect.disabled=item.category==="important";active.checked=item.is_active!==false;buildConfig();Object.entries(item.effect_config||{}).forEach(([k,v])=>{if(cf[k])cf[k].value=String(v);});if(cf.json)cf.json.value=JSON.stringify(item.effect_config,null,2);form.scrollIntoView({behavior:"smooth",block:"center"});});
         row.append(info,edit);list.appendChild(row);
       });
     }
