@@ -8,7 +8,7 @@ with expected_tables(table_name) as (
     ('matches'),('match_results'),('achievements'),('player_achievements'),
     ('draw_card_catalog'),('card_draw_pools'),('card_draw_history'),
     ('player_registry'),('legacy_card_collections'),('legacy_collection_imports'),
-    ('card_inventory_adjustments'),('battle_item_catalog'),('battle_item_deck_commits')
+    ('card_inventory_adjustments'),('battle_item_catalog'),('battle_item_deck_commits'),('card_dismantle_requests')
 ),
 expected_columns(table_name,column_name) as (
   values
@@ -39,6 +39,11 @@ expected_columns(table_name,column_name) as (
     ('card_inventory_adjustments','user_id'),('card_inventory_adjustments','card_id'),
     ('card_inventory_adjustments','delta'),('card_inventory_adjustments','reason'),
     ('card_inventory_adjustments','adjusted_by'),
+    ('card_draw_pools','rate_alt'),('card_draw_pools','cover_card_id'),
+    ('draw_card_catalog','is_alt'),
+    ('card_draw_history','draw_index'),
+    ('card_dismantle_requests','user_id'),('card_dismantle_requests','request_id'),
+    ('card_dismantle_requests','reward_tokens'),('card_dismantle_requests','items'),
     ('battle_item_catalog','card_id'),('battle_item_catalog','card_name'),
     ('battle_item_catalog','enabled'),
     ('battle_item_deck_commits','user_id'),('battle_item_deck_commits','request_id'),
@@ -84,6 +89,10 @@ function_status as (
     ('admin_correct_2v2_match'),
     ('admin_grant_tokens'),
     ('draw_one_card'),
+    ('draw_packages'),
+    ('dismantle_cards'),
+    ('admin_set_draw_pool_v2'),
+    ('admin_set_draw_pool_cover'),
     ('admin_save_achievement'),
     ('save_profile_display')
   ) required(function_name)
