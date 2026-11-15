@@ -82,13 +82,13 @@ begin
   if nullif(btrim(p_name),'') is null or length(p_name)>60 then
     raise exception '道具名称不能为空，且最多 60 个字符';
   end if;
-  if p_category not in ('important','consumable') then
+  if p_category is null or p_category not in ('important','consumable') then
     raise exception '道具类别无效';
   end if;
   if p_category='important' and p_effect_type<>'none' then
     raise exception '重要道具暂不支持直接使用效果，请选择消耗品类别';
   end if;
-  if p_effect_type not in ('none','draw_pack','grant_tokens','grant_card','grant_item','random_reward') then
+  if p_effect_type is null or p_effect_type not in ('none','draw_pack','grant_tokens','grant_card','grant_item','random_reward') then
     raise exception '暂不支持这种道具效果';
   end if;
   if jsonb_typeof(v_config)<>'object' then
@@ -117,9 +117,9 @@ begin
       raise exception '道具奖励需要指定道具编号和有效的正整数数量';
     end if;
   elsif p_effect_type='random_reward' then
-    if jsonb_typeof(v_config->'options')<>'array'
-       or jsonb_array_length(v_config->'options')<2
-       or jsonb_array_length(v_config->'options')>20 then
+    if coalesce(jsonb_typeof(v_config->'options'),'')<>'array'
+       or coalesce(jsonb_array_length(v_config->'options'),0)<2
+       or coalesce(jsonb_array_length(v_config->'options'),0)>20 then
       raise exception '随机奖励需要配置 2 至 20 个奖励选项';
     end if;
     if exists (
@@ -468,7 +468,7 @@ begin
   if nullif(btrim(p_title),'') is null or length(p_title)>100 then
     raise exception '邮件标题不能为空，且最多 100 个字符';
   end if;
-  if p_target_type not in ('all','selected') then
+  if p_target_type is null or p_target_type not in ('all','selected') then
     raise exception '收件人范围无效';
   end if;
   if p_target_type='selected' and coalesce(cardinality(p_user_ids),0)=0 then
@@ -484,8 +484,8 @@ begin
   )<>cardinality(p_user_ids) then
     raise exception '部分收件人账号不存在';
   end if;
-  if jsonb_typeof(p_attachments)<>'array' or jsonb_array_length(p_attachments)=0
-     or jsonb_array_length(p_attachments)>30 then
+  if coalesce(jsonb_typeof(p_attachments),'')<>'array' or coalesce(jsonb_array_length(p_attachments),0)=0
+     or coalesce(jsonb_array_length(p_attachments),0)>30 then
     raise exception '每封邮件需要 1 至 30 项奖励附件';
   end if;
   if p_expires_at is not null and p_expires_at<=now() then
