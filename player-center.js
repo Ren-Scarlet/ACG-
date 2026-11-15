@@ -73,16 +73,25 @@
     statusEl.textContent = message;
     statusEl.className = "status" + (bad ? " bad" : " good");
   }
-  function showCenter() {
+  function showCenter(page="overview") {
+    // A normal visit starts at the overview; deep links can request a specific page.
+    currentPage = page;
     knownViews.forEach(id => document.getElementById(id)?.classList.add("hidden"));
     view.classList.remove("hidden");
     [...knownTabs,"tab-player-center"].forEach(id => document.getElementById(id)?.classList.remove("active"));
     tab.classList.add("active");
     const title = document.getElementById("page-title");
     if (title) title.textContent = "玩家中心";
-    if (currentUser) loadPage(currentPage);
+    if (currentUser) loadPage(page);
+    else {
+      contentEl.replaceChildren(node("div","pc-empty","请先登录账号，再使用抽卡和个人资料功能。"));
+      pcLayout.classList.remove("hidden");
+      personalEl.classList.remove("hidden");
+    }
   }
-  tab.addEventListener("click",showCenter);
+  tab.addEventListener("click",()=>showCenter("overview"));
+  // Direct entry from the homepage avoids showing the overview before the requested page.
+  window.acgOpenPlayerCenterPage = page => showCenter(page==="draw"?"draw":"overview");
   knownTabs.forEach(id => document.getElementById(id)?.addEventListener("click", () => {
     view.classList.add("hidden");
     tab.classList.remove("active");
@@ -518,6 +527,11 @@
     view.querySelectorAll("[data-page]").forEach(button=>button.classList.toggle("active",button.dataset.page===page));
     contentEl.replaceChildren(node("p","pc-muted","正在读取……"));
     try {
+      if(page==="draw"&&!currentUser){
+        const message=node("div","pc-empty","抽卡功能需要先登录。请先登录当前 ACG 卡牌网站账号。");
+        const login=node("button","primary","前往账号登录");login.type="button";login.addEventListener("click",()=>document.getElementById("tab-account")?.click());
+        message.appendChild(login);contentEl.replaceChildren(message);setStatus("请先登录。",true);return;
+      }
       if(page==="overview")await loadOverview();
       else if(page==="matches")await loadMatches();
       else if(page==="tokens")await loadTokens();
@@ -541,6 +555,7 @@
     const userChanged=nextUserId!==lastSessionUserId;
     lastSessionUserId=nextUserId;
     if(!currentUser){
+      closeDrawLobby();
       personalEl.classList.add("hidden");
       pcLayout.classList.add("hidden");
       loginHint.textContent="登录后可查看自己的对战记录、代币、收藏和成就。公开主页仍可供访客查询。";
@@ -551,9 +566,9 @@
     pcLayout.classList.remove("hidden");
     loginHint.textContent="已登录。以下内容仅本人可查看。";
     view.querySelector("#pc-public-name").value=currentUser.user_metadata?.username||"";
-    // Auth token refreshes must never pull the user back into a previously opened page (especially the draw lobby).
-    if (!view.classList.contains("hidden")) await loadPage(currentPage);
-    await checkAdmin();
+    // Only a real sign-in / account switch initializes data. Token refreshes must not reopen the last page.
+    if (userChanged && !view.classList.contains("hidden")) await loadPage(currentPage);
+    if (userChanged) await checkAdmin();
   }
 
 
