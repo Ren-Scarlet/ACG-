@@ -4,52 +4,27 @@
   if(!client||!view||view.dataset.itemMailReady==="1")return;
   view.dataset.itemMailReady="1";
 
-  if(!document.getElementById("acg-item-mail-clean-style")){
+  if(!document.getElementById("acg-item-mail-admin-style")){
     const style=document.createElement("style");
-    style.id="acg-item-mail-clean-style";
+    style.id="acg-item-mail-admin-style";
     style.textContent=`
-      .acg-admin-workspace{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;width:100vw;height:100vh;height:100dvh;overflow:hidden;background:#f3f8fb;color:#173b56;font-family:inherit}
-      .acg-admin-workspace *{box-sizing:border-box}
-      .acg-admin-workspace-top{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px clamp(16px,3vw,36px);background:#e7f4f8;border-bottom:1px solid #a9cbd8}
-      .acg-admin-workspace-heading h2{margin:0;color:#123d5a;font-size:clamp(22px,3vw,30px);font-weight:900}
-      .acg-admin-workspace-kicker{display:none}
-      .acg-admin-workspace-back{min-height:40px;padding:9px 16px;border:1px solid #7faec1;border-radius:5px;background:#fff;color:#164663;font-weight:800;cursor:pointer}
-      .acg-admin-workspace-content{flex:1;min-height:0;overflow:auto;width:100%;padding:clamp(14px,2vw,26px)}
-      .acg-admin-workspace-pane{display:block!important;width:min(1120px,100%);max-width:1120px;min-width:0;margin:0 auto;padding:clamp(16px,2vw,26px);background:#f8fcfd;color:#173b56;border:1px solid #a9cbd8;border-radius:7px;box-shadow:0 3px 0 #d4e9ef}
-      .acg-admin-workspace-pane h3{margin:0 0 7px;color:#123d5a;font-size:20px;font-weight:900}
-      .acg-admin-workspace-pane h4{margin:24px 0 12px;padding:10px 12px;background:#e4f4f8;border-left:4px solid #19b8d0;color:#164663;font-size:15px;font-weight:900}
-      .acg-admin-workspace-pane>p{margin:0 0 18px;color:#4d6d80;font-size:13px;line-height:1.65}
-      .acg-admin-workspace-pane form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;width:100%;margin:14px 0;align-items:start}
-      .acg-admin-workspace-pane .field{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0;width:100%;margin:0}
-      .acg-admin-workspace-pane .field>label{display:block;width:100%;color:#244d66;font-size:13px;font-weight:800;line-height:1.4;white-space:normal}
-      .acg-admin-workspace-pane input:not([type=checkbox]),.acg-admin-workspace-pane select,.acg-admin-workspace-pane textarea{display:block;width:100%;min-width:0;max-width:100%;min-height:42px;padding:9px 11px;border:1px solid #9bbdcb;border-radius:4px;background:#fff;color:#173b56;font:inherit;font-size:14px}
-      .acg-admin-workspace-pane textarea{min-height:88px;resize:vertical}
-      .acg-admin-workspace-pane input::placeholder,.acg-admin-workspace-pane textarea::placeholder{color:#718b9b;opacity:1}
-      .acg-admin-workspace-pane form>.acg-form-grid,.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>.status,.acg-admin-workspace-pane form>label{grid-column:1/-1}
-      .acg-admin-workspace-pane .acg-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 18px;width:100%;min-width:0}
-      .acg-admin-workspace-pane form>label{display:flex;align-items:center;gap:9px;color:#244d66;font-weight:800}
-      .acg-admin-workspace-pane form>label input{width:18px;height:18px}
-      .acg-admin-workspace-pane button{min-height:40px;padding:9px 16px;border:1px solid #8db5c6;border-radius:5px;background:#eaf5f8;color:#164663;font-weight:800;cursor:pointer}
-      .acg-admin-workspace-pane button.primary{border-color:#124866;background:#164f70;color:#fff}
-      .acg-admin-workspace-pane button:disabled{opacity:.55;cursor:not-allowed}
-      .acg-admin-workspace-pane .status{margin:0;color:#176b57;font-size:13px;line-height:1.5}
-      .acg-admin-workspace-pane .status.bad{color:#b42345}
-      .acg-admin-workspace-pane .pc-row{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:13px 8px;border-bottom:1px solid #c9dfe7;color:#173b56}
-      .acg-admin-workspace-pane .pc-row>div{min-width:0;overflow-wrap:anywhere}
-      .acg-admin-workspace-pane .pc-muted{color:#557589;font-size:12px;line-height:1.55}
-      .acg-admin-workspace-pane .pc-empty{padding:18px;text-align:center;color:#557589;background:#edf7fa;border:1px solid #c7e0e8}
-      .acg-admin-workspace-pane .acg-attachment-list{display:grid;gap:10px;width:100%;grid-column:1/-1}
-      .acg-admin-workspace-pane .pc-grid{display:grid;grid-template-columns:minmax(140px,1fr) minmax(180px,1.5fr) minmax(90px,.6fr) auto;gap:10px;align-items:end;width:100%;padding:12px;background:#edf7fa;border:1px solid #c8e0e8}
-      .acg-admin-workspace-pane .pc-grid>.field{min-width:0}
-      @media(max-width:720px){
-        .acg-admin-workspace-top{align-items:flex-start}
-        .acg-admin-workspace-pane form,.acg-admin-workspace-pane .acg-form-grid{grid-template-columns:minmax(0,1fr)}
-        .acg-admin-workspace-pane .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-      }
-      @media(max-width:460px){
-        .acg-admin-workspace-top{flex-direction:column}
-        .acg-admin-workspace-pane .pc-grid{grid-template-columns:minmax(0,1fr)}
-      }
+      #player-center-view #pc-admin-panel .pc-admin-category-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;width:100%!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-nav button{min-width:0!important;min-height:46px!important;white-space:normal!important;line-height:1.35!important;padding:10px 12px!important}
+      #player-center-view #pc-admin-panel .pc-admin-pane-host{display:block!important;width:100%!important;max-width:none!important;min-width:0!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane{display:block!important;float:none!important;clear:both!important;width:100%!important;max-width:none!important;min-width:0!important;margin:12px 0!important;padding:20px!important;box-sizing:border-box!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane.hidden{display:none!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 18px!important;width:100%!important;align-items:start!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane form>.field{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;width:100%!important;min-width:0!important;margin:0!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane form>.field>label{display:block!important;width:100%!important;white-space:normal!important;line-height:1.45!important;color:#244d66!important;font-weight:800!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane input:not([type=checkbox]),#player-center-view #pc-admin-panel .pc-admin-category-pane select,#player-center-view #pc-admin-panel .pc-admin-category-pane textarea{width:100%!important;min-width:0!important;max-width:100%!important;min-height:42px!important;padding:9px 11px!important;background:#fff!important;color:#173b56!important;border:1px solid #9bbdcb!important;border-radius:4px!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane .acg-form-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 18px!important;width:100%!important;grid-column:1/-1!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane .acg-attachment-list{display:grid!important;gap:10px!important;width:100%!important;grid-column:1/-1!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{display:grid!important;grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.6fr) auto!important;gap:10px!important;align-items:end!important;width:100%!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane .pc-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;flex-wrap:wrap!important;width:100%!important;padding:13px 8px!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane h3{color:#123d5a!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane h4{margin:22px 0 12px!important;padding:10px 12px!important;background:#e4f4f8!important;border-left:4px solid #19b8d0!important;color:#164663!important}
+      @media(max-width:760px){#player-center-view #pc-admin-panel .pc-admin-category-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}#player-center-view #pc-admin-panel .pc-admin-category-pane form,#player-center-view #pc-admin-panel .pc-admin-category-pane .acg-form-grid{grid-template-columns:minmax(0,1fr)!important}#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+      @media(max-width:460px){#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{grid-template-columns:minmax(0,1fr)!important}}
     `;
     document.head.appendChild(style);
   }
@@ -100,53 +75,33 @@
     }catch(error){list.replaceChildren(el("div","pc-empty","邮件读取失败："+error.message));}
   }
 
-  const admin=$("#pc-admin-panel"),nav=admin?.querySelector(".pc-admin-category-nav"),paneHost=admin?.querySelector(".pc-admin-pane-host");
+  const admin=$("#pc-admin-panel"),nav=admin?.querySelector(".pc-admin-category-nav");
+  let paneHost=admin?.querySelector(".pc-admin-pane-host");
   if(admin&&nav){
+    if(!paneHost){
+      paneHost=el("div","pc-admin-pane-host");
+      const existing=[...admin.querySelectorAll(".pc-admin-category-pane")];
+      existing.forEach(p=>paneHost.appendChild(p));
+      nav.insertAdjacentElement("afterend",paneHost);
+    }
     const addArea=(id,label)=>{
       if(admin.querySelector('[data-admin-category="'+id+'"]'))return;
       const pane=el("section","pc-admin-category-pane hidden");pane.dataset.adminCategory=id;
       const tab=button(label);tab.dataset.adminCategory=id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected","false");
-      if(id==="items"||id==="mail"){
-        tab.classList.add("pc-admin-standalone-launch");
-        tab.title="在独立工作页面中打开";
-        tab.addEventListener("click",()=>{
-          const title=id==="items"?"道具工坊":"邮件管理";
-          nav.querySelectorAll("button").forEach(x=>{const on=x.dataset.adminCategory===id;x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on));});
-          admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.add("hidden"));
-          const overlay=el("div","acg-admin-workspace");
-          overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-label",title);
-          const top=el("header","acg-admin-workspace-top");
-          const heading=el("div","acg-admin-workspace-heading");
-          heading.append(el("span","acg-admin-workspace-kicker","ADMIN WORKSPACE"),el("h2","",title));
-          const content=el("main","acg-admin-workspace-content");
-          const back=button("← 返回系统管理","acg-admin-workspace-back");
-          const closeWorkspace=()=>{
-            if(pane.isConnected) (paneHost||admin).appendChild(pane);
-            pane.classList.remove("acg-admin-workspace-pane");
-            pane.classList.add("pc-admin-category-pane","hidden");
-            overlay.remove();
-            nav.querySelectorAll("button").forEach(x=>{const on=x.dataset.adminCategory==="players";x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on));});
-            admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!=="players"));
-          };
-          back.addEventListener("click",closeWorkspace);
-          top.append(heading,back);
-          // Detach legacy admin-grid class while shown as a full-page workspace.
-          pane.classList.remove("pc-admin-category-pane","hidden");
-          pane.classList.add("acg-admin-workspace-pane");
-          content.appendChild(pane);
-          overlay.append(top,content);
-          document.body.appendChild(overlay);
-          back.focus();
-          overlay.addEventListener("keydown",event=>{if(event.key==="Escape")closeWorkspace();});
+      tab.addEventListener("click",()=>{
+        nav.querySelectorAll("button").forEach(x=>{
+          const selected=x.dataset.adminCategory===id;
+          x.classList.toggle("active",selected);x.setAttribute("aria-selected",String(selected));
         });
-      }else{
-        tab.addEventListener("click",()=>{nav.querySelectorAll("button").forEach(x=>{const on=x.dataset.adminCategory===id;x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on));});admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!==id));});
-      }
-      nav.appendChild(tab);(paneHost||admin).appendChild(pane);
+        admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!==id));
+      });
+      nav.appendChild(tab);
+      paneHost.appendChild(pane);
     };
-    addArea("items","道具工坊");addArea("mail","邮件管理");
-    nav.addEventListener("click",()=>setTimeout(()=>{const active=nav.querySelector("button.active")?.dataset.adminCategory;admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!==active));},0));
-    buildItemWorkshop(admin.querySelector('[data-admin-category="items"]'));buildMailManager(admin.querySelector('[data-admin-category="mail"]'));
+    addArea("items","道具工坊");
+    addArea("mail","邮件管理");
+    buildItemWorkshop(admin.querySelector('[data-admin-category="items"]'));
+    buildMailManager(admin.querySelector('[data-admin-category="mail"]'));
   }
 
   function buildItemWorkshop(pane){
