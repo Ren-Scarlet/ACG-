@@ -196,7 +196,7 @@
   }
   async function refreshAdmin(){
     if(!admin)return;
-    try{await Promise.all([loadStatic(),loadPlayers(),loadItems()]);const ip=admin.querySelector('[data-admin-category="items"]'),mp=admin.querySelector('[data-admin-category="mail"]');if(ip?._refresh)await ip._refresh();if(mp?._loadHistory)await mp._loadHistory();}catch(_){}
+    try{await Promise.all([loadStatic(),loadPlayers(),loadItems()]);const ip=admin.querySelector('[data-admin-category="items"]'),mp=admin.querySelector('[data-admin-category="mail"]');if(ip?._refresh)await ip._refresh();if(mp?._refresh)await mp._refresh();}catch(_){}
   }
   client.auth.onAuthStateChange((_event,session)=>{if(session?.user)setTimeout(()=>{void refreshAdmin();},0);});
   void refreshAdmin();void loadStatic();void loadItems().catch(()=>{});
