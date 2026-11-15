@@ -85,6 +85,9 @@ begin
   if p_category not in ('important','consumable') then
     raise exception '道具类别无效';
   end if;
+  if p_category='important' and p_effect_type<>'none' then
+    raise exception '重要道具暂不支持直接使用效果，请选择消耗品类别';
+  end if;
   if p_effect_type not in ('none','draw_pack','grant_tokens','grant_card','grant_item','random_reward') then
     raise exception '暂不支持这种道具效果';
   end if;
