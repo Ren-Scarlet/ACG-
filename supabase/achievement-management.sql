@@ -194,8 +194,13 @@ begin
     condition_type=excluded.condition_type,
     threshold=excluded.threshold,
     min_games=excluded.min_games;
+
+  -- Re-evaluate every account immediately after an achievement is created or edited.
+  -- Existing unlocks remain permanent; newly qualified players are inserted once.
+  perform public.refresh_player_achievements(u.id)
+  from auth.users u;
 end;
-$$;
+$;
 
 revoke all on function public.admin_save_achievement(text,text,text,bigint,boolean,text,numeric,integer) from public, anon, authenticated;
 grant execute on function public.admin_save_achievement(text,text,text,bigint,boolean,text,numeric,integer) to authenticated;
