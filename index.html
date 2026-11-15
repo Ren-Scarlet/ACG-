@@ -159,6 +159,13 @@
 
     .status { color:#a6abc0; font-size:13px; }
     .status.good { color:#8bd5a7; } .status.bad { color:#ff9b9b; }
+    .admin-progress { display:flex; align-items:center; gap:10px; width:100%; margin-top:9px; }
+    .admin-progress[hidden] { display:none !important; }
+    .admin-progress progress { appearance:none; -webkit-appearance:none; flex:1; width:100%; height:10px; border:0; border-radius:99px; overflow:hidden; background:#d5e8f7; }
+    .admin-progress progress::-webkit-progress-bar { background:#d5e8f7; border-radius:99px; }
+    .admin-progress progress::-webkit-progress-value { background:linear-gradient(90deg,#0878cf,#20c7df); border-radius:99px; transition:width .15s; }
+    .admin-progress progress::-moz-progress-bar { background:linear-gradient(90deg,#0878cf,#20c7df); border-radius:99px; }
+    .admin-progress output { min-width:42px; color:#0756a6; font-size:12px; font-weight:800; text-align:right; }
     .hidden { display:none !important; }
     @media(max-width:700px) {
       main { padding:16px; } .toolbar { grid-template-columns:1fr 1fr; }
@@ -642,6 +649,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             <div class="save-row">
               <button id="upload-card-images" class="primary" type="button">上传并自动关联卡牌</button>
               <span id="card-image-upload-status" class="status">尚未选择图片。</span>
+              <div id="card-image-upload-progress-wrap" class="admin-progress" hidden><progress id="card-image-upload-progress" max="100" value="0"></progress><output id="card-image-upload-progress-label">0%</output></div>
             </div>
           </div>
           <div class="panel">
@@ -693,6 +701,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             <p id="catalog-card-summary" class="summary"></p>
             <section id="catalog-card-list"></section>
             <div class="save-row"><button id="save-card-data" class="primary" type="button">保存卡牌资料到 GitHub</button><button id="discard-card-data" type="button">重新读取线上资料</button><span id="card-data-status" class="status">尚无未保存修改。</span></div>
+            <div id="card-data-save-progress-wrap" class="admin-progress" hidden><progress id="card-data-save-progress" max="100" value="0"></progress><output id="card-data-save-progress-label">0%</output></div>
           </div>
         </section>
 
@@ -1268,17 +1277,44 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       const decoded = new TextDecoder().decode(Uint8Array.from(atob(body.content.replace(/\n/g, "")), c => c.charCodeAt(0)));
       return { sha: body.sha, data: JSON.parse(decoded) };
     }
-    async function githubSaveJson(path, data, message, expectedSha) {
+    function updateAdminProgress(prefix, percent, label, visible=true) {
+      const wrap = document.getElementById(prefix + "-progress-wrap");
+      const bar = document.getElementById(prefix + "-progress");
+      const output = document.getElementById(prefix + "-progress-label");
+      if (!wrap || !bar || !output) return;
+      wrap.hidden = !visible;
+      const value = Math.max(0, Math.min(100, Number(percent) || 0));
+      bar.value = value;
+      output.textContent = Math.round(value) + "%";
+      if (label) output.setAttribute("aria-label", label);
+    }
+    function githubPutJsonWithProgress(url, payload, onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", url, true);
+        Object.entries({ ...apiHeaders(), "Content-Type": "application/json" }).forEach(([key, value]) => xhr.setRequestHeader(key, value));
+        xhr.upload.addEventListener("progress", event => {
+          if (event.lengthComputable && onProgress) onProgress(event.loaded / event.total);
+        });
+        xhr.addEventListener("load", () => {
+          let body = {};
+          try { body = JSON.parse(xhr.responseText || "{}"); } catch (_) {}
+          if (xhr.status >= 200 && xhr.status < 300) resolve(body);
+          else reject(new Error(body.message || "GitHub 保存失败（HTTP " + xhr.status + "）"));
+        });
+        xhr.addEventListener("error", () => reject(new Error("网络连接中断，GitHub 未返回保存结果。")));
+        xhr.addEventListener("abort", () => reject(new Error("上传已取消。")));
+        xhr.send(JSON.stringify(payload));
+      });
+    }
+    async function githubSaveJson(path, data, message, expectedSha, onProgress) {
       const latest = await githubGetJson(path);
       if (expectedSha && latest.sha !== expectedSha) throw new Error(path + " 已被其他操作更新。为避免覆盖新资料，请重新读取线上资料后再修改。");
       const bytes = new TextEncoder().encode(JSON.stringify(data, null, 2) + "\n");
       let binary = ""; for (let i=0;i<bytes.length;i++) binary += String.fromCharCode(bytes[i]);
-      const response = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
-        method: "PUT", headers: { ...apiHeaders(), "Content-Type": "application/json" },
-        body: JSON.stringify({ message, content: btoa(binary), sha: latest.sha })
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.message || "GitHub 保存失败（HTTP " + response.status + "）");
+      const body = await githubPutJsonWithProgress(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`, {
+        message, content: btoa(binary), sha: latest.sha
+      }, onProgress);
       return body.content?.sha || null;
     }
     function rebuildCatalogFilters() {
@@ -1415,9 +1451,13 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       const path = isCards ? "data/cards.json" : "data/packs.json";
       const status = document.getElementById(isCards ? "card-data-status" : "pack-data-status");
       const button = document.getElementById(isCards ? "save-card-data" : "save-pack-data");
-      button.disabled = true; setStatus(status, "正在保存到 GitHub……");
+      button.disabled = true; setStatus(status, "正在准备保存资料……");
+      if (isCards) updateAdminProgress("card-data-save", 0, "正在保存卡牌资料", true);
       try {
-        const sha = await githubSaveJson(path, data, isCards ? "Manage card catalog" : "Manage card packs", adminDataSha[kind]);
+        const sha = await githubSaveJson(path, data, isCards ? "Manage card catalog" : "Manage card packs", adminDataSha[kind], isCards ? ratio => {
+          updateAdminProgress("card-data-save", ratio * 100, "正在上传 cards.json");
+          setStatus(status, "正在上传卡牌资料到 GitHub…… " + Math.round(ratio * 100) + "%");
+        } : null);
         adminDataSha[kind] = sha;
         if (isCards) {
           const battleItems = allCards.filter(card => card.type === "对战道具").map(card => ({card_id:card.id,card_name:card.name}));
@@ -1430,11 +1470,15 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
           }
           cardDataDirty = false;
         } else packDataDirty = false;
+        if (isCards) updateAdminProgress("card-data-save", 100, "卡牌资料已上传", true);
         setStatus(status, "保存成功！网页资料已更新。", "good");
         rebuildCatalogFilters(); renderCatalogCards(); renderCatalogPacks(); renderCards();
       } catch (error) {
         setStatus(status, "保存失败：" + error.message, "bad");
-      } finally { button.disabled = false; }
+      } finally {
+        if (isCards) updateAdminProgress("card-data-save", 0, "", false);
+        button.disabled = false;
+      }
     }
     async function reloadCatalogFile(kind) {
       if (!authorized) return;
@@ -1483,12 +1527,14 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       const overwrite = document.getElementById("overwrite-card-images").checked;
       if (!confirm("将上传 " + prepared.length + " 张图片到 images/ 并自动关联卡牌。之后还要保存 cards.json。继续吗？")) return;
       button.disabled = true;
+      updateAdminProgress("card-image-upload", 0, "批量上传卡图", true);
       let success = 0;
       const failed = [];
       try {
         for (let i = 0; i < prepared.length; i++) {
           const { file, card } = prepared[i];
-          setStatus(status, "正在上传 " + (i + 1) + "/" + prepared.length + "：" + file.name);
+          setStatus(status, "正在上传 " + (i + 1) + "/" + prepared.length + "：" + file.name + "（0%）");
+          updateAdminProgress("card-image-upload", prepared.slice(0, i).reduce((sum, item) => sum + item.file.size, 0) / prepared.reduce((sum, item) => sum + item.file.size, 0) * 100, "正在上传 " + file.name, true);
           const path = "images/" + file.name;
           const apiUrl = "https://api.github.com/repos/" + OWNER + "/" + REPO + "/contents/" + path.split("/").map(encodeURIComponent).join("/");
           let existingSha = null;
@@ -1507,17 +1553,32 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
           for (let j = 0; j < bytes.length; j += 0x8000) binary += String.fromCharCode(...bytes.subarray(j, j + 0x8000));
           const payload = { message: "Upload card image " + file.name, content: btoa(binary) };
           if (existingSha) payload.sha = existingSha;
-          const response = await fetch(apiUrl, { method: "PUT", headers: { ...apiHeaders(), "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-          const result = await response.json();
-          if (!response.ok) { failed.push(file.name + "：" + (result.message || "上传失败")); continue; }
+          const completedBefore = prepared.slice(0, i).reduce((sum, item) => sum + item.file.size, 0);
+          const totalBytes = prepared.reduce((sum, item) => sum + item.file.size, 0) || 1;
+          let lastRatio = 0;
+          let result;
+          try {
+            result = await githubPutJsonWithProgress(apiUrl, payload, ratio => {
+              lastRatio = ratio;
+              const overall = (completedBefore + file.size * ratio) / totalBytes * 100;
+              updateAdminProgress("card-image-upload", overall, "正在上传 " + file.name, true);
+              setStatus(status, "正在上传 " + (i + 1) + "/" + prepared.length + "：" + file.name + "（" + Math.round(ratio * 100) + "%，批次 " + Math.round(overall) + "%）");
+            });
+          } catch (uploadError) {
+            failed.push(file.name + "：" + uploadError.message);
+            continue;
+          }
           card.image = "./images/" + file.name;
           success++;
+          const completedPercent = prepared.slice(0, i + 1).reduce((sum, item) => sum + item.file.size, 0) / (prepared.reduce((sum, item) => sum + item.file.size, 0) || 1) * 100;
+          updateAdminProgress("card-image-upload", completedPercent, "已上传 " + (i + 1) + "/" + prepared.length, true);
           markCardDataDirty();
           renderCatalogCards();
           renderCards();
         }
         if (success) { rebuildCatalogFilters(); renderCatalogCards(); renderCards(); input.value = ""; }
         const detail = failed.concat(errors);
+        updateAdminProgress("card-image-upload", 100, "批量卡图上传结束", true);
         setStatus(status, "成功上传并关联 " + success + "/" + prepared.length + " 张。" + (detail.length ? " 未完成：" + detail.join("；") : "") + (success ? " 请再保存卡牌资料到 GitHub。" : ""), success ? "good" : "bad");
       } catch (error) {
         setStatus(status, "上传中断：" + error.message + "。已成功上传的图片不会回滚。", "bad");
