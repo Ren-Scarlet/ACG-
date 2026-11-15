@@ -130,7 +130,7 @@
         else if(effect.value==="random_reward")cfg=JSON.parse(cf.json.value);
       }catch(error){status(msg,"效果配置格式错误："+error.message,true);return;}
       save.disabled=true;status(msg,"正在保存道具……");
-      try{const {error}=await client.rpc("admin_save_item",{p_item_id:id.value.trim(),p_name:name.value.trim(),p_icon:icon.value.trim()||"🎁",p_description:desc.value.trim(),p_category:category.value,p_effect_type:effect.value,p_effect_config:cfg,p_is_active:active.checked});if(error)throw error;status(msg,"道具已保存。玩家道具箱和邮件附件目录会使用这份资料。");await loadItems();renderItems();renderAttachmentRows();}
+      try{const {error}=await client.rpc("admin_save_item",{p_item_id:id.value.trim(),p_name:name.value.trim(),p_icon:icon.value.trim()||"🎁",p_description:desc.value.trim(),p_category:category.value,p_effect_type:effect.value,p_effect_config:cfg,p_is_active:active.checked});if(error)throw error;status(msg,"道具已保存。玩家道具箱和邮件附件目录会使用这份资料。");await loadItems();renderItems();refreshAttachmentOptions();}
       catch(error){status(msg,"保存失败："+error.message,true);}finally{save.disabled=false;}
     });
     pane.appendChild(form);
@@ -151,7 +151,7 @@
     adjustForm.addEventListener("submit",async e=>{e.preventDefault();const n=Number(delta.value);if(!player.value||!item.value||!Number.isSafeInteger(n)||n===0||!reason.value.trim()){status(adjustMsg,"请填写有效的玩家、道具、数量和备注。",true);return;}adjust.disabled=true;status(adjustMsg,"正在调整库存……");try{const {data,error}=await client.rpc("admin_adjust_card_inventory",{p_user_id:player.value,p_card_id:item.value,p_delta:n,p_reason:reason.value.trim()});if(error)throw error;status(adjustMsg,"调整成功，当前数量："+data);}catch(error){status(adjustMsg,"调整失败："+error.message,true);}finally{adjust.disabled=false;}});
     pane.append(el("h4","","道具库存调整"),adjustForm);
     function refreshOptions(){item.replaceChildren(new Option("请选择道具",""));items.forEach(x=>item.add(new Option(x.name+" · "+x.item_id,x.item_id)));}
-    pane._refresh=async()=>{await loadItems();refreshOptions();renderItems();};
+    pane._refresh=async()=>{await loadStatic();await loadPlayers();await loadItems();player.replaceChildren(new Option("请选择玩家",""));players.forEach(p=>player.add(new Option(playerLabel(p),p.id)));refreshOptions();buildConfig();renderItems();};
     loadItems().then(()=>{refreshOptions();renderItems();}).catch(error=>list.appendChild(el("div","pc-empty","读取道具失败："+error.message)));
   }
 
@@ -189,12 +189,15 @@
       try{const {data,error}=await client.rpc("admin_list_mail");if(error)throw error;history.replaceChildren();if(!data?.length){history.appendChild(el("div","pc-empty","还没有发送过邮件。"));return;}data.forEach(m=>{const row=el("div","pc-row"),info=el("div","");info.append(el("strong","",m.title),el("div","pc-muted",new Date(m.created_at).toLocaleString("zh-CN")),el("div","pc-muted","收件人 "+m.recipient_count+" 人 · 已领取 "+m.claimed_count+" 人"));row.appendChild(info);history.appendChild(row);});}
       catch(error){history.replaceChildren(el("div","pc-empty","读取邮件记录失败："+error.message));}
     }
-    pane._loadHistory=loadHistory;loadHistory();
+    function refreshAttachmentOptions(){[...attachments.children].forEach(row=>{const selects=row.querySelectorAll("select");if(selects[0]?.value==="item"){const reward=selects[1];reward.replaceChildren(new Option("选择奖励",""));items.filter(x=>x.is_active).forEach(x=>reward.add(new Option(x.name+" · "+x.item_id,x.item_id)));}});}
+    pane._loadHistory=loadHistory;
+    pane._refresh=async()=>{await loadStatic();await loadPlayers();await loadItems();recipient.replaceChildren();players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));refreshAttachmentOptions();await loadHistory();};
+    loadHistory();
   }
   async function refreshAdmin(){
     if(!admin)return;
     try{await Promise.all([loadStatic(),loadPlayers(),loadItems()]);const ip=admin.querySelector('[data-admin-category="items"]'),mp=admin.querySelector('[data-admin-category="mail"]');if(ip?._refresh)await ip._refresh();if(mp?._loadHistory)await mp._loadHistory();}catch(_){}
   }
   client.auth.onAuthStateChange((_event,session)=>{if(session?.user)setTimeout(()=>{void refreshAdmin();},0);});
-  void loadStatic();void loadItems().catch(()=>{});
+  void refreshAdmin();void loadStatic();void loadItems().catch(()=>{});
 })();
