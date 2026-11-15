@@ -50,13 +50,35 @@
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] option{
         color:#172d42!important;background:#fff!important;
       }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] button,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] button{
+        box-sizing:border-box!important;
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        vertical-align:middle!important;
+        min-height:38px!important;
+        height:auto!important;
+        max-width:100%!important;
+        padding:8px 14px!important;
+        margin:4px 6px 4px 0!important;
+        border-radius:6px!important;
+        font:600 14px/1.35 inherit!important;
+        white-space:normal!important;
+        text-align:center!important;
+        cursor:pointer!important;
+      }
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] button:not(.primary),
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] button:not(.primary){
-        color:#123650!important;background:#e4f1f7!important;border:1px solid #8eafc2!important;font-weight:700;
+        color:#123650!important;background:#e4f1f7!important;border:1px solid #8eafc2!important;
       }
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] button.primary,
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] button.primary{
-        color:#fff!important;background:#145578!important;border:1px solid #0e4565!important;font-weight:700;
+        color:#fff!important;background:#145578!important;border:1px solid #0e4565!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] .pc-grid,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] .pc-grid{
+        align-items:end!important;
       }
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] .pc-row,
       #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] .pc-row{
