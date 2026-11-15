@@ -109,8 +109,9 @@ begin
     end if;
   elsif p_effect_type='grant_item' then
     if nullif(v_config->>'item_id','') is null
-       or coalesce((v_config->>'amount')::integer,0)<=0 then
-      raise exception '道具奖励需要指定道具编号和正整数数量';
+       or coalesce((v_config->>'amount')::bigint,0)<=0
+       or coalesce((v_config->>'amount')::bigint,0)>2147483647 then
+      raise exception '道具奖励需要指定道具编号和有效的正整数数量';
     end if;
   elsif p_effect_type='random_reward' then
     if jsonb_typeof(v_config->'options')<>'array'
@@ -123,6 +124,7 @@ begin
       where coalesce(opt.value->>'reward_type','') not in ('tokens','card','item')
          or coalesce((opt.value->>'amount')::bigint,0)<=0
          or coalesce((opt.value->>'weight')::numeric,0)<=0
+         or (opt.value->>'reward_type' in ('card','item') and coalesce((opt.value->>'amount')::bigint,0)>2147483647)
          or (opt.value->>'reward_type' in ('card','item')
              and nullif(opt.value->>'reward_id','') is null)
     ) then
