@@ -195,7 +195,7 @@ declare
   v_total_weight numeric;
   v_pick numeric;
   v_running numeric;
-  v_option jsonb;
+  v_option record;
 begin
   if v_user_id is null then raise exception '请先登录'; end if;
   if nullif(btrim(p_item_id),'') is null or p_request_id is null then
@@ -334,12 +334,12 @@ begin
     v_pick := random()*v_total_weight;
     v_running := 0;
     for v_option in select value from jsonb_array_elements(v_item.effect_config->'options') loop
-      v_running := v_running+(v_option->>'weight')::numeric;
+      v_running := v_running+(v_option.value->>'weight')::numeric;
       if v_pick<=v_running then exit; end if;
     end loop;
-    v_reward_type := v_option->>'reward_type';
-    v_reward_id := v_option->>'reward_id';
-    v_amount := (v_option->>'amount')::bigint;
+    v_reward_type := v_option.value->>'reward_type';
+    v_reward_id := v_option.value->>'reward_id';
+    v_amount := (v_option.value->>'amount')::bigint;
     if v_reward_type='tokens' then
       update public.player_stats
       set tokens=tokens+v_amount,updated_at=now()
