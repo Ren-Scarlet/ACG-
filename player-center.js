@@ -114,7 +114,8 @@
     pcListPages[key]=page;
     if(total<=pageSize)return {start:0,end:total,page,pageCount};
     const nav=node("div","pc-pagination");
-    const add=(label,target,disabled=false,active=false)=>{const button=node("button",active?"active":"",label);button.type="button";button.disabled=disabled;button.addEventListener("click",()=>{pcListPages[key]=target;onChange();});nav.appendChild(button);};
+    nav.style.cssText="display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:center!important;gap:8px!important;width:100%!important;box-sizing:border-box!important;padding:12px!important;margin:16px 0!important;";
+    const add=(label,target,disabled=false,active=false)=>{const button=node("button",active?"active":"",label);button.type="button";button.style.cssText="flex:0 0 auto!important;min-width:40px!important;min-height:36px!important;height:auto!important;padding:7px 12px!important;margin:0!important;white-space:nowrap!important;";button.disabled=disabled;button.addEventListener("click",()=>{pcListPages[key]=target;onChange();});nav.appendChild(button);};
     add("上一页",page-1,page===1);
     const first=Math.max(1,page-2),last=Math.min(pageCount,page+2);
     if(first>1){add("1",1,false,page===1);if(first>2)nav.appendChild(node("span","pc-muted","…"));}
@@ -1227,7 +1228,7 @@
     const typeSelect=view.querySelector("#pc-inventory-type-filter");
     if(!packSelect||!starSelect||!typeSelect)return;
     packSelect.replaceChildren(new Option("全部卡包",""));
-    packCatalog.filter(pack=>pack.category!=="berry"&&pack.category!=="battle_item").forEach(pack=>packSelect.add(new Option(pack.name,pack.id)));
+    packCatalog.forEach(pack=>packSelect.add(new Option(pack.name,pack.id)));
     starSelect.replaceChildren(new Option("全部星级",""));
     [...new Set(Object.values(cardsById).map(card=>Number(card.star||0)).filter(Boolean))].sort((a,b)=>b-a).forEach(star=>starSelect.add(new Option(star+" 星",String(star))));
     typeSelect.replaceChildren(new Option("全部类型",""));
