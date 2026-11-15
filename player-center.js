@@ -385,7 +385,7 @@
     const cards=Object.values(cardsById);
     pools.forEach((pool,index)=>{
       const tile=node("article","adl-pool"+(index===0?" active":""));tile.dataset.packId=pool.pack_id;
-      forceStyle(tile,{display:"block",minWidth:"0",minHeight:"260px",background:"linear-gradient(150deg,#1b2a40,#0d1420 68%)",border:index===0?"2px solid #e7bd65":"1px solid #35445a",borderRadius:"8px",overflow:"hidden",cursor:"pointer",boxSizing:"border-box"});
+      forceStyle(tile,{display:"block",minWidth:"0",minHeight:"260px",background:"linear-gradient(150deg,#1b2a40,#0d1420 68%)",borderRadius:"8px",overflow:"hidden",cursor:"pointer",boxSizing:"border-box"});
       const cover=node("div","adl-cover");
       const coverCard=(cards.find(c=>c.id===pool.cover_card_id&&c.pack_id===pool.pack_id&&c.image)||cards.filter(c=>c.pack_id===pool.pack_id&&c.image).sort((a,b)=>Number(b.star||0)-Number(a.star||0))[0]);
       // CSS background avoids image-translation extensions intercepting artwork clicks.
