@@ -189,6 +189,7 @@
   #player-center-view #pc-admin-panel .pc-admin-category-pane form .pc-grid{grid-template-columns:minmax(0,1fr)!important}
 }
     `;
+    style.textContent += "\n/* Independent full-screen admin workspaces */\n.acg-admin-workspace{position:fixed!important;inset:0!important;z-index:100000!important;display:flex!important;flex-direction:column!important;width:100vw!important;height:100vh!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#eef4f8!important;color:#18364b!important;box-sizing:border-box!important;font-family:inherit!important}\n.acg-admin-workspace *{box-sizing:border-box!important}\n.acg-admin-workspace-top{flex:0 0 auto!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important;width:100%!important;padding:18px 4vw!important;background:linear-gradient(120deg,#123d5a,#1b6381)!important;color:#fff!important;border-bottom:1px solid #0b3149!important;box-shadow:0 3px 14px #102f4430!important}\n.acg-admin-workspace-kicker{display:block!important;font-size:11px!important;letter-spacing:.16em!important;font-weight:800!important;color:#c5e6f3!important}\n.acg-admin-workspace-heading h2{margin:4px 0 0!important;font-size:28px!important;line-height:1.2!important;color:#fff!important}\n.acg-admin-workspace-back{flex:0 0 auto!important;min-height:42px!important;padding:10px 18px!important;color:#123d5a!important;background:#fff!important;border:1px solid #c5dce8!important;border-radius:8px!important;font-weight:800!important;cursor:pointer!important}\n.acg-admin-workspace-content{flex:1 1 auto!important;width:100%!important;min-height:0!important;overflow:auto!important;padding:clamp(16px,3vw,36px)!important}\n.acg-admin-workspace-pane{display:block!important;width:min(1200px,100%)!important;max-width:1200px!important;min-width:0!important;margin:0 auto!important;padding:clamp(18px,3vw,34px)!important;background:#fff!important;color:#18364b!important;border:1px solid #c9d9e2!important;border-radius:14px!important;box-shadow:0 8px 28px #193b5014!important}\n.acg-admin-workspace-pane h3{font-size:22px!important;color:#123d5a!important;margin:0 0 8px!important}\n.acg-admin-workspace-pane p{color:#506b7d!important}\n.acg-admin-workspace-pane form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px 22px!important;width:100%!important;align-items:start!important}\n.acg-admin-workspace-pane form>.field{min-width:0!important;width:100%!important;margin:0!important}\n.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>p,.acg-admin-workspace-pane form>div:not(.field),.acg-admin-workspace-pane form>label,.acg-admin-workspace-pane form>.pc-grid{grid-column:1/-1!important;min-width:0!important}\n.acg-admin-workspace-pane input:not([type=checkbox]),.acg-admin-workspace-pane select,.acg-admin-workspace-pane textarea{width:100%!important;min-width:0!important;max-width:100%!important;min-height:44px!important;padding:10px 12px!important;color:#18364b!important;background:#fff!important;border:1px solid #a9c0ce!important;border-radius:7px!important}\n.acg-admin-workspace-pane textarea{min-height:96px!important}\n.acg-admin-workspace-pane label{color:#254a63!important;font-weight:750!important}\n.acg-admin-workspace-pane button{min-height:42px!important;padding:10px 16px!important;border-radius:7px!important}\n.acg-admin-workspace-pane .pc-grid{display:grid!important;grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.55fr) auto!important;gap:12px!important;align-items:end!important;width:100%!important}\n.acg-admin-workspace-pane .pc-row{display:flex!important;justify-content:space-between!important;gap:18px!important;padding:16px 8px!important;border-bottom:1px solid #d8e4eb!important;color:#18364b!important}\n@media(max-width:760px){.acg-admin-workspace-top{align-items:flex-start!important;flex-direction:column!important}.acg-admin-workspace-pane form{grid-template-columns:minmax(0,1fr)!important}.acg-admin-workspace-pane form>.field,.acg-admin-workspace-pane form>h4,.acg-admin-workspace-pane form>p,.acg-admin-workspace-pane form>div:not(.field),.acg-admin-workspace-pane form>label,.acg-admin-workspace-pane form>.pc-grid{grid-column:1!important}.acg-admin-workspace-pane .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}\n@media(max-width:460px){.acg-admin-workspace-pane .pc-grid{grid-template-columns:minmax(0,1fr)!important}}\n";
     document.head.appendChild(style);
   }
   const $=(s,r=view)=>r.querySelector(s);
@@ -244,7 +245,41 @@
       if(admin.querySelector('[data-admin-category="'+id+'"]'))return;
       const pane=el("section","pc-admin-category-pane hidden");pane.dataset.adminCategory=id;
       const tab=button(label);tab.dataset.adminCategory=id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected","false");
-      tab.addEventListener("click",()=>{nav.querySelectorAll("button").forEach(x=>{const on=x.dataset.adminCategory===id;x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on));});admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!==id));});
+      if(id==="items"||id==="mail"){
+        tab.classList.add("pc-admin-standalone-launch");
+        tab.title="在独立工作页面中打开";
+        tab.addEventListener("click",()=>{
+          const title=id==="items"?"道具工坊":"邮件管理";
+          nav.querySelectorAll("button").forEach(x=>{const on=x.dataset.adminCategory===id;x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on));});
+          admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.add("hidden"));
+          const overlay=el("div","acg-admin-workspace");
+          overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-label",title);
+          const top=el("header","acg-admin-workspace-top");
+          const heading=el("div","acg-admin-workspace-heading");
+          heading.append(el("span","acg-admin-workspace-kicker","ADMIN WORKSPACE"),el("h2","",title));
+          const content=el("main","acg-admin-workspace-content");
+          const back=button("← 返回系统管理","acg-admin-workspace-back");
+          const closeWorkspace=()=>{
+            if(pane.isConnected) (paneHost||admin).appendChild(pane);
+            pane.classList.remove("acg-admin-workspace-pane");
+            pane.classList.add("hidden");
+            overlay.remove();
+            nav.querySelectorAll("button").forEach(x=>{const on=x.dataset.adminCategory==="players";x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on));});
+            admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!=="players"));
+          };
+          back.addEventListener("click",closeWorkspace);
+          top.append(heading,back);
+          pane.classList.remove("hidden");
+          pane.classList.add("acg-admin-workspace-pane");
+          content.appendChild(pane);
+          overlay.append(top,content);
+          document.body.appendChild(overlay);
+          back.focus();
+          overlay.addEventListener("keydown",event=>{if(event.key==="Escape")closeWorkspace();});
+        });
+      }else{
+        tab.addEventListener("click",()=>{nav.querySelectorAll("button").forEach(x=>{const on=x.dataset.adminCategory===id;x.classList.toggle("active",on);x.setAttribute("aria-selected",String(on));});admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!==id));});
+      }
       nav.appendChild(tab);(paneHost||admin).appendChild(pane);
     };
     addArea("items","道具工坊");addArea("mail","邮件管理");
