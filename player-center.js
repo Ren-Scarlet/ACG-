@@ -686,14 +686,20 @@
     if(adminPlayers.some(player=>player.id===previousToken))tokenSelect.value=previousToken;
   }
   let adminCheckPromise = null;
+  let adminCheckUserId = null;
   async function checkAdmin() {
     if (!currentUser) {
       adminPanel.classList.add("hidden");
+      adminCheckUserId = null;
       return false;
     }
-    if (adminCheckPromise) return adminCheckPromise;
     const checkedUserId = currentUser.id;
-    adminCheckPromise = (async () => {
+    if (adminCheckPromise && adminCheckUserId === checkedUserId) return adminCheckPromise;
+    // A new account may sign in while the previous account's permission query is still pending.
+    // Do not let the old request block or overwrite the new account's result.
+    adminPanel.classList.add("hidden");
+    adminCheckUserId = checkedUserId;
+    const task = (async () => {
       try {
         const {data,error}=await client.from("profiles").select("is_admin").eq("id",checkedUserId).maybeSingle();
         if(error)throw error;
@@ -711,14 +717,23 @@
         await loadAdminMatches();
         await loadAdminAchievements();
         await loadAdminPools();
-        return true;
+        return currentUser?.id===checkedUserId;
       } catch(error) {
-        adminPanel.classList.add("hidden");
-        setStatus("管理员资料读取失败："+error.message,true);
+        if(currentUser?.id===checkedUserId) {
+          adminPanel.classList.add("hidden");
+          setStatus("管理员资料读取失败："+error.message,true);
+        }
         return false;
       }
-    })().finally(() => { adminCheckPromise = null; });
-    return adminCheckPromise;
+    })();
+    adminCheckPromise = task;
+    try { return await task; }
+    finally {
+      if (adminCheckPromise === task) {
+        adminCheckPromise = null;
+        adminCheckUserId = null;
+      }
+    }
   }
   let adminInventory = {};
   let inventoryBusy = new Set();
