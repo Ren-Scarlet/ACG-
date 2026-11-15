@@ -392,6 +392,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   <strong>✦ SEASON VISUAL / 首页主视觉</strong>
   <div id="acg-home-admin-panel" style="display:none;clear:both;padding-top:14px">
    <p style="font-size:11px;color:#b7c9dd;margin:0 0 12px">管理员通过 GitHub 授权后，可上传新一期插画并发布为全站首页主视觉。图片裁切铺满左侧栏，允许人物局部跨越边界。</p>
+   <button id="acg-home-open-admin" type="button" class="home-secondary" style="margin:0 0 14px">打开管理员授权 / 卡牌资料管理</button>
    <label style="display:block;font-size:11px;margin-bottom:6px">上传主视觉图片（JPG / PNG / WebP）</label><input id="acg-home-file" type="file" accept="image/jpeg,image/png,image/webp" style="font-size:11px;margin-bottom:12px">
    <div style="margin:14px 0;padding:12px;border:1px solid #315b7d;background:#071a30">
     <strong style="display:block;margin-bottom:8px;color:#d8f7ff">♪ BACKGROUND MUSIC / 背景音乐</strong>
@@ -1764,6 +1765,11 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     document.getElementById("acg-home-admin-toggle").addEventListener("click",()=>{
       const p=document.getElementById("acg-home-admin-panel");p.style.display=p.style.display==="none"?"block":"none";
     });
+    document.getElementById("acg-home-open-admin").addEventListener("click",()=>{
+      acgHomeSetVisible(false);
+      document.getElementById("tab-admin")?.click();
+      window.scrollTo(0,0);
+    });
     document.getElementById("acg-home-file").addEventListener("change",e=>{
       const file=e.target.files?.[0];if(!file)return;
       if(acgHomePreviewUrl)URL.revokeObjectURL(acgHomePreviewUrl);
@@ -1934,7 +1940,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
  const config={
  'library-view':{en:'CARD COLLECTION',title:'CARD INDEX',desc:'卡牌图鉴 / 浏览收藏',items:[['全部卡牌','all'],['角色卡','角色卡'],['技能卡','技能卡'],['装备卡','装备卡'],['事件卡','事件卡'],['其他','其他']]},
  'builder-view':{en:'DECK BUILDER',title:'DECK EDIT',desc:'卡组构筑 / 管理卡组',items:[['DECK 01','deck0'],['DECK 02','deck1'],['DECK 03','deck2'],['DECK 04','deck3'],['DECK 05','deck4']]},
- 'account-view':{en:'SYSTEM CONFIGURATION',title:'SYSTEM',desc:'系统设置 / 账号管理',items:[['账号设置','account'],['界面设置','interface'],['音乐设置','music'],['帮助与说明','help']]},
+ 'account-view':{en:'SYSTEM CONFIGURATION',title:'SYSTEM',desc:'系统设置 / 账号管理',items:[['账号设置','account'],['界面设置','interface'],['音乐设置','music'],['帮助与说明','help'],['管理员授权','admin-auth']]},
  'admin-view':{en:'ADMINISTRATION',title:'SYSTEM ADMIN',desc:'系统管理 / 管理员工具',items:[['卡牌资料','cards'],['卡包管理','packs'],['玩家管理','players'],['抽卡设置','gacha']]},
  'shared-deck-view':{en:'SHARED DECK',title:'DECK SHARE',desc:'卡组分享 / 查看配置',items:[['卡组内容','share']]}
  };
@@ -1952,6 +1958,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   else if(current==='library-view'){const f=document.getElementById('type-filter');if(f){const o=[...f.options].find(x=>x.text.includes(key)||x.value===key);if(o){f.value=o.value;f.dispatchEvent(new Event('change',{bubbles:true}))}}}
   else if(key.startsWith('deck')){const sel=document.getElementById('saved-deck-select');if(sel&&sel.options.length>1){const ix=Number(key.slice(4))+1;if(sel.options[ix]){sel.selectedIndex=ix;document.getElementById('load-local-deck')?.click()}}}
   else if(current==='account-view'){
+   if(key==='admin-auth'){document.getElementById('tab-admin')?.click();return;}
    const ids={account:'account-forms',interface:'account-profile',music:'account-profile',help:'account-status'};
    const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
   }else if(current==='admin-view'){
