@@ -77,13 +77,69 @@
   }
 
   const admin=$("#pc-admin-panel");
-  const itemPane=admin?.querySelector('[data-admin-category="items"]');
-  const mailPane=admin?.querySelector('[data-admin-category="mail"]');
-  if(itemPane&&mailPane){
+  if(admin){
+    // Normalize the admin workspace at runtime instead of trusting legacy CSS/grid rules.
+    let categoryNav=admin.querySelector(".pc-admin-category-nav");
+    if(!categoryNav){categoryNav=el("div","pc-admin-category-nav");admin.insertBefore(categoryNav,admin.firstChild);}
+    let paneHost=admin.querySelector(".pc-admin-pane-host");
+    if(!paneHost){paneHost=el("div","pc-admin-pane-host");admin.appendChild(paneHost);}
+    const categories=[
+      ["players","玩家与仓库"],["matches","比赛管理"],["pools","卡池管理"],
+      ["tokens","代币发放"],["achievements","成就管理"],["items","道具工坊"],["mail","邮件管理"]
+    ];
+    const categoryPanes={};
+    categories.forEach(([id,label])=>{
+      let pane=admin.querySelector('[data-admin-category="'+id+'"].pc-admin-category-pane');
+      if(!pane){pane=el("section","pc-admin-category-pane");pane.dataset.adminCategory=id;}
+      if(!paneHost.contains(pane))paneHost.appendChild(pane);
+      categoryPanes[id]=pane;
+      let tab=categoryNav.querySelector('button[data-admin-category="'+id+'"]');
+      if(!tab){tab=button(label);tab.dataset.adminCategory=id;tab.type="button";tab.setAttribute("role","tab");categoryNav.appendChild(tab);}
+      tab.textContent=label;
+    });
+    // Any stale category panes are moved into the same full-width host.
+    admin.querySelectorAll(".pc-admin-category-pane").forEach(pane=>{if(!paneHost.contains(pane))paneHost.appendChild(pane);});
+    categoryNav.style.setProperty("display","grid","important");
+    categoryNav.style.setProperty("grid-template-columns","repeat(5,minmax(0,1fr))","important");
+    categoryNav.style.setProperty("width","100%","important");
+    categoryNav.style.setProperty("max-width","100%","important");
+    categoryNav.style.setProperty("gap","8px","important");
+    paneHost.style.setProperty("display","block","important");
+    paneHost.style.setProperty("width","100%","important");
+    paneHost.style.setProperty("max-width","none","important");
+    paneHost.style.setProperty("min-width","0","important");
+    paneHost.style.setProperty("grid-column","1 / -1","important");
+    paneHost.style.setProperty("box-sizing","border-box","important");
+    Object.values(categoryPanes).forEach(pane=>{
+      pane.style.setProperty("width","100%","important");
+      pane.style.setProperty("max-width","none","important");
+      pane.style.setProperty("min-width","0","important");
+      pane.style.setProperty("float","none","important");
+      pane.style.setProperty("box-sizing","border-box","important");
+    });
+    const activateAdminCategory=id=>{
+      categories.forEach(([key])=>{
+        const pane=categoryPanes[key],tab=categoryNav.querySelector('button[data-admin-category="'+key+'"]');
+        const selected=key===id;
+        if(pane){pane.classList.toggle("hidden",!selected);pane.style.setProperty("display",selected?"block":"none","important");}
+        if(tab){tab.classList.toggle("active",selected);tab.setAttribute("aria-selected",String(selected));}
+      });
+    };
+    if(categoryNav.dataset.acgUnifiedHandler!=="1"){
+      categoryNav.dataset.acgUnifiedHandler="1";
+      categoryNav.addEventListener("click",event=>{
+        const tab=event.target.closest("button[data-admin-category]");
+        if(!tab||!categoryNav.contains(tab))return;
+        if(categoryPanes[tab.dataset.adminCategory])activateAdminCategory(tab.dataset.adminCategory);
+      },true);
+    }
+    const currentActive=categoryNav.querySelector("button.active[data-admin-category]")?.dataset.adminCategory||"players";
+    activateAdminCategory(currentActive);
+    const itemPane=categoryPanes.items,mailPane=categoryPanes.mail;
     buildItemWorkshop(itemPane);
     buildMailManager(mailPane);
   }else{
-    console.error("[ACG] 道具工坊/邮件管理入口未初始化：玩家中心管理员分类缺少 items/mail 面板。");
+    console.error("[ACG] 管理员面板不存在，无法初始化道具工坊和邮件管理。");
   }
 
   function buildItemWorkshop(pane){
