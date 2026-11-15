@@ -47,6 +47,9 @@
     .admin-record { display:flex; gap:12px; align-items:center; padding:12px; background:#222536; border:1px solid #383d50; border-radius:12px; margin:8px 0; min-width:0; }
     .admin-record img { width:54px; aspect-ratio:5/7; object-fit:contain; background:#11131b; border-radius:6px; }
     .admin-record-main { flex:1; min-width:0; overflow-wrap:anywhere; }
+    /* Card catalog: keep uploaded card names highly legible on the light admin panel. */
+    #catalog-card-list .admin-record-main > strong { display:block; color:#0756a6 !important; font-size:15px; font-weight:900; line-height:1.5; }
+    #catalog-card-list .admin-record-main > .hint { color:#456b91 !important; }
     .admin-record-actions { display:flex; gap:6px; flex-wrap:wrap; }
     .admin-record-actions button { padding:7px 10px; }
     .danger-button { border-color:#9a4d58; background:#512b35; }
