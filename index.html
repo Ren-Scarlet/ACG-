@@ -695,7 +695,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             <p class="hint">卡牌 ID 由系统自动生成；编辑已有卡牌时 ID 不可修改。图片填写仓库中的相对路径，例如 ./images/卡牌.jpg。</p>
             <div class="admin-form-grid">
               <div class="field"><label for="edit-card-name">卡牌名称</label><input id="edit-card-name" maxlength="100" placeholder="输入卡牌名称"></div>
-              <div class="field"><label for="edit-card-star">星级</label><input id="edit-card-star" type="number" min="1" max="12" step="1" value="3"></div>
+              <div class="field" id="edit-card-star-field"><label for="edit-card-star">星级</label><input id="edit-card-star" type="number" min="1" max="12" step="1" value="3"><small class="hint">树果包不使用星级，选择树果包后会自动隐藏此项。</small></div>
               <div class="field"><label for="edit-card-type">卡牌类型</label><input id="edit-card-type" maxlength="60" placeholder="例如：能力卡"></div>
               <div class="field"><label for="edit-card-pack">所属卡包</label><select id="edit-card-pack"></select></div>
               <div class="field wide"><label for="edit-card-effect">卡牌效果</label><textarea id="edit-card-effect" placeholder="输入完整卡牌效果"></textarea></div>
@@ -854,8 +854,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         const info = document.createElement("div"); info.className = "card-info";
         const title = document.createElement("div"); title.className = "card-title";
         const name = document.createElement("h3"); name.textContent = card.name;
-        const starLabel = document.createElement("span"); starLabel.className = "star"; starLabel.textContent = card.star + "星";
-        title.append(name, starLabel);
+        if (!isBerryCard(card)) { const starLabel = document.createElement("span"); starLabel.className = "star"; starLabel.textContent = card.star + "星"; title.append(name, starLabel); }
+        else title.append(name);
         const typeLabel = document.createElement("div"); typeLabel.className = "type";
         const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
         typeLabel.textContent = packName + " · " + card.type + (card.tags && card.tags.length ? " · " + card.tags.join(" · ") : "");
@@ -999,7 +999,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         const name = document.createElement("strong"); name.textContent = card.name;
         const meta = document.createElement("small");
         const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
-        meta.textContent = packName + " · " + card.star + "星 · " + card.type + " · 拥有 " + getCount(builderCollections, builderPlayer.id, card.id);
+        meta.textContent = packName + (isBerryCard(card) ? "" : " · " + card.star + "星") + " · " + card.type + " · 拥有 " + getCount(builderCollections, builderPlayer.id, card.id);
         info.append(name, meta);
         const counter = document.createElement("div"); counter.className = "builder-count";
         const minus = document.createElement("button"); minus.type = "button"; minus.textContent = "−"; minus.setAttribute("aria-label", "从构筑移除" + card.name);
@@ -1260,7 +1260,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       const info = document.createElement("div"); info.className = "shared-card-main";
       const name = document.createElement("strong"); name.textContent = card.name;
       const packName = allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类卡包";
-      const meta = document.createElement("small"); meta.textContent = packName + " · " + card.star + "星 · " + card.type + " · × " + quantity;
+      const meta = document.createElement("small"); meta.textContent = packName + (isBerryCard(card) ? "" : " · " + card.star + "星") + " · " + card.type + " · × " + quantity;
       info.append(name, meta); row.append(img, info); return row;
     }
     async function openSharedDeckFromUrl() {
@@ -1435,6 +1435,21 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       packDataDirty = true;
       setStatus(document.getElementById("pack-data-status"), "有尚未保存的卡包资料修改。", "bad");
     }
+    function isBerryCard(card) {
+      const pack = allPacks.find(item => item.id === card?.pack_id);
+      return (pack?.category || "normal") === "berry";
+    }
+    function updateCardStarField() {
+      const packId = document.getElementById("edit-card-pack").value;
+      const pack = allPacks.find(item => item.id === packId);
+      const field = document.getElementById("edit-card-star-field");
+      const input = document.getElementById("edit-card-star");
+      const berry = (pack?.category || "normal") === "berry";
+      field.classList.toggle("hidden", berry);
+      input.disabled = berry;
+      if (berry) input.value = "";
+      else if (!input.value) input.value = "3";
+    }
     function resetCardForm() {
       editingCardId = null;
       document.getElementById("edit-card-name").value = "";
@@ -1445,6 +1460,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       document.getElementById("edit-card-tags").value = "";
       document.getElementById("card-editor-title").textContent = "新增卡牌";
       document.getElementById("save-card").textContent = "新增卡牌";
+      updateCardStarField();
       setStatus(document.getElementById("card-editor-status"), "填写资料后保存。");
     }
     function resetPackForm() {
@@ -1471,7 +1487,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         const row = document.createElement("article"); row.className = "admin-record";
         const img = document.createElement("img"); img.src = card.image || ""; img.alt = card.name; img.onerror = () => { img.style.visibility = "hidden"; };
         const main = document.createElement("div"); main.className = "admin-record-main";
-        const title = document.createElement("strong"); title.textContent = card.name + " · " + card.star + "星";
+        const title = document.createElement("strong"); title.textContent = card.name + (isBerryCard(card) ? "" : " · " + card.star + "星");
         const detail = document.createElement("div"); detail.className = "hint";
         detail.textContent = card.id + " · " + (allPacks.find(pack => pack.id === card.pack_id)?.name || "未分类") + " · " + card.type;
         const effect = document.createElement("div"); effect.className = "hint"; effect.textContent = card.effect || "";
@@ -1484,6 +1500,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
           document.getElementById("edit-card-star").value = card.star || 3;
           document.getElementById("edit-card-type").value = card.type || "";
           document.getElementById("edit-card-pack").value = card.pack_id || "";
+          updateCardStarField();
           document.getElementById("edit-card-effect").value = card.effect || "";
           document.getElementById("edit-card-image").value = card.image || "";
           document.getElementById("edit-card-tags").value = Array.isArray(card.tags) ? card.tags.join(", ") : "";
@@ -1716,15 +1733,17 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         const name = typeof item.name === "string" ? item.name.trim() : "";
         const type = typeof item.type === "string" ? item.type.trim() : "";
         const packId = typeof item.pack_id === "string" ? item.pack_id.trim() : "";
-        const star = item.star === undefined || item.star === null || item.star === "" ? 3 : Number(item.star);
+        const targetPack = allPacks.find(pack => pack.id === packId);
+        const berry = (targetPack?.category || "normal") === "berry";
+        const star = berry ? null : (item.star === undefined || item.star === null || item.star === "" ? 3 : Number(item.star));
         if (!name) errors.push("第 " + row + " 项缺少卡牌名称");
         if (!type) errors.push("第 " + row + " 项缺少卡牌类型");
-        if (!Number.isInteger(star) || star < 1 || star > 12) errors.push("第 " + row + " 项星级必须是 1～12 的整数");
-        if (!allPacks.some(pack => pack.id === packId)) errors.push("第 " + row + " 项所属卡包无效：" + (packId || "未填写"));
+        if (!berry && (!Number.isInteger(star) || star < 1 || star > 12)) errors.push("第 " + row + " 项星级必须是 1～12 的整数");
+        if (!targetPack) errors.push("第 " + row + " 项所属卡包无效：" + (packId || "未填写"));
         if (item.effect !== undefined && item.effect !== null && typeof item.effect !== "string") errors.push("第 " + row + " 项效果必须是文字");
         if (item.image !== undefined && item.image !== null && typeof item.image !== "string") errors.push("第 " + row + " 项图片路径必须是文字");
         if (item.tags !== undefined && item.tags !== null && !Array.isArray(item.tags) && typeof item.tags !== "string") errors.push("第 " + row + " 项标签必须是数组或逗号分隔文字");
-        if (!name || !type || !Number.isInteger(star) || star < 1 || star > 12 || !allPacks.some(pack => pack.id === packId)) return;
+        if (!name || !type || (!berry && (!Number.isInteger(star) || star < 1 || star > 12)) || !targetPack) return;
         const tags = Array.isArray(item.tags)
           ? item.tags.map(tag => String(tag).trim()).filter(Boolean)
           : String(item.tags || "").split(/[,，]/).map(tag => tag.trim()).filter(Boolean);
@@ -1759,15 +1778,17 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 
     function submitCardForm() {
       const name = document.getElementById("edit-card-name").value.trim();
-      const star = Number(document.getElementById("edit-card-star").value);
       const type = document.getElementById("edit-card-type").value.trim();
       const packId = document.getElementById("edit-card-pack").value;
+      const selectedPack = allPacks.find(pack => pack.id === packId);
+      const berry = (selectedPack?.category || "normal") === "berry";
+      const star = berry ? null : Number(document.getElementById("edit-card-star").value);
       const effect = document.getElementById("edit-card-effect").value.trim();
       const image = document.getElementById("edit-card-image").value.trim();
       const tags = document.getElementById("edit-card-tags").value.split(/[,，]/).map(x => x.trim()).filter(Boolean);
       if (!name || !type || !packId) { setStatus(document.getElementById("card-editor-status"), "卡牌名称、类型和所属卡包不能为空。", "bad"); return; }
-      if (!Number.isInteger(star) || star < 1 || star > 12) { setStatus(document.getElementById("card-editor-status"), "星级必须是 1～12 的整数。", "bad"); return; }
-      if (!allPacks.some(pack => pack.id === packId)) { setStatus(document.getElementById("card-editor-status"), "请选择有效的所属卡包。", "bad"); return; }
+      if (!berry && (!Number.isInteger(star) || star < 1 || star > 12)) { setStatus(document.getElementById("card-editor-status"), "星级必须是 1～12 的整数。", "bad"); return; }
+      if (!selectedPack) { setStatus(document.getElementById("card-editor-status"), "请选择有效的所属卡包。", "bad"); return; }
       const id = editingCardId || nextDataId(allCards, "card");
       if (allCards.some(card => card.id === id && card.id !== editingCardId)) { setStatus(document.getElementById("card-editor-status"), "卡牌 ID 重复，请刷新资料后重试。", "bad"); return; }
       const record = { id, name, star, type, tags, pack_id: packId, effect, image };
@@ -1859,6 +1880,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     document.getElementById("admin-tab-packs").addEventListener("click", () => switchAdminPanel("packs"));
     document.getElementById("import-card-json").addEventListener("click", importCardsFromJson);
     document.getElementById("save-card").addEventListener("click", submitCardForm);
+    document.getElementById("edit-card-pack").addEventListener("change", updateCardStarField);
     document.getElementById("cancel-card-edit").addEventListener("click", resetCardForm);
     document.getElementById("save-pack").addEventListener("click", submitPackForm);
     document.getElementById("cancel-pack-edit").addEventListener("click", resetPackForm);
