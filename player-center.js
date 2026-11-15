@@ -750,6 +750,7 @@
     backBtn.addEventListener("click",()=>{overlay.remove();loadPage("draw");});actions.append(all,backBtn);
     stage.append(head,grid,summary,actions);main.append(title,stage);overlay.append(main);document.body.appendChild(overlay);
   }
+  window.acgShowItemPackOpening = (pool,result) => showSinglePackOpening({ ...pool, pack_name: pool.pack_name || pool.name || "奖励卡包", draw_mode: pool.draw_mode || (pool.category==="berry"?"uniform":"rarity"), price_tokens: 0 },result);
   async function loadDismantle() {
     const [{data:inventory,error:ie},{data:stats,error:se}]=await Promise.all([
       client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id"),
