@@ -39,5 +39,5 @@ begin
 end;
 $$;
 
-revoke all on function public.admin_set_draw_pool_cover(text,text) from public;
+revoke all on function public.admin_set_draw_pool_cover(text,text) from public, anon;
 grant execute on function public.admin_set_draw_pool_cover(text,text) to authenticated;
