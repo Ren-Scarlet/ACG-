@@ -343,17 +343,22 @@
     const category=warehouseCategories.find(x=>x.id===myWarehouseCategory)||warehouseCategories[0];
     description.textContent=category.description;
     host.replaceChildren();
-    if(myWarehouseCategory!=="cards"){
+    if(myWarehouseCategory==="key-items"||myWarehouseCategory==="consumables"){
       summary.textContent=category.label+" · 尚未添加物品";
-      host.appendChild(node("div","pc-empty","这里将存放"+category.label+"。目前仓库数据库已接入卡牌库存，其他物品类别将在对应物品资料和库存系统接入后启用；不会把卡牌误显示在这里。"));
+      host.appendChild(node("div","pc-empty","这里将存放"+category.label+"。目前该类别的独立物品库存尚未接入。"));
       return;
     }
+    const isBerryCard=card=>{
+      const pack=packCatalog.find(item=>item.id===card?.pack_id);
+      return pack?.category==="berry";
+    };
     const filtered=myWarehouseRows.filter(row=>{
       const card=cardsById[row.card_id]||{id:row.card_id,name:row.card_id,pack_id:""};
-      return (!myWarehouseQuery||String(card.name).toLowerCase().includes(myWarehouseQuery)||String(card.id).toLowerCase().includes(myWarehouseQuery))&&(!myWarehousePack||card.pack_id===myWarehousePack);
+      const belongsHere=myWarehouseCategory==="berries"?isBerryCard(card):!isBerryCard(card);
+      return belongsHere&&(!myWarehouseQuery||String(card.name).toLowerCase().includes(myWarehouseQuery)||String(card.id).toLowerCase().includes(myWarehouseQuery))&&(!myWarehousePack||card.pack_id===myWarehousePack);
     }).sort((a,b)=>compareCardsByStar(cardsById[a.card_id]||{name:a.card_id,star:0},cardsById[b.card_id]||{name:b.card_id,star:0}));
-    const total=myWarehouseRows.reduce((sum,row)=>sum+Number(row.quantity||0),0);
-    summary.textContent="拥有 "+myWarehouseRows.length+" 种卡牌，共 "+total+" 张 · 当前筛选 "+filtered.length+" 种";
+    const total=filtered.reduce((sum,row)=>sum+Number(row.quantity||0),0);
+    summary.textContent=category.label+"：拥有 "+filtered.length+" 种，共 "+total+" 张";
     if(!filtered.length){host.appendChild(node("div","pc-empty",myWarehouseRows.length?"没有符合条件的卡牌。":"你的卡牌仓库还是空的，去获取一些卡牌吧。"));return;}
     const page=renderPcPagination(host,"my-inventory",filtered.length,()=>renderMyWarehouse());
     filtered.slice(page.start,page.end).forEach(row=>{
@@ -376,8 +381,8 @@
     const tabsHost=node("div");tabsHost.id="pc-warehouse-tabs-host";
     const description=node("p","pc-muted");description.id="pc-warehouse-category-description";
     const filters=node("div","pc-search");
-    const searchWrap=node("div","field"),searchLabel=node("label","","搜索卡牌"),search=node("input");
-    search.placeholder="输入卡牌名称或编号";search.value=myWarehouseQuery;searchLabel.appendChild(search);searchWrap.append(searchLabel);
+    const searchWrap=node("div","field"),searchLabel=node("label","","搜索"+(myWarehouseCategory==="berries"?"树果":"卡牌")),search=node("input");
+    search.placeholder="输入名称或编号";search.value=myWarehouseQuery;searchLabel.appendChild(search);searchWrap.append(searchLabel);
     const packWrap=node("div","field"),packLabel=node("label","","卡包筛选"),pack=node("select");
     pack.add(new Option("全部卡包",""));
     [...new Set(Object.values(cardsById).map(card=>card.pack_id).filter(Boolean))].sort().forEach(id=>pack.add(new Option(id,id)));
