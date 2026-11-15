@@ -589,7 +589,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     </section>
 
     <section id="admin-view" class="hidden">
-      <div class="panel">
+      <div class="panel" id="github-admin-auth-panel">
         <h3>GitHub 管理员授权</h3>
         <p class="hint">需要一个仅对本仓库有权限的 Fine-grained personal access token。建议只授权仓库 <strong>ren-scarlet/ACG-</strong>，并仅开启 Contents：Read and write。密钥只保存在当前页面内存中，刷新或关闭页面后需要重新输入，不会写入网页文件或浏览器长期存储。</p>
         <div class="admin-top" style="margin-top:14px">
@@ -1925,7 +1925,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 
     loadData();
   </script>
-  <script src="./auth.js?v=29"></script>
+  <script src="./auth.js?v=30"></script>
 
 <script>
 (()=> {
@@ -1941,7 +1941,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
  'library-view':{en:'CARD COLLECTION',title:'CARD INDEX',desc:'卡牌图鉴 / 浏览收藏',items:[['全部卡牌','all'],['角色卡','角色卡'],['技能卡','技能卡'],['装备卡','装备卡'],['事件卡','事件卡'],['其他','其他']]},
  'builder-view':{en:'DECK BUILDER',title:'DECK EDIT',desc:'卡组构筑 / 管理卡组',items:[['DECK 01','deck0'],['DECK 02','deck1'],['DECK 03','deck2'],['DECK 04','deck3'],['DECK 05','deck4']]},
  'account-view':{en:'SYSTEM CONFIGURATION',title:'SYSTEM',desc:'系统设置 / 账号管理',items:[['账号设置','account'],['界面设置','interface'],['音乐设置','music'],['帮助与说明','help'],['管理员授权','admin-auth']]},
- 'admin-view':{en:'ADMINISTRATION',title:'SYSTEM ADMIN',desc:'系统管理 / 管理员工具',items:[['卡牌资料','cards'],['卡包管理','packs'],['玩家管理','players'],['抽卡设置','gacha']]},
+ 'admin-view':{en:'ADMINISTRATION',title:'SYSTEM ADMIN',desc:'系统管理 / 管理员工具',items:[['GitHub 授权','auth'],['卡牌管理','cards'],['卡包管理','packs'],['返回账号信息','account']]},
  'shared-deck-view':{en:'SHARED DECK',title:'DECK SHARE',desc:'卡组分享 / 查看配置',items:[['卡组内容','share']]}
  };
  let current='';
@@ -1962,7 +1962,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
    const ids={account:'account-forms',interface:'account-profile',music:'account-profile',help:'account-status'};
    const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
   }else if(current==='admin-view'){
-   const ids={cards:'admin-cards-panel',packs:'admin-packs-panel',players:'pc-admin-panel',gacha:'admin-view'};
+   if(key==='account'){document.getElementById('tab-account')?.click();return;}
+   const ids={auth:'github-admin-auth-panel',cards:'admin-cards-panel',packs:'admin-packs-panel'};
    const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
   }
  }
