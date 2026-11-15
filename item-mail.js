@@ -97,7 +97,7 @@
   function buildItemWorkshop(pane){
     if(!pane)return;
     pane.append(el("h3","","道具工坊"),el("p","pc-muted","创建可重复使用的道具。说明文字只用于展示；实际效果由效果模板执行。新效果类型需要扩展系统，不会执行任意文字或脚本。"));
-    const form=el("form",""),id=input("text","例如：consumable_tree_fruit_ticket");id.maxLength=80;id.pattern="[a-z0-9][a-z0-9_-]{1,79}";id.required=true;
+    const form=el("form",""),id=input("text","留空将自动生成编号，例如：item_...");id.maxLength=80;id.pattern="[a-z0-9][a-z0-9_-]{1,79}";id.required=false;
     const name=input("text","道具名称");name.maxLength=60;name.required=true;
     const icon=input("text","例如：🎟️");icon.maxLength=12;
     const desc=el("textarea");desc.rows=2;desc.maxLength=500;desc.placeholder="玩家可见说明";
@@ -114,13 +114,13 @@
       else if(effect.value==="random_reward"){const j=el("textarea");j.rows=7;j.value=JSON.stringify({options:[{reward_type:"tokens",amount:100,weight:1},{reward_type:"card",reward_id:"card_001",amount:1,weight:1}]},null,2);add("json","随机奖励 JSON",j);config.appendChild(el("p","pc-muted",'格式：{"options":[{"reward_type":"tokens","amount":100,"weight":1},{"reward_type":"card","reward_id":"card_001","amount":1,"weight":1}]}。weight 为相对权重。'));}
       else config.appendChild(el("p","pc-muted","该道具不会执行自动效果。"));
     }
-    effect.addEventListener("change",buildConfig);buildConfig();
+    effect.addEventListener("change",buildConfig);category.addEventListener("change",()=>{const important=category.value==="important";effect.disabled=important;if(important)effect.value="none";buildConfig();});buildConfig();
     const active=el("input");active.type="checkbox";active.checked=true;const activeLabel=el("label","");activeLabel.style.display="flex";activeLabel.style.gap="8px";activeLabel.append(active,el("span","","启用道具"));
     const save=button("保存道具","primary");save.type="submit";const reset=button("新建道具");reset.addEventListener("click",()=>{form.reset();id.readOnly=false;active.checked=true;buildConfig();});
     const msg=el("p","status","");
     form.append(field("道具编号（创建后建议保持不变）",id),field("道具名称",name),field("图标 / Emoji",icon),field("玩家可见说明",desc),field("道具类别",category),field("效果模板",effect),config,activeLabel,save,reset,msg);
     form.addEventListener("submit",async e=>{
-      e.preventDefault();if(!/^[a-z0-9][a-z0-9_-]{1,79}$/.test(id.value.trim())){status(msg,"道具编号格式不正确。",true);return;}
+      e.preventDefault();if(!id.value.trim())id.value="item_"+Date.now();if(!/^[a-z0-9][a-z0-9_-]{1,79}$/.test(id.value.trim())){status(msg,"道具编号格式不正确。",true);return;}
       let cfg={};try{
         if(effect.value==="draw_pack")cfg={pack_id:cf.pack_id.value,pack_count:Number(cf.pack_count.value)};
         else if(effect.value==="grant_tokens")cfg={amount:Number(cf.amount.value)};
