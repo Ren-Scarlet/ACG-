@@ -375,6 +375,7 @@
     const pager=host.querySelector(".pc-pagination");if(pager)host.appendChild(pager);
   }
   async function loadInventory() {
+    await loadCardNames();
     contentEl.replaceChildren();
     const heading=node("div","pc-warehouse-heading");
     heading.append(node("h3","","我的玩家仓库"),node("p","pc-muted","仓库分为卡牌、重要道具、消耗品和树果四个分类。对战道具等消耗品将在对应库存接入后显示。"));
