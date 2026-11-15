@@ -8,22 +8,22 @@
     const style=document.createElement("style");
     style.id="acg-item-mail-admin-style";
     style.textContent=`
-      #player-center-view #pc-admin-panel .pc-admin-category-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;width:100%!important}
-      #player-center-view #pc-admin-panel .pc-admin-category-nav button{min-width:0!important;min-height:46px!important;white-space:normal!important;line-height:1.35!important;padding:10px 12px!important}
-      #player-center-view #pc-admin-panel .pc-admin-pane-host{display:block!important;width:100%!important;max-width:none!important;min-width:0!important}
-      #player-center-view #pc-admin-panel .pc-admin-category-pane{display:block!important;float:none!important;clear:both!important;width:100%!important;max-width:none!important;min-width:0!important;margin:12px 0!important;padding:20px!important;box-sizing:border-box!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-nav{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(145px,1fr))!important;gap:9px!important;width:100%!important;align-items:stretch!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-nav button{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;width:100%!important;min-height:46px!important;padding:9px 12px!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;line-height:1.3!important}
+      #player-center-view #pc-admin-panel .pc-admin-pane-host{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane{display:block!important;float:none!important;clear:both!important;width:100%!important;max-width:none!important;min-width:0!important;margin:12px 0!important;padding:clamp(14px,2vw,22px)!important;box-sizing:border-box!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane.hidden{display:none!important}
-      #player-center-view #pc-admin-panel .pc-admin-category-pane form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 18px!important;width:100%!important;align-items:start!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 18px!important;width:100%!important;min-width:0!important;align-items:start!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane form>.field{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;width:100%!important;min-width:0!important;margin:0!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane form>.field>label{display:block!important;width:100%!important;white-space:normal!important;line-height:1.45!important;color:#244d66!important;font-weight:800!important}
-      #player-center-view #pc-admin-panel .pc-admin-category-pane input:not([type=checkbox]),#player-center-view #pc-admin-panel .pc-admin-category-pane select,#player-center-view #pc-admin-panel .pc-admin-category-pane textarea{width:100%!important;min-width:0!important;max-width:100%!important;min-height:42px!important;padding:9px 11px!important;background:#fff!important;color:#173b56!important;border:1px solid #9bbdcb!important;border-radius:4px!important}
-      #player-center-view #pc-admin-panel .pc-admin-category-pane .acg-form-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 18px!important;width:100%!important;grid-column:1/-1!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane input:not([type=checkbox]),#player-center-view #pc-admin-panel .pc-admin-category-pane select,#player-center-view #pc-admin-panel .pc-admin-category-pane textarea{width:100%!important;min-width:0!important;max-width:100%!important;min-height:42px!important;padding:9px 11px!important;background:#fff!important;color:#173b56!important;border:1px solid #9bbdcb!important;border-radius:4px!important;box-sizing:border-box!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane .acg-form-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px 18px!important;width:100%!important;min-width:0!important;grid-column:1/-1!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane .acg-attachment-list{display:grid!important;gap:10px!important;width:100%!important;grid-column:1/-1!important}
-      #player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{display:grid!important;grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.6fr) auto!important;gap:10px!important;align-items:end!important;width:100%!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{display:grid!important;grid-template-columns:minmax(130px,1fr) minmax(180px,1.5fr) minmax(90px,.6fr) auto!important;gap:10px!important;align-items:end!important;width:100%!important;min-width:0!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane .pc-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;flex-wrap:wrap!important;width:100%!important;padding:13px 8px!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane h3{color:#123d5a!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane h4{margin:22px 0 12px!important;padding:10px 12px!important;background:#e4f4f8!important;border-left:4px solid #19b8d0!important;color:#164663!important}
-      @media(max-width:760px){#player-center-view #pc-admin-panel .pc-admin-category-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}#player-center-view #pc-admin-panel .pc-admin-category-pane form,#player-center-view #pc-admin-panel .pc-admin-category-pane .acg-form-grid{grid-template-columns:minmax(0,1fr)!important}#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+      @media(max-width:760px){#player-center-view #pc-admin-panel .pc-admin-category-pane form,#player-center-view #pc-admin-panel .pc-admin-category-pane .acg-form-grid{grid-template-columns:minmax(0,1fr)!important}#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
       @media(max-width:460px){#player-center-view #pc-admin-panel .pc-admin-category-pane .pc-grid{grid-template-columns:minmax(0,1fr)!important}}
     `;
     document.head.appendChild(style);
@@ -75,33 +75,14 @@
     }catch(error){list.replaceChildren(el("div","pc-empty","邮件读取失败："+error.message));}
   }
 
-  const admin=$("#pc-admin-panel"),nav=admin?.querySelector(".pc-admin-category-nav");
-  let paneHost=admin?.querySelector(".pc-admin-pane-host");
-  if(admin&&nav){
-    if(!paneHost){
-      paneHost=el("div","pc-admin-pane-host");
-      const existing=[...admin.querySelectorAll(".pc-admin-category-pane")];
-      existing.forEach(p=>paneHost.appendChild(p));
-      nav.insertAdjacentElement("afterend",paneHost);
-    }
-    const addArea=(id,label)=>{
-      if(admin.querySelector('[data-admin-category="'+id+'"]'))return;
-      const pane=el("section","pc-admin-category-pane hidden");pane.dataset.adminCategory=id;
-      const tab=button(label);tab.dataset.adminCategory=id;tab.setAttribute("role","tab");tab.setAttribute("aria-selected","false");
-      tab.addEventListener("click",()=>{
-        nav.querySelectorAll("button").forEach(x=>{
-          const selected=x.dataset.adminCategory===id;
-          x.classList.toggle("active",selected);x.setAttribute("aria-selected",String(selected));
-        });
-        admin.querySelectorAll(".pc-admin-category-pane").forEach(x=>x.classList.toggle("hidden",x.dataset.adminCategory!==id));
-      });
-      nav.appendChild(tab);
-      paneHost.appendChild(pane);
-    };
-    addArea("items","道具工坊");
-    addArea("mail","邮件管理");
-    buildItemWorkshop(admin.querySelector('[data-admin-category="items"]'));
-    buildMailManager(admin.querySelector('[data-admin-category="mail"]'));
+  const admin=$("#pc-admin-panel");
+  const itemPane=admin?.querySelector('[data-admin-category="items"]');
+  const mailPane=admin?.querySelector('[data-admin-category="mail"]');
+  if(itemPane&&mailPane){
+    buildItemWorkshop(itemPane);
+    buildMailManager(mailPane);
+  }else{
+    console.error("[ACG] 道具工坊/邮件管理入口未初始化：玩家中心管理员分类缺少 items/mail 面板。");
   }
 
   function buildItemWorkshop(pane){
