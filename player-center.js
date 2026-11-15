@@ -595,10 +595,18 @@
         const q=Math.max(0,Math.min(item.quantity,Math.floor(Number(input.value)||0)));
         if(q)selected.set(item.card_id,q);else selected.delete(item.card_id);input.value=String(q);updateEstimate();
       });
-      controls.append(input,node("span","pc-muted","分解数量"));meta.appendChild(controls);row.appendChild(meta);contentEl.appendChild(row);
-      rows.push({id:item.card_id,input,quantity:item.quantity,reward});
+      controls.append(input,node("span","pc-muted","分解数量"));meta.appendChild(controls);row.appendChild(meta);
+      rows.push({id:item.card_id,input,quantity:item.quantity,reward,row});
     });
     if(!rows.length){contentEl.appendChild(node("div","pc-empty","当前没有可分解的卡牌。"));return;}
+    const listContainer=node("div");contentEl.appendChild(listContainer);
+    function renderDismantlePage(){
+      listContainer.replaceChildren();
+      const page=renderPcPagination(listContainer,"dismantle",rows.length,renderDismantlePage);
+      rows.slice(page.start,page.end).forEach(item=>listContainer.appendChild(item.row));
+      const pager=listContainer.querySelector(".pc-pagination");if(pager)listContainer.appendChild(pager);
+    }
+    renderDismantlePage();
     const summary=node("div","pc-stat","预计返还：0 代币");contentEl.appendChild(summary);
     function updateEstimate(){
       const total=[...selected.entries()].reduce((sum,[id,q])=>sum+q*(rows.find(r=>r.id===id)?.reward||0),0);
