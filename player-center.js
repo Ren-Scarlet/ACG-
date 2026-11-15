@@ -986,7 +986,9 @@
       {id:"matches",label:"比赛管理"},
       {id:"pools",label:"卡池管理"},
       {id:"tokens",label:"代币发放"},
-      {id:"achievements",label:"成就管理"}
+      {id:"achievements",label:"成就管理"},
+      {id:"items",label:"道具工坊"},
+      {id:"mail",label:"邮件管理"}
     ];
     const panelTitle=adminPanel.querySelector("h3");
     const intro=adminPanel.querySelector("p");
