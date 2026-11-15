@@ -23,6 +23,48 @@
   style.textContent += "#player-center-view #pc-personal{display:block!important;min-width:0;grid-template-columns:none!important;grid-template-rows:none!important}#player-center-view #pc-personal>.pc-tabs{display:none!important}#player-center-view .pc-mainpane>.panel{padding:clamp(14px,2vw,24px)!important;background:linear-gradient(145deg,#faffff,#e4f6fb)!important;color:#123b5a!important;border:1px solid #8bbdce!important;box-shadow:3px 4px 0 #b4dbe6!important}#player-center-view .pc-mainpane>.panel>h3{margin-top:0!important}#player-center-view .pc-mainpane #pc-personal-content{background:transparent!important;border:0!important;box-shadow:none!important;padding:12px 0!important;min-height:240px!important}";
   style.textContent += "/* Isolate the draw lobby from the site's global main/grid and panel theme. */#acg-draw-lobby{position:fixed!important;inset:0!important;z-index:99990!important;display:block!important;overflow-y:auto!important;overflow-x:hidden!important;background:radial-gradient(ellipse at 50% -15%,#263958 0,#101827 34%,#080b12 72%)!important;color:#edf2fa!important}#acg-draw-lobby>.adl-top{display:flex!important;width:100%!important;max-width:none!important;margin:0!important;padding:0 max(20px,calc((100vw - 1180px)/2))!important}#acg-draw-lobby main.adl-main{display:block!important;position:relative!important;isolation:isolate!important;max-width:1180px!important;width:100%!important;min-height:0!important;margin:0 auto!important;padding:34px 22px 70px!important;background:transparent!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;grid-template-columns:none!important;grid-template-rows:none!important;gap:0!important;align-items:initial!important;justify-content:initial!important;color:#edf2fa!important}#acg-draw-lobby .adl-eyebrow{text-align:left!important;color:#78d9e8!important;font-size:11px!important;letter-spacing:4px!important}#acg-draw-lobby .adl-hero{display:flex!important;align-items:end!important;justify-content:space-between!important;margin:8px 0 25px!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}#acg-draw-lobby .adl-pools{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:15px!important;width:100%!important;min-height:0!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}#acg-draw-lobby .adl-pool{display:block!important;position:relative!important;min-width:0!important;min-height:260px!important;background:linear-gradient(150deg,#1b2a40,#0d1420 68%)!important;border:1px solid #35445a!important;border-radius:8px!important;overflow:hidden!important;cursor:pointer!important;box-shadow:0 12px 30px #0005!important}#acg-draw-lobby .adl-pool.active{border:2px solid #e7bd65!important;box-shadow:0 16px 36px #0008,0 0 0 1px #d5a84c55!important}#acg-draw-lobby .adl-cover{height:174px!important;display:grid!important;place-items:center!important;position:relative!important;overflow:hidden!important;background:radial-gradient(circle at 50% 42%,#6f9dc8,transparent 60%)!important}#acg-draw-lobby .adl-cover:before{content:'';position:absolute!important;width:180px!important;height:180px!important;border:1px solid #ffffff30!important;transform:rotate(45deg)!important;box-shadow:0 0 35px #6f9dc8!important;background:#07101caa!important;pointer-events:none!important}#acg-draw-lobby .adl-cover-art{position:relative!important;z-index:1!important;width:100px!important;height:145px!important;background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;transform:rotate(-7deg)!important;filter:drop-shadow(0 12px 12px #000b)!important;border:2px solid #d7bd7b!important;border-radius:5px!important;pointer-events:none!important}#acg-draw-lobby .adl-pool:nth-child(2) .adl-cover{background:radial-gradient(circle at 50% 42%,#b18bdc,transparent 60%)!important}#acg-draw-lobby .adl-pool:nth-child(3) .adl-cover{background:radial-gradient(circle at 50% 42%,#d17a49,transparent 60%)!important}#acg-draw-lobby .adl-pool:nth-child(4) .adl-cover{background:radial-gradient(circle at 50% 42%,#4a9dc9,transparent 60%)!important}#acg-draw-lobby .adl-config{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;margin-top:30px!important;padding:17px 18px!important;background:linear-gradient(100deg,#141e2d,#0e1521)!important;border:1px solid #283449!important;border-radius:7px!important;box-shadow:none!important}#acg-draw-lobby .adl-rates{display:flex!important;gap:18px!important;flex-wrap:wrap!important;margin-top:14px!important;background:transparent!important;border:0!important;box-shadow:none!important}#acg-draw-lobby .adl-history{display:block!important;margin-top:28px!important;background:transparent!important;border:0!important;border-top:1px solid #34445c!important;box-shadow:none!important}#acg-draw-lobby .adl-historyrow{display:flex!important;align-items:center!important;gap:10px!important}#acg-draw-lobby .adl-status{background:transparent!important;border:0!important;box-shadow:none!important;color:#f2cd77!important}@media(max-width:850px){#acg-draw-lobby .adl-pools{grid-template-columns:repeat(2,minmax(0,1fr))!important}}@media(max-width:540px){#acg-draw-lobby main.adl-main{padding:23px 13px 45px!important}#acg-draw-lobby .adl-hero{align-items:flex-start!important;flex-direction:column!important}#acg-draw-lobby .adl-pools{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}#acg-draw-lobby .adl-pool{min-height:220px!important}#acg-draw-lobby .adl-cover{height:140px!important}#acg-draw-lobby .adl-cover-art{height:120px!important;width:82px!important}#acg-draw-lobby .adl-config{align-items:flex-start!important;flex-direction:column!important}#acg-draw-lobby .adl-actions{width:100%!important}#acg-draw-lobby .adl-btn{flex:1!important}}";
   style.textContent += "/* Draw lobby typography contrast: override the global light-page heading color on dark pack surfaces. */#acg-draw-lobby main.adl-main h1,#acg-draw-lobby main.adl-main h2,#acg-draw-lobby main.adl-main h3,#acg-draw-lobby main.adl-main h4{color:#f2f6ff!important;text-shadow:0 1px 5px #0008!important}#acg-draw-lobby .adl-poolinfo h3{color:#fff0bd!important;font-size:17px!important;font-weight:900!important;text-shadow:0 2px 8px #000!important}#acg-draw-lobby .adl-poolinfo p{color:#c1cede!important}#acg-draw-lobby .adl-poolinfo strong{color:#f4d47c!important}#acg-draw-lobby .adl-config h3,#acg-draw-lobby .adl-history h3{color:#f2f6ff!important}#acg-draw-lobby .adl-config p,#acg-draw-lobby .adl-history p{color:#c1cede!important}#acg-draw-lobby .adl-section{color:#f2f6ff!important}#acg-draw-lobby .adl-hero h1{color:#f5f7ff!important}";
+  style.textContent += `
+#player-center-view #pc-admin-panel .pc-admin-category-nav{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:8px!important;
+  align-items:stretch!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-nav button{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  min-width:0!important;
+  min-height:46px!important;
+  padding:8px 6px!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  text-align:center!important;
+  line-height:1.25!important;
+  font-size:14px!important;
+  font-weight:800!important;
+  color:#12314b!important;
+  background:#f3fbff!important;
+  border:1px solid #6d9db5!important;
+  border-radius:6px!important;
+  text-shadow:none!important;
+  box-shadow:0 2px 0 #9bbbc9!important;
+}
+#player-center-view #pc-admin-panel .pc-admin-category-nav button.active{
+  color:#ffffff!important;
+  background:#174d70!important;
+  border-color:#0b3552!important;
+  box-shadow:0 2px 0 #082b43!important;
+}
+@media(max-width:700px){
+  #player-center-view #pc-admin-panel .pc-admin-category-nav{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+`;
   document.head.appendChild(style);
 
   const tab = document.createElement("button");
