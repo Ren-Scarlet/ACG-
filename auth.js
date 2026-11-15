@@ -104,8 +104,10 @@
       if (data.session) {
         await renderSession(data.session);
         signupForm.reset();
+      } else if (data.user) {
+        showStatus("注册请求已提交。当前账号需要先完成邮箱验证；请检查注册邮箱中的验证邮件，验证后再回来登录。", "good");
       } else {
-        showStatus("注册请求已提交，但当前没有建立登录会话。请检查 Supabase 的邮箱确认设置是否已关闭。", "bad");
+        showStatus("注册请求已提交，但暂时无法确认账号状态。请稍后尝试登录；如果仍无法登录，请联系管理员检查 Supabase Auth 日志。", "bad");
       }
     } catch (error) {
       showStatus("注册失败：" + error.message, "bad");
