@@ -94,5 +94,12 @@ jobs:
           for name in ["draw_packages", "dismantle_cards", "admin_set_draw_pool_v2", "admin_set_draw_pool_cover"]:
               assert f"'{name}'" in preflight, f"Preflight missing function: {name}"
           assert "card_dismantle_requests" in preflight
-          print("Key draw, dismantle and cover migrations are represented in preflight.")
+          items = Path("supabase/item-workshop-mail-v1.sql").read_text(encoding="utf-8")
+          for name in ["admin_save_item", "use_inventory_item", "admin_send_mail", "player_claim_mail"]:
+              assert f"function public.{name}" in items, f"Missing item/mail function: {name}"
+          for name in ["item_catalog", "mail_messages", "mail_recipients", "mail_attachments"]:
+              assert f"'{name}'" in preflight, f"Preflight missing table: {name}"
+          for name in ["admin_save_item", "use_inventory_item", "admin_send_mail", "player_claim_mail"]:
+              assert f"'{name}'" in preflight, f"Preflight missing function: {name}"
+          print("Key draw, item workshop, mailbox and reward functions are represented in preflight.")
           PY
