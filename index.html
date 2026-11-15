@@ -1968,6 +1968,10 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   side.querySelectorAll('button').forEach(b=>b.remove());
   c.items.forEach(([label,key],i)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.classList.toggle('active',i===0);b.addEventListener('click',()=>selectCategory(key,b));side.append(b)});
   side.style.display='flex';
+  if(id==='account-view'){
+   const active=side.querySelector('button');
+   selectCategory('account',active);
+  }
  }
  function selectCategory(key,button){
   side.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===button));
@@ -1976,8 +1980,20 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   else if(key.startsWith('deck')){const sel=document.getElementById('saved-deck-select');if(sel&&sel.options.length>1){const ix=Number(key.slice(4))+1;if(sel.options[ix]){sel.selectedIndex=ix;document.getElementById('load-local-deck')?.click()}}}
   else if(current==='account-view'){
    if(key==='admin-auth'){document.getElementById('tab-admin')?.click();return;}
-   const ids={account:'account-forms',interface:'account-interface-settings',music:'account-music-settings',help:'account-help-settings'};
-   const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'center'});
+   const accountTargets={
+    account:['account-forms','account-profile'],
+    interface:['account-interface-settings'],
+    music:['account-music-settings'],
+    help:['account-help-settings']
+   };
+   const allAccountTargets=['account-forms','account-profile','account-interface-settings','account-music-settings','account-help-settings'];
+   const visibleTargets=accountTargets[key]||accountTargets.account;
+   allAccountTargets.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.toggle('hidden',!visibleTargets.includes(id));
+   });
+   const target=visibleTargets.map(id=>document.getElementById(id)).find(el=>el&&!el.classList.contains('hidden'));
+   target?.scrollIntoView({behavior:'smooth',block:'start'});
   }else if(current==='admin-view'){
    if(key==='account'){document.getElementById('tab-account')?.click();return;}
    if(key==='players'){window.acgOpenPlayerAdminPanel?.();return;}
