@@ -36,7 +36,7 @@
         icon.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
         const info=el("div","pc-card-info");info.append(el("strong","",item.name),el("small","",item.description||"暂无说明"),el("small","",(item.category==="consumable"?"消耗品":"重要道具")+" · 持有 × "+owned.get(item.item_id)));
         row.append(icon,info);
-        if(item.category==="consumable"&&item.effect_type!=="none"&&item.is_active){const use=button("使用","primary");use.addEventListener("click",()=>useItem(item,use));row.appendChild(use);}
+        if(item.category==="consumable"&&item.effect_type!=="none"&&item.is_active){let choice=null;if(item.effect_type==="choose_reward"){choice=select([["请选择一项奖励",""],...(item.effect_config?.options||[]).map((o,i)=>[o.label||((o.reward_type==="tokens"?"代币":o.reward_type==="card"?cardName(o.reward_id):itemName(o.reward_id))+" × "+o.amount),String(i+1)])]);row.appendChild(choice);}const use=button("使用","primary");use.addEventListener("click",()=>useItem(item,use,choice?.value));row.appendChild(use);}
         list.appendChild(row);
       });
     }catch(error){list.replaceChildren(el("div","pc-empty","读取道具失败："+error.message));}
