@@ -8,7 +8,7 @@ with expected_tables(table_name) as (
     ('matches'),('match_results'),('achievements'),('player_achievements'),
     ('draw_card_catalog'),('card_draw_pools'),('card_draw_history'),
     ('player_registry'),('legacy_card_collections'),('legacy_collection_imports'),
-    ('card_inventory_adjustments'),('battle_item_catalog'),('battle_item_deck_commits'),('card_dismantle_requests')
+    ('card_inventory_adjustments'),('battle_item_catalog'),('battle_item_deck_commits'),('card_dismantle_requests'),('consumable_use_history'),('item_catalog'),('mail_messages'),('mail_recipients'),('mail_attachments')
 ),
 expected_columns(table_name,column_name) as (
   values
@@ -47,7 +47,10 @@ expected_columns(table_name,column_name) as (
     ('battle_item_catalog','card_id'),('battle_item_catalog','card_name'),
     ('battle_item_catalog','enabled'),
     ('battle_item_deck_commits','user_id'),('battle_item_deck_commits','request_id'),
-    ('battle_item_deck_commits','item_cards')
+    ('battle_item_deck_commits','item_cards'),
+    ('item_catalog','item_id'),('item_catalog','effect_type'),
+    ('mail_messages','title'),('mail_recipients','claimed_at'),
+    ('mail_attachments','reward_type'),('consumable_use_history','result_data')
 ),
 table_status as (
   select e.table_name,
@@ -94,7 +97,9 @@ function_status as (
     ('admin_set_draw_pool_v2'),
     ('admin_set_draw_pool_cover'),
     ('admin_save_achievement'),
-    ('save_profile_display')
+    ('save_profile_display'),
+    ('admin_save_item'),('use_inventory_item'),('admin_send_mail'),
+    ('admin_list_mail'),('player_list_mail'),('player_mark_mail_read'),('player_claim_mail')
   ) required(function_name)
 ),
 auth_triggers as (
