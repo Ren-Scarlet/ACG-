@@ -24,9 +24,10 @@
 基础账号迁移 `tonight-launch.sql` 不会自动安装全部抽卡、分解、成就管理功能。请按顺序检查并执行：
 
 1. `supabase/card-draw.sql`（抽卡基础表与基础函数）。
-2. `supabase/card-draw-v2.sql`（5 张/包、十连、异画、分解、卡池概率及封面字段/管理员封面函数；可安全重跑以补齐封面迁移）。
+2. `supabase/card-draw-v2.sql`（5 张/包、十连、异画、分解和卡池概率；这是版本迁移文件，不要为了补封面字段重复执行，因为它会暂停现有卡池）。
+3. `supabase/card-draw-cover.sql`（单独补齐卡包封面字段和管理员封面函数；该文件可安全重复执行）。
 3. `supabase/achievement-management.sql`（管理员成就配置）。
-4. 仅在项目原有管理员功能尚未安装时，核对 `supabase/card-draw-admin.sql` 及其他对应迁移，避免重复执行不兼容的旧版本。
+5. 仅在项目原有管理员功能尚未安装时，核对 `supabase/card-draw-admin.sql` 及其他对应迁移，避免重复执行不兼容的旧版本。
 
 完成后重新运行 `supabase/launch-preflight.sql`。重点确认 `draw_packages`、`dismantle_cards`、`admin_set_draw_pool_v2`、`admin_set_draw_pool_cover` 和 `admin_save_achievement` 均存在，且 `missing_required_columns` 为空。不要因为预检里存在函数就推断函数逻辑已通过实机测试。
 
