@@ -474,23 +474,47 @@
     const right=node("div","adl-topright"),token=node("div","adl-token","代币："+(stats?.tokens??0)),close=node("button","adl-close","返回玩家中心");
     close.type="button";close.addEventListener("click",()=>{closeDrawLobby();showCenter("overview");});right.append(token,close);top.append(brand,right);
     const main=node("main","adl-main"),eyebrow=node("div","adl-eyebrow","CARD PACK COLLECTION"),hero=node("div","adl-hero");
+    const groupStyle=node("style");
+    groupStyle.textContent=".adl-group-title{margin:24px 0 12px;padding:0 0 9px;color:#f4d98d;font-size:19px;letter-spacing:.08em;border-bottom:1px solid #59647a}.adl-special-divider{height:1px;margin:34px 0 22px;background:linear-gradient(90deg,transparent,#d9b45f 12%,#d9b45f 88%,transparent);position:relative}.adl-special-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 12px;padding:0 0 10px;border-bottom:1px solid #725d37;color:#ffe2a0;font-size:21px;font-weight:900}.adl-special-heading small{font-size:10px;letter-spacing:.18em;color:#c6a96c}.adl-subgroup-title{margin:22px 0 10px;color:#c8e8ff;font-size:15px;letter-spacing:.06em}.adl-subgroup-title:before{content:'◆';color:#e5bd68;margin-right:8px;font-size:10px}@media(max-width:850px){.adl-pools{grid-template-columns:repeat(2,minmax(0,1fr))!important}}@media(max-width:520px){.adl-pools{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}.adl-pool{min-height:220px!important}.adl-special-heading{font-size:18px}}";
+    root.appendChild(groupStyle);
     forceStyle(main,{display:"block",position:"relative",width:"min(1180px,100%)",maxWidth:"1180px",margin:"0 auto",padding:"34px 22px 70px",background:"transparent",border:"0",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
     const hgroup=node("div");hgroup.append(node("h1","","卡包抽卡"),node("p","","选择你的卡包，开启下一张传说。每包 5 张卡，十连共 50 张。"));
     const tokenbox=node("div","adl-tokenbox");tokenbox.append(document.createTextNode("当前代币"),node("b","",String(stats?.tokens??0)));hero.append(hgroup,tokenbox);
     const section=node("div","adl-section");section.append(document.createTextNode("选择卡包"),node("small","","SELECT YOUR PACK"));
-    const grid=node("div","adl-pools");let selectedPool=pools[0]||null;
-    forceStyle(grid,{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:"15px",width:"100%",margin:"0",padding:"0",background:"transparent",border:"0",boxShadow:"none",boxSizing:"border-box"});
+    const packCategory=pool=>packCatalog.find(pack=>pack.id===pool.pack_id)?.category||"normal";
+    const categoryOrder={normal:0,battle_item:1,berry:2};
+    const orderedPools=pools.slice().sort((a,b)=>(categoryOrder[packCategory(a)]??0)-(categoryOrder[packCategory(b)]??0)||String(a.pack_name).localeCompare(String(b.pack_name),"zh-CN"));
+    let selectedPool=orderedPools[0]||null;
     const cards=Object.values(cardsById);
-    pools.forEach((pool,index)=>{
-      const tile=node("article","adl-pool"+(index===0?" active":""));tile.dataset.packId=pool.pack_id;
-      forceStyle(tile,{display:"block",minWidth:"0",minHeight:"260px",background:"linear-gradient(150deg,#1b2a40,#0d1420 68%)",borderRadius:"8px",overflow:"hidden",cursor:"pointer",boxSizing:"border-box"});
-      const cover=node("div","adl-cover");
-      const coverCard=(cards.find(c=>c.id===pool.cover_card_id&&c.pack_id===pool.pack_id&&c.image)||cards.filter(c=>c.pack_id===pool.pack_id&&c.image).sort((a,b)=>Number(b.star||0)-Number(a.star||0))[0]);
-      // CSS background avoids image-translation extensions intercepting artwork clicks.
-      if(coverCard){const art=node("div","adl-cover-art");art.style.backgroundImage="url("+JSON.stringify(coverCard.image)+")";cover.appendChild(art);}
-      const info=node("div","adl-poolinfo");info.append(node("h3","",pool.pack_name),node("p","",pool.description||"ACG 卡牌卡池"),node("strong","","单包 "+pool.price_tokens+" 代币 · 5 张卡"));
-      tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;grid.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
-    });
+    const makePoolGrid=groupPools=>{
+      const grid=node("div","adl-pools");
+      forceStyle(grid,{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:"15px",width:"100%",margin:"0",padding:"0",background:"transparent",border:"0",boxShadow:"none",boxSizing:"border-box"});
+      groupPools.forEach(pool=>{
+        const tile=node("article","adl-pool"+(selectedPool?.pack_id===pool.pack_id?" active":""));tile.dataset.packId=pool.pack_id;
+        forceStyle(tile,{display:"block",minWidth:"0",minHeight:"260px",background:"linear-gradient(150deg,#1b2a40,#0d1420 68%)",borderRadius:"8px",overflow:"hidden",cursor:"pointer",boxSizing:"border-box"});
+        const cover=node("div","adl-cover");
+        const coverCard=(cards.find(c=>c.id===pool.cover_card_id&&c.pack_id===pool.pack_id&&c.image)||cards.filter(c=>c.pack_id===pool.pack_id&&c.image).sort((a,b)=>Number(b.star||0)-Number(a.star||0))[0]);
+        // CSS background avoids image-translation extensions intercepting artwork clicks.
+        if(coverCard){const art=node("div","adl-cover-art");art.style.backgroundImage="url("+JSON.stringify(coverCard.image)+")";cover.appendChild(art);}
+        const info=node("div","adl-poolinfo");info.append(node("h3","",pool.pack_name),node("p","",pool.description||"ACG 卡牌卡池"),node("strong","","单包 "+pool.price_tokens+" 代币 · 5 张卡"));
+        tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;root.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
+      });
+      return grid;
+    };
+    const normalPools=orderedPools.filter(pool=>packCategory(pool)==="normal");
+    const battleItemPools=orderedPools.filter(pool=>packCategory(pool)==="battle_item");
+    const berryPools=orderedPools.filter(pool=>packCategory(pool)==="berry");
+    const otherPools=orderedPools.filter(pool=>!["normal","battle_item","berry"].includes(packCategory(pool)));
+    const normalHeading=node("h3","adl-group-title","普通卡牌卡包");
+    const normalGrid=makePoolGrid(normalPools);
+    const specialDivider=node("div","adl-special-divider");
+    const specialHeading=node("div","adl-special-heading");
+    specialHeading.append(node("span","","额外系统补给"),node("small","","SPECIAL SUPPLIES"));
+    const battleHeading=node("h4","adl-subgroup-title","对战道具包");
+    const battleGrid=makePoolGrid(battleItemPools);
+    const berryHeading=node("h4","adl-subgroup-title","树果包");
+    const berryGrid=makePoolGrid(berryPools);
+    const otherGrid=makePoolGrid(otherPools);
     const config=node("div","adl-config"),configInfo=node("div"),configTitle=node("h3","",selectedPool?.pack_name||"暂无开放卡池"),configDesc=node("p","","每包 5 张卡 · 经典卡池");
     forceStyle(config,{display:"flex",position:"relative",width:"100%",height:"auto",minHeight:"0",maxHeight:"none",flex:"0 0 auto",flexDirection:"row",flexWrap:"nowrap",alignSelf:"auto",gridColumn:"1 / -1",gridRow:"auto",alignItems:"center",justifyContent:"space-between",gap:"16px",margin:"30px 0 0",padding:"17px 18px",overflow:"visible",background:"linear-gradient(100deg,#141e2d,#0e1521)",border:"1px solid #283449",borderRadius:"7px",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
     configInfo.append(configTitle,configDesc);const actions=node("div","adl-actions"),single=node("button","adl-btn primary","开启 1 包 · 5 张"),ten=node("button","adl-btn","开启 10 包 · 50 张");
@@ -515,9 +539,18 @@
     });
     const launch=count=>{if(!selectedPool)return;status.textContent="正在连接抽卡系统……";single.disabled=ten.disabled=true;performDraw(selectedPool,count).finally(()=>{single.disabled=ten.disabled=false;});};
     single.addEventListener("click",()=>launch(1));ten.addEventListener("click",()=>launch(10));
-    main.append(eyebrow,hero,section,grid,config,rates,status,historySection);root.append(top,main);document.body.appendChild(root);
+    main.append(eyebrow,hero,section);
+    if(normalPools.length){main.append(normalHeading,normalGrid);}
+    if(battleItemPools.length||berryPools.length||otherPools.length){
+      main.append(specialDivider,specialHeading);
+      if(battleItemPools.length)main.append(battleHeading,battleGrid);
+      if(berryPools.length)main.append(berryHeading,berryGrid);
+      if(otherPools.length)main.append(otherGrid);
+    }
+    main.append(config,rates,status,historySection);root.append(top,main);document.body.appendChild(root);
   }
   async function loadDraw() {
+    await loadCardNames();
     const {data:pools,error}=await client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled,cover_card_id").eq("enabled",true).order("pack_id");
     if(error)throw error;drawPools=pools||[];
     const {data:stats,error:statsError}=await client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle();
