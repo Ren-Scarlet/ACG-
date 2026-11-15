@@ -84,31 +84,46 @@
     @media(max-width:700px) { .builder-stats { grid-template-columns:1fr 1fr 1fr; gap:6px; } .builder-stat { padding:9px; font-size:12px; } .builder-stat strong { font-size:17px; } .builder-card { gap:7px; padding:7px; } .builder-card img { width:46px; } .builder-count { gap:4px; } .builder-count button { width:29px; height:29px; } }
     @media(max-width:700px) { .player-search { grid-template-columns:1fr; } .player-card { gap:8px; padding:8px; } .player-card img { width:54px; } }
 
-    /* Builder contrast fix: keep text readable on dark deck/card surfaces. */
-    #builder-view .builder-stat,
-    #builder-view .builder-card,
-    #builder-view .shared-card,
-    #builder-view .panel {
-      color:#f2f6ff !important;
+    /* Builder readability and filter controls */
+    #builder-view .panel,#builder-view .builder-stat,#builder-view .builder-card{
+      background:#202b3d!important;border-color:#49627d!important;color:#dce8f5!important;
     }
-    #builder-view .builder-stat strong,
-    #builder-view .builder-stat small,
-    #builder-view .builder-card-main strong,
-    #builder-view .builder-card-main small,
-    #builder-view .shared-card-main strong,
-    #builder-view .shared-card-main small,
-    #builder-view .panel h3,
-    #builder-view .panel p,
-    #builder-view .panel label {
-      color:#f2f6ff !important;
+    #builder-view .panel h3,#builder-view .builder-section>h3{
+      color:#65d8ef!important;font-weight:900;letter-spacing:.02em;
     }
-    #builder-view .builder-stat small,
-    #builder-view .builder-card-main small,
-    #builder-view .shared-card-main small,
-    #builder-view .hint { color:#c3cbe0 !important; }
-    #builder-view button { color:#ffffff !important; }
-    #builder-view .builder-count button { background:#5967a5 !important; border-color:#8290d0 !important; color:#ffffff !important; }
-    #builder-view input,#builder-view select { color:#f5f5f5 !important; }
+    #builder-view .panel p,#builder-view .hint,#builder-view .builder-filter-note{
+      color:#b9cce0!important;
+    }
+    #builder-view .field label,#builder-view label{color:#f2cc75!important}
+    #builder-view .builder-stat{box-shadow:inset 3px 0 #35b8d5}
+    #builder-view .builder-stat strong{color:#ffe08a!important}
+    #builder-view .builder-stat small{color:#a9c2d9!important}
+    #builder-view .builder-card-main strong{color:#f4d98d!important}
+    #builder-view .builder-card-main small{color:#b9cce0!important}
+    #builder-view .builder-count span{color:#f5df9b!important}
+    #builder-view button{color:#e8f5ff!important;background:#29435f!important;border-color:#5c7d9c!important}
+    #builder-view button.primary,#builder-view .builder-category-tabs button.active{
+      color:#10263a!important;background:#f1cb68!important;border-color:#ffe59a!important;font-weight:900;
+    }
+    #builder-view .builder-count button{background:#087f9e!important;border-color:#42c7df!important;color:#fff!important;font-weight:900}
+    #builder-view input,#builder-view select{
+      color:#193149!important;background:#f2f7fb!important;border:1px solid #8caec4!important;
+    }
+    #builder-view input::placeholder{color:#657f94!important;opacity:1}
+    #builder-view .builder-filter-panel{
+      margin:14px 0 18px;padding:14px;background:#172538;border:1px solid #3e607d;border-radius:12px;
+    }
+    #builder-view .builder-category-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+    #builder-view .builder-category-tabs button{min-height:38px;padding:8px 16px;border-radius:7px}
+    #builder-view .builder-filters{
+      display:grid;grid-template-columns:minmax(220px,1.5fr) repeat(4,minmax(130px,1fr)) auto;gap:9px;align-items:center;
+    }
+    #builder-view .builder-filters input,#builder-view .builder-filters select{min-width:0;min-height:40px}
+    #builder-view .builder-filters #builder-filter-reset{min-height:40px;white-space:nowrap}
+    #builder-view .builder-filter-note{font-size:12px;margin:10px 0 0}
+    #builder-view .builder-section[hidden]{display:none!important}
+    @media(max-width:900px){#builder-view .builder-filters{grid-template-columns:repeat(2,minmax(0,1fr))}#builder-view .builder-filters input{grid-column:1/-1}}
+    @media(max-width:520px){#builder-view .builder-filters{grid-template-columns:1fr}#builder-view .builder-category-tabs button{flex:1 1 calc(50% - 8px)}}
 
     /* ACG HUB Persona-style home */
     body.acg-home-active{background:#071b43;overflow:hidden}
@@ -542,7 +557,23 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             <p class="hint" id="deck-list-summary">尚未加入卡牌。</p>
             <section id="current-deck-list" class="grid"></section><div id="current-deck-pagination" class="list-pagination" aria-label="当前卡组分页"></div>
           </div>
-          <input id="builder-card-search" type="search" placeholder="搜索你拥有的卡牌……">
+          <div class="builder-filter-panel">
+            <div class="builder-category-tabs" role="group" aria-label="卡牌分类">
+              <button type="button" class="active" data-builder-category="all">全部类别</button>
+              <button type="button" data-builder-category="relic">礼装卡</button>
+              <button type="button" data-builder-category="special">特殊攻击卡</button>
+              <button type="button" data-builder-category="battleItem">对战道具</button>
+            </div>
+            <div class="builder-filters">
+              <input id="builder-card-search" type="search" placeholder="搜索卡牌名称、效果或标签……">
+              <select id="builder-pack-filter" aria-label="按卡包筛选"><option value="">全部卡包</option></select>
+              <select id="builder-star-filter" aria-label="按星级筛选"><option value="">全部星级</option></select>
+              <select id="builder-type-filter" aria-label="按卡牌类型筛选"><option value="">全部类型</option></select>
+              <select id="builder-sort-filter" aria-label="卡牌排序"><option value="star">星级从高到低</option><option value="name">按名称排序</option><option value="id">按编号排序</option></select>
+              <button type="button" id="builder-filter-reset">重置筛选</button>
+            </div>
+            <p class="builder-filter-note" id="builder-filter-summary">筛选只影响下方可选卡牌，不会改变当前卡组。</p>
+          </div>
           <div class="save-row">
             <button id="clear-builder" type="button">清空当前构筑</button>
             <button id="generate-deck-link" type="button">生成分享链接</button>
@@ -587,17 +618,17 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             <p id="deck-share-status" class="status" style="margin-top:8px"></p>
           </div>
         </div>
-        <div class="builder-section">
+        <div class="builder-section" id="relic-builder-section">
           <h3>礼装卡（主卡组）</h3>
           <p class="hint">从已拥有的非特殊攻击卡中选择，数量必须符合当前规则。</p>
           <section id="relic-builder-list" class="grid"></section><div id="relic-builder-list-pagination" class="list-pagination" aria-label="礼装卡分页"></div>
         </div>
-        <div class="builder-section">
+        <div class="builder-section" id="special-builder-section">
           <h3>超越／调律／共鸣攻击卡（单独放置）</h3>
           <p class="hint">三种特殊攻击卡合计最多放入规定数量，不计入礼装卡数量。</p>
           <section id="special-builder-list" class="grid"></section><div id="special-builder-list-pagination" class="list-pagination" aria-label="特殊攻击卡分页"></div>
         </div>
-        <div class="builder-section">
+        <div class="builder-section" id="battleItem-builder-section">
           <h3>对战道具（独立构筑区）</h3>
           <p class="hint">对战道具独立放置，不计入礼装卡或特殊攻击卡数量限制。加入卡组不会消耗道具，也不会扣除收藏数量。</p>
           <section id="battle-item-builder-list" class="grid"></section><div id="battle-item-builder-list-pagination" class="list-pagination" aria-label="对战道具分页"></div>
