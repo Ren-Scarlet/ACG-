@@ -905,6 +905,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       const list = document.getElementById("current-deck-list");
       const summary = document.getElementById("deck-list-summary");
       list.replaceChildren();
+      document.getElementById("current-deck-pagination").replaceChildren();
       const selected = allCards.filter(card => deckCardCount(card.id) > 0).sort(compareCardsByStar);
       const counts = deckCounts();
       const total = counts.relic + counts.special + counts.battleItems;
