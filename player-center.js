@@ -14,7 +14,7 @@
   style.textContent += "#acg-draw-lobby{position:fixed;inset:0;z-index:99990;overflow:auto;background:radial-gradient(ellipse at 50% 0%,#1b2940 0,#101827 48%,#090e18 100%);color:#edf4ff;font-family:Inter,\"Microsoft YaHei\",sans-serif}#acg-draw-lobby *{box-sizing:border-box}#acg-draw-lobby .adl-top{height:55px;padding:0 max(18px,calc((100vw - 1120px)/2));display:flex;align-items:center;justify-content:space-between;background:#070b13e8;border-bottom:1px solid #ffffff1c}#acg-draw-lobby .adl-brand{font-weight:1000;letter-spacing:3px}#acg-draw-lobby .adl-brand b{color:#efc45d}#acg-draw-lobby .adl-topright{display:flex;gap:12px;align-items:center}#acg-draw-lobby .adl-token{border:1px solid #34445c;padding:8px 12px;color:#eecb78;font-size:12px}#acg-draw-lobby button{font:inherit;cursor:pointer;color:inherit}#acg-draw-lobby .adl-close{border:1px solid #53637a;background:#172235;padding:8px 13px;font-size:12px}#acg-draw-lobby .adl-main{max-width:1160px;margin:auto;padding:30px 20px 55px}#acg-draw-lobby .adl-eyebrow{text-align:center;color:#78d9f4;font-size:10px;letter-spacing:5px;font-weight:800}#acg-draw-lobby .adl-hero{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:8px 0 24px}#acg-draw-lobby .adl-hero h1{font-size:clamp(28px,4vw,42px);margin:0 0 5px;letter-spacing:2px}#acg-draw-lobby .adl-hero p{font-size:12px;color:#aab8ca;margin:0}#acg-draw-lobby .adl-tokenbox{border:1px solid #34445c;border-radius:5px;padding:12px 18px;white-space:nowrap;color:#aab8ca;font-size:11px}#acg-draw-lobby .adl-tokenbox b{font-size:21px;color:#f1bd56;margin-left:12px}#acg-draw-lobby .adl-section{display:flex;align-items:center;gap:12px;margin:25px 0 12px;font-weight:800;font-size:14px}#acg-draw-lobby .adl-section small{font-size:9px;color:#91a9c7;font-weight:400}#acg-draw-lobby .adl-section:after{content:\"\";height:1px;flex:1;background:#35435a}#acg-draw-lobby .adl-pools{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}#acg-draw-lobby .adl-pool{border:1px solid #394b64;background:#0d1522;border-radius:8px;overflow:hidden;cursor:pointer;transition:.2s;min-width:0}#acg-draw-lobby .adl-pool.active{border:2px solid #e9bd59;box-shadow:0 0 0 1px #e9bd5944,inset 0 0 20px #e9bd5911}#acg-draw-lobby .adl-cover{height:170px;display:grid;place-items:center;position:relative;overflow:hidden;background:radial-gradient(ellipse,#526a85,#18263a 60%,#0c1421)}#acg-draw-lobby .adl-cover:before{content:\"\";position:absolute;width:75%;aspect-ratio:1;transform:rotate(45deg);background:#07101caa;border:1px solid #ffffff22}#acg-draw-lobby .adl-cover img{height:145px;max-width:78%;object-fit:contain;position:relative;z-index:1;transform:rotate(-7deg);filter:drop-shadow(0 8px 10px #000b)}#acg-draw-lobby .adl-pool:nth-child(2) .adl-cover{background:radial-gradient(ellipse,#65517b,#211b37 60%,#0c1421)}#acg-draw-lobby .adl-pool:nth-child(3) .adl-cover{background:radial-gradient(ellipse,#805339,#30202a 60%,#0c1421)}#acg-draw-lobby .adl-pool:nth-child(4) .adl-cover{background:radial-gradient(ellipse,#285d7b,#142b43 60%,#0c1421)}#acg-draw-lobby .adl-poolinfo{padding:12px 14px 14px}#acg-draw-lobby .adl-poolinfo h3{margin:0 0 5px;font-size:15px}#acg-draw-lobby .adl-poolinfo p{margin:0 0 7px;color:#9eafc7;font-size:11px}#acg-draw-lobby .adl-poolinfo strong{font-size:11px;color:#edc15d}#acg-draw-lobby .adl-config{margin-top:26px;padding:17px 18px;border:1px solid #34445c;background:#111b2a;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:15px}#acg-draw-lobby .adl-config h3{font-size:16px;margin:0 0 5px}#acg-draw-lobby .adl-config p{font-size:11px;color:#9eafc7;margin:0}#acg-draw-lobby .adl-actions{display:flex;gap:9px;flex-wrap:wrap}#acg-draw-lobby .adl-btn{border:1px solid #596a81;background:#1c2b40;padding:12px 16px;font-size:12px;font-weight:800;white-space:nowrap}#acg-draw-lobby .adl-btn.primary{background:linear-gradient(110deg,#c59c42,#ffe99b);color:#17130a;border-color:#ffe7a2;box-shadow:0 0 20px #eac65a33}#acg-draw-lobby .adl-rates{font-size:11px;color:#aab8ca;margin:13px 0 0;display:flex;gap:16px;flex-wrap:wrap}#acg-draw-lobby .adl-rates .alt{color:#e99bff}#acg-draw-lobby .adl-rates .r5{color:#ffda73}#acg-draw-lobby .adl-rates .r4{color:#a8caff}#acg-draw-lobby .adl-history{margin-top:28px;border-top:1px solid #34445c;padding-top:16px}#acg-draw-lobby .adl-history h3{font-size:14px}#acg-draw-lobby .adl-historyrow{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #ffffff12;font-size:12px;color:#dbe4f2}#acg-draw-lobby .adl-historyrow img{width:38px;height:52px;object-fit:contain}#acg-draw-lobby .adl-muted{color:#91a1b8;font-size:11px}#acg-draw-lobby .adl-status{margin:12px 0;color:#f2cd77;font-size:12px;min-height:18px}@media(max-width:680px){#acg-draw-lobby .adl-main{padding:20px 11px 35px}#acg-draw-lobby .adl-hero{align-items:flex-start;flex-direction:column}#acg-draw-lobby .adl-config{align-items:flex-start;flex-direction:column}#acg-draw-lobby .adl-actions{width:100%}#acg-draw-lobby .adl-btn{flex:1}#acg-draw-lobby .adl-cover{height:140px}#acg-draw-lobby .adl-cover img{height:120px}}";
   style.textContent += "/* P3R skin: scoped to player center only; draw screens retain their original dedicated theme */#player-center-view{color:#16375e}#player-center-view .panel{background:linear-gradient(145deg,#ffffff,#e8f8ff)!important;border:1px solid #8bdcf0!important;border-radius:3px!important;box-shadow:0 8px 24px #14518a20!important}#player-center-view h2,#player-center-view h3,#player-center-view h4{color:#0756a6!important;font-style:italic;font-weight:1000}#player-center-view .pc-stat,#player-center-view .pc-empty,#player-center-view .pc-inventory-card,#player-center-view .pc-draw-card{background:linear-gradient(145deg,#ffffff,#eaf8ff)!important;border:1px solid #8bdcf0!important;border-radius:3px!important;color:#16375e!important}#player-center-view .pc-row{border-color:#c2e3ef!important}#player-center-view button{border-radius:2px!important}#player-center-view input,#player-center-view select{background:#ffffff!important;color:#16375e!important;border:1px solid #7dcce4!important;border-radius:2px!important}";
   style.textContent += "/* Admin draw-pool controls: high-contrast text on the light P3R panel */#player-center-view #pc-admin-pool-list .pc-row{color:#123f62!important}#player-center-view #pc-admin-pool-list .pc-row strong{display:block;color:#0756a6!important;font-size:15px;font-weight:1000}#player-center-view #pc-admin-pool-list .pc-row .pc-muted{color:#315f7c!important;font-weight:600}#player-center-view #pc-admin-pool-list .pc-row .pc-positive{color:#08765e!important;font-weight:900}#player-center-view #pc-admin-pool-list button{background:linear-gradient(110deg,#07558a,#087eb4)!important;color:#fff!important;border:1px solid #0b5683!important;text-shadow:none!important;font-weight:900!important}#player-center-view #pc-admin-pool-list button:hover{filter:brightness(1.12)}#player-center-view #pc-pool-form label{color:#174767!important;font-weight:800!important}#player-center-view #pc-pool-form select,#player-center-view #pc-pool-form input{color:#092f50!important;background:#fff!important;font-weight:700!important}";
-  style.textContent += "#player-center-view .pc-warehouse-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}#player-center-view .pc-warehouse-tabs button,#player-center-view .pc-admin-category-nav button{min-height:44px;padding:10px 12px;border:1px solid #79b7ce;background:linear-gradient(135deg,#123c5d,#176184);color:#f4fcff;font-weight:900;cursor:pointer;border-radius:3px}#player-center-view .pc-warehouse-tabs button.active,#player-center-view .pc-admin-category-nav button.active{background:linear-gradient(135deg,#fff1bd,#e3b957);color:#17304a;border-color:#d7a944;box-shadow:0 3px 0 #9d7631}#player-center-view .pc-admin-category-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin:14px 0 18px;padding:12px;background:#d8f1f8;border:1px solid #8bbdce}#player-center-view .pc-admin-category-pane{padding:16px;background:linear-gradient(145deg,#f8fdff,#e1f4fa);border:1px solid #9ac9d8;margin:8px 0 16px}#player-center-view .pc-admin-category-pane>h3:first-child,#player-center-view .pc-admin-category-pane>h4:first-child{margin-top:0}@media(max-width:650px){#player-center-view .pc-warehouse-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}";
+  style.textContent += "#player-center-view .pc-admin-category-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}#player-center-view .pc-admin-category-nav button{min-width:0;white-space:normal;line-height:1.35;text-align:center}@media(max-width:700px){#player-center-view .pc-admin-category-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}}#player-center-view .pc-warehouse-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0}#player-center-view .pc-warehouse-tabs button,#player-center-view .pc-admin-category-nav button{min-height:44px;padding:10px 12px;border:1px solid #79b7ce;background:linear-gradient(135deg,#123c5d,#176184);color:#f4fcff;font-weight:900;cursor:pointer;border-radius:3px}#player-center-view .pc-warehouse-tabs button.active,#player-center-view .pc-admin-category-nav button.active{background:linear-gradient(135deg,#fff1bd,#e3b957);color:#17304a;border-color:#d7a944;box-shadow:0 3px 0 #9d7631}#player-center-view .pc-admin-category-nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:9px;margin:14px 0 18px;padding:12px;background:#d8f1f8;border:1px solid #8bbdce}#player-center-view .pc-admin-category-pane{padding:16px;background:linear-gradient(145deg,#f8fdff,#e1f4fa);border:1px solid #9ac9d8;margin:8px 0 16px}#player-center-view .pc-admin-category-pane>h3:first-child,#player-center-view .pc-admin-category-pane>h4:first-child{margin-top:0}@media(max-width:650px){#player-center-view .pc-warehouse-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}";
   style.textContent += "/* Player center: real two-column navigation/content layout */#player-center-view{margin-top:18px!important;padding:clamp(14px,2vw,26px)!important;background:linear-gradient(145deg,#eafaff,#cceaf3)!important;color:#09243d!important;border:1px solid #83bfd2!important;border-top:5px solid #e83c63!important;box-shadow:8px 8px 0 #031226!important}#player-center-view>.panel:first-child{background:transparent!important;border:0!important;box-shadow:none!important;padding:0 0 12px!important;border-bottom:1px solid #7eb8ca!important}#player-center-view>.panel:first-child h3{font-size:clamp(24px,3vw,36px)!important;letter-spacing:.04em!important;color:#082c4b!important}#player-center-view #pc-personal{display:grid;grid-template-columns:minmax(190px,230px) minmax(0,1fr);grid-template-rows:auto 1fr auto;gap:0 22px;align-items:start}#player-center-view #pc-personal>#pc-login-hint{grid-column:1/-1}#player-center-view #pc-personal>.pc-tabs{grid-column:1;grid-row:2;display:flex!important;flex-direction:column!important;gap:7px!important;margin:0!important;padding:0!important;position:sticky;top:12px}#player-center-view #pc-personal>.pc-tabs button{width:100%;min-height:46px!important;text-align:left!important;padding:11px 14px!important;background:linear-gradient(100deg,#0a2b49,#155477)!important;color:#effcff!important;border:0!important;border-left:5px solid #20c5df!important;border-bottom:1px solid #8bbccc!important;clip-path:polygon(0 0,100% 0,95% 100%,0 100%)!important;border-radius:0!important;font-weight:900!important}#player-center-view #pc-personal>.pc-tabs button:nth-child(even){border-left-color:#e83c63!important}#player-center-view #pc-personal>.pc-tabs button.active{background:linear-gradient(100deg,#f6fdff,#bdeaf4)!important;color:#092b48!important;box-shadow:3px 3px 0 #e83c63!important}#player-center-view #pc-personal-content,#player-center-view #pc-display-editor{grid-column:2;min-width:0}#player-center-view #pc-personal-content{grid-row:2;background:linear-gradient(145deg,#faffff,#e4f6fb);border:1px solid #8bbdce;padding:clamp(14px,2vw,24px);min-height:360px;box-shadow:3px 4px 0 #b4dbe6}#player-center-view #pc-display-editor{grid-row:3;margin-top:18px!important;background:#e5f5fa;padding:16px!important;border:1px solid #8bbdce!important}#player-center-view .pc-muted{color:#41677e!important}#player-center-view .pc-positive{color:#147a62!important}#player-center-view .pc-negative{color:#bb3152!important}#player-center-view .pc-empty{padding:20px!important}@media(max-width:760px){#player-center-view #pc-personal{grid-template-columns:1fr;gap:12px}#player-center-view #pc-personal>.pc-tabs{grid-column:1;grid-row:auto;position:static;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}#player-center-view #pc-personal-content,#player-center-view #pc-display-editor{grid-column:1;grid-row:auto}}";
 
   /* ACG electric cyan season theme for player center, draw lobby and ten-draw */
@@ -309,6 +309,7 @@
 
   const TREE_FRUIT_TICKET={id:"consumable_tree_fruit_ticket",name:"树果卷",icon:"🎟️",description:"使用后免费抽取一次树果包，获得 5 颗随机树果。"};
   let myWarehouseRows = [];
+  let myWarehouseItems = [];
   let myWarehouseQuery = "";
   let myWarehousePack = "";
   let myWarehouseCategory = "cards";
@@ -344,26 +345,32 @@
     const category=warehouseCategories.find(x=>x.id===myWarehouseCategory)||warehouseCategories[0];
     description.textContent=category.description;
     host.replaceChildren();
-    if(myWarehouseCategory==="key-items"){
-      summary.textContent=category.label+" · 尚未添加物品";
-      host.appendChild(node("div","pc-empty","这里将存放"+category.label+"。"));
-      return;
-    }
-    if(myWarehouseCategory==="consumables"){
+    if(myWarehouseCategory==="key-items"||myWarehouseCategory==="consumables"){
+      const categoryKey=myWarehouseCategory==="consumables"?"consumable":"important";
+      const catalog=myWarehouseItems.filter(item=>item.category===categoryKey);
+      const owned=catalog.map(item=>({item,quantity:Number(myWarehouseRows.find(row=>row.card_id===item.item_id)?.quantity||0)}))
+        .filter(x=>x.quantity>0&&(!myWarehouseQuery||x.item.name.toLowerCase().includes(myWarehouseQuery)||x.item.item_id.toLowerCase().includes(myWarehouseQuery)));
       const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id);
-      const quantity=Number(ticketRow?.quantity||0);
-      const matches=!myWarehouseQuery||TREE_FRUIT_TICKET.name.toLowerCase().includes(myWarehouseQuery)||TREE_FRUIT_TICKET.id.includes(myWarehouseQuery);
-      summary.textContent="消耗品 · "+(quantity>0?"持有 "+quantity+" 张":"尚未持有消耗品");
-      if(!quantity||!matches){host.appendChild(node("div","pc-empty",quantity?"没有符合搜索条件的消耗品。":"你还没有获得树果卷。"));return;}
-      const row=node("article","pc-consumable-row");
-      row.style.cssText="display:flex;align-items:center;gap:14px;padding:14px;margin:10px 0;border:1px solid #42617e;border-radius:10px;background:#14243a";
-      const icon=node("div","pc-consumable-icon",TREE_FRUIT_TICKET.icon);
-      icon.style.cssText="width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;border-radius:12px;background:#263d55;font-size:29px";
-      const info=node("div","pc-card-info");
-      info.append(node("strong","",TREE_FRUIT_TICKET.name),node("small","",TREE_FRUIT_TICKET.description),node("small","","持有数量：× "+quantity));
-      const use=node("button","primary","使用");use.type="button";use.disabled=consumableUseBusy;
-      use.addEventListener("click",()=>useTreeFruitTicket(use));
-      row.append(icon,info,use);host.appendChild(row);
+      const ticketQty=Number(ticketRow?.quantity||0);
+      const ticketMatches=!myWarehouseQuery||TREE_FRUIT_TICKET.name.toLowerCase().includes(myWarehouseQuery)||TREE_FRUIT_TICKET.id.includes(myWarehouseQuery);
+      const showTicket=myWarehouseCategory==="consumables"&&ticketQty>0&&ticketMatches&&!catalog.some(x=>x.item_id===TREE_FRUIT_TICKET.id);
+      const total=owned.length+(showTicket?1:0);
+      summary.textContent=category.label+" · 持有 "+total+" 种";
+      if(!total){host.appendChild(node("div","pc-empty",myWarehouseCategory==="consumables"?"你还没有获得消耗品。":"你还没有获得重要道具。"));return;}
+      if(showTicket){
+        const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",TREE_FRUIT_TICKET.icon);
+        icon.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
+        const info=node("div","pc-card-info");info.append(node("strong","",TREE_FRUIT_TICKET.name),node("small","",TREE_FRUIT_TICKET.description),node("small","","持有数量：× "+ticketQty));
+        const use=node("button","primary","使用");use.type="button";use.addEventListener("click",()=>useTreeFruitTicket(use));row.append(icon,info,use);host.appendChild(row);
+      }
+      owned.forEach(({item,quantity})=>{
+        const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",item.icon||"🎁");
+        icon.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
+        const info=node("div","pc-card-info");info.append(node("strong","",item.name),node("small","",item.description||"暂无说明"),node("small","","持有数量：× "+quantity));
+        row.append(icon,info);
+        if(item.category==="consumable"&&item.is_active&&item.effect_type!=="none"){const use=node("button","primary","使用");use.type="button";use.addEventListener("click",()=>useWarehouseItem(item,use));row.appendChild(use);}
+        host.appendChild(row);
+      });
       return;
     }
     const isBerryCard=card=>{
@@ -420,6 +427,21 @@
     }catch(error){setStatus("树果卷使用失败："+error.message,true);}
     finally{consumableUseBusy=false;}
   }
+  async function useWarehouseItem(item,button){
+    if(button.disabled)return;
+    const key="acg-warehouse-item:"+currentUser.id+":"+item.item_id;
+    let requestId;try{requestId=localStorage.getItem(key);if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(key,requestId);}}catch(_){requestId=crypto.randomUUID();}
+    button.disabled=true;setStatus("正在使用「"+item.name+"」……",false);
+    try{
+      const {data,error}=await client.rpc("use_inventory_item",{p_item_id:item.item_id,p_request_id:requestId,p_choice_index:null});
+      if(error)throw error;try{localStorage.removeItem(key);}catch(_){}
+      const result=Array.isArray(data)?data[0]:data;
+      if(result?.cards?.length)showSinglePackOpening({pack_id:result.result?.pack_id||"pack_010",pack_name:result.result?.pack_name||"奖励卡包",price_tokens:0,draw_mode:item.effect_type==="draw_pack"&&packCatalog.find(x=>x.id===result.result?.pack_id)?.category==="berry"?"uniform":"rarity"},result);
+      else if(result?.result?.kind==="tokens")setStatus("使用成功，获得 "+result.result.amount+" 代币。",false);
+      else setStatus("使用成功，奖励已发放。",false);
+      await loadPage("inventory");
+    }catch(error){setStatus("道具使用失败："+error.message,true);button.disabled=false;}
+  }
   async function loadInventory() {
     await loadCardNames();
     contentEl.replaceChildren();
@@ -441,9 +463,12 @@
     search.addEventListener("input",()=>{myWarehouseQuery=search.value.trim().toLowerCase();pcListPages["my-inventory"]=1;renderMyWarehouse();});
     pack.addEventListener("change",()=>{myWarehousePack=pack.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
     host.appendChild(node("div","pc-empty","正在读取你的仓库……"));
-    const {data,error}=await client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id");
-    if(error)throw error;
-    myWarehouseRows=data||[];
+    const [{data:inventory,error},{data:itemCatalog,error:itemError}]=await Promise.all([
+      client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id"),
+      client.from("item_catalog").select("item_id,name,icon,description,category,effect_type,effect_config,is_active")
+    ]);
+    if(error)throw error;if(itemError)throw itemError;
+    myWarehouseRows=inventory||[];myWarehouseItems=itemCatalog||[];
     renderMyWarehouse();
   }
 
