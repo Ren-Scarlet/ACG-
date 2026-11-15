@@ -24,6 +24,11 @@
     .card { overflow:hidden; background:#222536; border:1px solid #383d50; border-radius:12px; }
     .card img { display:block; width:100%; aspect-ratio:5/7; object-fit:contain; background:#11131b; }
     .card-info { padding:12px; }
+    .list-pagination{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:18px 0 8px;padding:12px;border:1px solid #34445c;background:#0d1728;border-radius:8px;color:#dce9f7}
+    .list-pagination button{min-width:38px;padding:7px 11px;border:1px solid #526b89;border-radius:6px;background:#172b45;color:#eaf4ff;cursor:pointer}
+    .list-pagination button.active{background:#d6ad58;color:#172033;border-color:#f0ce83;font-weight:900}
+    .list-pagination button:disabled{opacity:.4;cursor:not-allowed}
+    .list-pagination .page-note{font-size:13px;color:#aebed2;margin:0 6px}
     .card-title { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px; }
     .card-title h3 { margin:0; font-size:16px; line-height:1.45; }
     .star { flex:0 0 auto; color:#f3cc72; font-size:13px; white-space:nowrap; }
@@ -502,7 +507,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         <select id="library-sort" aria-label="卡牌排序"><option value="star">按星级排序</option><option value="id">按编号排序</option></select>
       </section>
       <p class="summary" id="summary">正在读取卡牌资料……</p>
-      <section class="grid" id="card-list"><div class="loading">正在加载卡牌……</div></section>
+      <section class="grid" id="card-list"><div class="loading">正在加载卡牌……</div></section><div id="library-pagination" class="list-pagination" aria-label="图鉴分页"></div>
     </section>
 
     <section id="builder-view" class="hidden">
@@ -702,7 +707,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
               <div class="field"><label for="catalog-card-sort">排序方式</label><select id="catalog-card-sort"><option value="star">按星级排序</option><option value="id">按编号排序</option></select></div>
             </div>
             <p id="catalog-card-summary" class="summary"></p>
-            <section id="catalog-card-list"></section>
+            <section id="catalog-card-list"></section><div id="catalog-card-pagination" class="list-pagination" aria-label="卡牌管理分页"></div>
             <div class="save-row"><button id="save-card-data" class="primary" type="button">保存卡牌资料到 GitHub</button><button id="discard-card-data" type="button">重新读取线上资料</button><span id="card-data-status" class="status">尚无未保存修改。</span></div>
             <div id="card-data-save-progress-wrap" class="admin-progress" hidden><progress id="card-data-save-progress" max="100" value="0"></progress><output id="card-data-save-progress-label">0%</output></div>
           </div>
@@ -754,6 +759,9 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     let cardDataDirty = false;
     let packDataDirty = false;
     let adminDataSha = { cards: null, packs: null };
+    const CARD_PAGE_SIZE = 20;
+    let libraryPage = 1;
+    let catalogCardPage = 1;
 
     const apiHeaders = () => ({
       "Accept": "application/vnd.github+json",
@@ -763,6 +771,26 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     function setStatus(el, message, kind="") {
       el.textContent = message;
       el.className = "status" + (kind ? " " + kind : "");
+    }
+    function renderListPagination(containerId, total, page, pageSize, onChange) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.replaceChildren();
+      const pageCount = Math.max(1, Math.ceil(total / pageSize));
+      const current = Math.min(Math.max(1, page), pageCount);
+      if (total <= pageSize) return;
+      const makeButton = (label, target, disabled=false, active=false) => {
+        const button = document.createElement("button"); button.type = "button"; button.textContent = label; button.disabled = disabled;
+        if (active) { button.className = "active"; button.setAttribute("aria-current", "page"); }
+        button.addEventListener("click", () => onChange(target)); return button;
+      };
+      container.appendChild(makeButton("上一页", current-1, current===1));
+      const first = Math.max(1, current-2), last = Math.min(pageCount, current+2);
+      if (first > 1) { container.appendChild(makeButton("1",1,false,current===1)); if (first > 2) { const dots=document.createElement("span"); dots.className="page-note"; dots.textContent="…"; container.appendChild(dots); } }
+      for (let p=first;p<=last;p++) container.appendChild(makeButton(String(p),p,false,p===current));
+      if (last < pageCount) { if (last < pageCount-1) { const dots=document.createElement("span"); dots.className="page-note"; dots.textContent="…"; container.appendChild(dots); } container.appendChild(makeButton(String(pageCount),pageCount,false,current===pageCount)); }
+      const note=document.createElement("span"); note.className="page-note"; note.textContent=current+" / "+pageCount+" 页 · 共 "+total+" 张"; container.appendChild(note);
+      container.appendChild(makeButton("下一页",current+1,current===pageCount));
     }
     function renderCards() {
       const keyword = searchInput.value.trim().toLowerCase();
@@ -775,10 +803,12 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
           (!star || String(card.star) === star) && (!type || card.type === type);
       });
       sortCards(filtered, document.getElementById("library-sort").value);
-      summary.textContent = `显示 ${filtered.length} / ${allCards.length} 张卡牌`;
+      const pageCount = Math.max(1, Math.ceil(filtered.length / CARD_PAGE_SIZE));
+      libraryPage = Math.min(libraryPage, pageCount);
+      summary.textContent = "显示 " + filtered.length + " / " + allCards.length + " 张卡牌 · 第 " + libraryPage + "/" + pageCount + " 页";
       cardList.replaceChildren();
-      if (!filtered.length) { cardList.innerHTML = '<div class="empty">没有找到符合条件的卡牌。</div>'; return; }
-      filtered.forEach(card => {
+      if (!filtered.length) { cardList.innerHTML = '<div class="empty">没有找到符合条件的卡牌。</div>'; renderListPagination("library-pagination",0,1,CARD_PAGE_SIZE,()=>{}); return; }
+      filtered.slice((libraryPage-1)*CARD_PAGE_SIZE,libraryPage*CARD_PAGE_SIZE).forEach(card => {
         const article = document.createElement("article"); article.className = "card";
         const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "card-info";
@@ -792,6 +822,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         const effect = document.createElement("div"); effect.className = "effect"; effect.textContent = card.effect;
         info.append(title, typeLabel, effect); article.append(img, info); cardList.appendChild(article);
       });
+      renderListPagination("library-pagination",filtered.length,libraryPage,CARD_PAGE_SIZE,next=>{libraryPage=next;renderCards();});
     }
 
     function isSpecialAttack(card) {
@@ -1382,8 +1413,10 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       sortCards(filtered, document.getElementById("catalog-card-sort").value);
       const list = document.getElementById("catalog-card-list");
       list.replaceChildren();
-      document.getElementById("catalog-card-summary").textContent = "共 " + allCards.length + " 张卡牌，当前显示 " + filtered.length + " 张。";
-      filtered.forEach(card => {
+      const pageCount = Math.max(1, Math.ceil(filtered.length / CARD_PAGE_SIZE));
+      catalogCardPage = Math.min(catalogCardPage, pageCount);
+      document.getElementById("catalog-card-summary").textContent = "共 " + allCards.length + " 张卡牌，当前筛选 " + filtered.length + " 张 · 第 " + catalogCardPage + "/" + pageCount + " 页。";
+      filtered.slice((catalogCardPage-1)*CARD_PAGE_SIZE,catalogCardPage*CARD_PAGE_SIZE).forEach(card => {
         const row = document.createElement("article"); row.className = "admin-record";
         const img = document.createElement("img"); img.src = card.image || ""; img.alt = card.name; img.onerror = () => { img.style.visibility = "hidden"; };
         const main = document.createElement("div"); main.className = "admin-record-main";
@@ -1417,6 +1450,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         });
         actions.append(edit, del); row.append(img, main, actions); list.appendChild(row);
       });
+      renderListPagination("catalog-card-pagination",filtered.length,catalogCardPage,CARD_PAGE_SIZE,next=>{catalogCardPage=next;renderCatalogCards();});
     }
     function renderCatalogPacks() {
       const list = document.getElementById("catalog-pack-list"); list.replaceChildren();
@@ -1767,14 +1801,14 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     document.getElementById("save-pack-data").addEventListener("click", () => saveCatalogFile("packs"));
     document.getElementById("discard-card-data").addEventListener("click", () => reloadCatalogFile("cards"));
     document.getElementById("discard-pack-data").addEventListener("click", () => reloadCatalogFile("packs"));
-    document.getElementById("catalog-card-search").addEventListener("input", renderCatalogCards);
-    document.getElementById("catalog-card-pack-filter").addEventListener("change", renderCatalogCards);
-    document.getElementById("catalog-card-sort").addEventListener("change", renderCatalogCards);
-    document.getElementById("library-sort").addEventListener("change", renderCards);
-    searchInput.addEventListener("input", renderCards);
-    starFilter.addEventListener("change", renderCards);
-    typeFilter.addEventListener("change", renderCards);
-    document.getElementById("pack-filter").addEventListener("change", renderCards);
+    document.getElementById("catalog-card-search").addEventListener("input", () => { catalogCardPage=1; renderCatalogCards(); });
+    document.getElementById("catalog-card-pack-filter").addEventListener("change", () => { catalogCardPage=1; renderCatalogCards(); });
+    document.getElementById("catalog-card-sort").addEventListener("change", () => { catalogCardPage=1; renderCatalogCards(); });
+    document.getElementById("library-sort").addEventListener("change", () => { libraryPage=1; renderCards(); });
+    searchInput.addEventListener("input", () => { libraryPage=1; renderCards(); });
+    starFilter.addEventListener("change", () => { libraryPage=1; renderCards(); });
+    typeFilter.addEventListener("change", () => { libraryPage=1; renderCards(); });
+    document.getElementById("pack-filter").addEventListener("change", () => { libraryPage=1; renderCards(); });
 
     async function loadData() {
       try {
