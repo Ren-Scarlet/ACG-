@@ -447,7 +447,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         <p class="hint">注册时填写用户名、真实邮箱和密码。用户名为 3～20 位英文字母、数字或下划线；登录时使用邮箱和密码。请使用自己能够正常收信的邮箱。</p>
         <p id="account-status" class="status" style="margin-top:12px">正在连接账号服务……</p>
       </div>
-      <div id="account-forms">
+      <div id="account-forms" class="hidden">
         <div class="panel">
           <h3>注册新账号</h3>
           <form id="account-signup-form" class="admin-form-grid">
@@ -2040,12 +2040,12 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   else if(current==='account-view'){
    if(key==='admin-auth'){document.getElementById('tab-admin')?.click();return;}
    const accountTargets={
-    account:['account-forms'],
+    account:[document.getElementById('account-profile')&&!document.getElementById('account-profile').classList.contains('hidden')?'account-profile':'account-forms'],
     interface:['account-interface-settings'],
     music:['account-music-settings'],
     help:['account-help-settings']
    };
-   const allAccountTargets=['account-forms','account-interface-settings','account-music-settings','account-help-settings'];
+   const allAccountTargets=['account-forms','account-profile','account-interface-settings','account-music-settings','account-help-settings'];
    const visibleTargets=accountTargets[key]||accountTargets.account;
    allAccountTargets.forEach(id=>{
     const el=document.getElementById(id);
