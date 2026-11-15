@@ -295,19 +295,51 @@
   let myWarehouseRows = [];
   let myWarehouseQuery = "";
   let myWarehousePack = "";
+  let myWarehouseCategory = "cards";
+  const warehouseCategories = [
+    {id:"cards",label:"卡牌",description:"普通卡牌、特殊攻击卡及可用于构筑的卡牌"},
+    {id:"key-items",label:"重要道具",description:"长期持有的重要物品"},
+    {id:"consumables",label:"消耗品",description:"使用后会消耗数量的物品"},
+    {id:"berries",label:"树果",description:"树果及相关收集品"}
+  ];
+  function renderWarehouseCategoryTabs(host) {
+    const tabs=node("div","pc-warehouse-tabs");
+    warehouseCategories.forEach(category=>{
+      const button=node("button",myWarehouseCategory===category.id?"active":"",category.label);
+      button.type="button";
+      button.setAttribute("aria-pressed",String(myWarehouseCategory===category.id));
+      button.addEventListener("click",()=>{
+        myWarehouseCategory=category.id;
+        pcListPages["my-inventory"]=1;
+        renderMyWarehouse();
+      });
+      tabs.appendChild(button);
+    });
+    host.appendChild(tabs);
+  }
   function renderMyWarehouse() {
+    const tabsHost=contentEl.querySelector("#pc-warehouse-tabs-host");
     const host=contentEl.querySelector("#pc-warehouse-cards");
     const summary=contentEl.querySelector("#pc-warehouse-summary");
-    if(!host||!summary)return;
+    const description=contentEl.querySelector("#pc-warehouse-category-description");
+    if(!host||!summary||!tabsHost)return;
+    tabsHost.replaceChildren();
+    renderWarehouseCategoryTabs(tabsHost);
+    const category=warehouseCategories.find(x=>x.id===myWarehouseCategory)||warehouseCategories[0];
+    description.textContent=category.description;
+    host.replaceChildren();
+    if(myWarehouseCategory!=="cards"){
+      summary.textContent=category.label+" · 尚未添加物品";
+      host.appendChild(node("div","pc-empty","这里将存放"+category.label+"。目前仓库数据库已接入卡牌库存，其他物品类别将在对应物品资料和库存系统接入后启用；不会把卡牌误显示在这里。"));
+      return;
+    }
     const filtered=myWarehouseRows.filter(row=>{
       const card=cardsById[row.card_id]||{id:row.card_id,name:row.card_id,pack_id:""};
       return (!myWarehouseQuery||String(card.name).toLowerCase().includes(myWarehouseQuery)||String(card.id).toLowerCase().includes(myWarehouseQuery))&&(!myWarehousePack||card.pack_id===myWarehousePack);
     }).sort((a,b)=>compareCardsByStar(cardsById[a.card_id]||{name:a.card_id,star:0},cardsById[b.card_id]||{name:b.card_id,star:0}));
     const total=myWarehouseRows.reduce((sum,row)=>sum+Number(row.quantity||0),0);
-    const kinds=myWarehouseRows.length;
-    summary.textContent="仓库容量：拥有 "+kinds+" 种卡牌，共 "+total+" 张 · 当前筛选 "+filtered.length+" 种";
-    host.replaceChildren();
-    if(!filtered.length){host.appendChild(node("div","pc-empty",myWarehouseRows.length?"没有符合条件的卡牌。":"你的仓库还是空的，去获取一些卡牌吧。"));return;}
+    summary.textContent="拥有 "+myWarehouseRows.length+" 种卡牌，共 "+total+" 张 · 当前筛选 "+filtered.length+" 种";
+    if(!filtered.length){host.appendChild(node("div","pc-empty",myWarehouseRows.length?"没有符合条件的卡牌。":"你的卡牌仓库还是空的，去获取一些卡牌吧。"));return;}
     const page=renderPcPagination(host,"my-inventory",filtered.length,()=>renderMyWarehouse());
     filtered.slice(page.start,page.end).forEach(row=>{
       const card=cardsById[row.card_id]||{id:row.card_id,name:row.card_id};
@@ -325,9 +357,11 @@
   async function loadInventory() {
     contentEl.replaceChildren();
     const heading=node("div","pc-warehouse-heading");
-    heading.append(node("h3","","我的玩家仓库"),node("p","pc-muted","这里保存你拥有的全部卡牌。普通卡牌可用于构筑；对战道具在确认生成卡组分享链接时消耗。"));
+    heading.append(node("h3","","我的玩家仓库"),node("p","pc-muted","仓库分为卡牌、重要道具、消耗品和树果四个分类。对战道具等消耗品将在对应库存接入后显示。"));
+    const tabsHost=node("div");tabsHost.id="pc-warehouse-tabs-host";
+    const description=node("p","pc-muted");description.id="pc-warehouse-category-description";
     const filters=node("div","pc-search");
-    const searchWrap=node("div","field"),searchLabel=node("label","","搜索仓库"),search=node("input");
+    const searchWrap=node("div","field"),searchLabel=node("label","","搜索卡牌"),search=node("input");
     search.placeholder="输入卡牌名称或编号";search.value=myWarehouseQuery;searchLabel.appendChild(search);searchWrap.append(searchLabel);
     const packWrap=node("div","field"),packLabel=node("label","","卡包筛选"),pack=node("select");
     pack.add(new Option("全部卡包",""));
@@ -336,7 +370,7 @@
     filters.append(searchWrap,packWrap);
     const summary=node("p","pc-muted");summary.id="pc-warehouse-summary";
     const host=node("div","pc-inventory-grid");host.id="pc-warehouse-cards";
-    contentEl.append(heading,filters,summary,host);
+    contentEl.append(heading,tabsHost,description,filters,summary,host);
     search.addEventListener("input",()=>{myWarehouseQuery=search.value.trim().toLowerCase();pcListPages["my-inventory"]=1;renderMyWarehouse();});
     pack.addEventListener("change",()=>{myWarehousePack=pack.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
     host.appendChild(node("div","pc-empty","正在读取你的仓库……"));
