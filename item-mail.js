@@ -189,7 +189,7 @@
       try{const {data,error}=await client.rpc("admin_list_mail");if(error)throw error;history.replaceChildren();if(!data?.length){history.appendChild(el("div","pc-empty","还没有发送过邮件。"));return;}data.forEach(m=>{const row=el("div","pc-row"),info=el("div","");info.append(el("strong","",m.title),el("div","pc-muted",new Date(m.created_at).toLocaleString("zh-CN")),el("div","pc-muted","收件人 "+m.recipient_count+" 人 · 已领取 "+m.claimed_count+" 人"));row.appendChild(info);history.appendChild(row);});}
       catch(error){history.replaceChildren(el("div","pc-empty","读取邮件记录失败："+error.message));}
     }
-    function refreshAttachmentOptions(){[...attachments.children].forEach(row=>{const selects=row.querySelectorAll("select");if(selects[0]?.value==="item"){const reward=selects[1];reward.replaceChildren(new Option("选择奖励",""));items.filter(x=>x.is_active).forEach(x=>reward.add(new Option(x.name+" · "+x.item_id,x.item_id)));}});}
+    function refreshAttachmentOptions(){[...attachments.children].forEach(row=>{const selects=row.querySelectorAll("select");const type=selects[0]?.value,reward=selects[1];if(!reward)return;reward.replaceChildren(new Option(type==="tokens"?"无需选择":"选择奖励",""));if(type==="card")Object.values(cardsById).forEach(x=>reward.add(new Option(x.name+" · "+x.id,x.id)));if(type==="item")items.filter(x=>x.is_active).forEach(x=>reward.add(new Option(x.name+" · "+x.item_id,x.item_id)));});}
     pane._loadHistory=loadHistory;
     pane._refresh=async()=>{await loadStatic();await loadPlayers();await loadItems();recipient.replaceChildren();players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));refreshAttachmentOptions();await loadHistory();};
     loadHistory();
