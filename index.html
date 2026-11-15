@@ -125,6 +125,91 @@
     @media(max-width:900px){#builder-view .builder-filters{grid-template-columns:repeat(2,minmax(0,1fr))}#builder-view .builder-filters input{grid-column:1/-1}}
     @media(max-width:520px){#builder-view .builder-filters{grid-template-columns:1fr}#builder-view .builder-category-tabs button{flex:1 1 calc(50% - 8px)}}
 
+    /* Final builder contrast override: light surfaces with consistently dark text */
+    #builder-view .panel,
+    #builder-view .builder-stat,
+    #builder-view .builder-card,
+    #builder-view .builder-filter-panel{
+      background:#f4f8fc!important;
+      color:#183149!important;
+      border-color:#b7c9d8!important;
+    }
+    #builder-view .panel *,
+    #builder-view .builder-stat *,
+    #builder-view .builder-card *,
+    #builder-view .builder-filter-panel *{
+      text-shadow:none!important;
+    }
+    #builder-view .panel p,
+    #builder-view .panel small,
+    #builder-view .panel span,
+    #builder-view .panel label,
+    #builder-view .panel li,
+    #builder-view .builder-card-main small,
+    #builder-view .builder-card-main span,
+    #builder-view .builder-stat small,
+    #builder-view .builder-filter-note,
+    #builder-view .builder-filter-summary{
+      color:#344c63!important;
+      opacity:1!important;
+    }
+    #builder-view .panel h3,
+    #builder-view .builder-section>h3{
+      color:#164c70!important;
+      font-weight:900!important;
+    }
+    #builder-view .builder-card-main strong{
+      color:#142f49!important;
+      font-weight:900!important;
+    }
+    #builder-view .builder-stat strong,
+    #builder-view .builder-count span{
+      color:#173d5a!important;
+      font-weight:900!important;
+    }
+    #builder-view .field label,
+    #builder-view label{
+      color:#203d56!important;
+      font-weight:800!important;
+    }
+    #builder-view .builder-filters input,
+    #builder-view .builder-filters select,
+    #builder-view input,
+    #builder-view select{
+      color:#172f45!important;
+      background:#fff!important;
+      border:1px solid #829caf!important;
+    }
+    #builder-view input::placeholder{color:#63788a!important;opacity:1!important}
+    #builder-view button{
+      color:#fff!important;
+      background:#245574!important;
+      border:1px solid #17435f!important;
+      font-weight:800!important;
+    }
+    #builder-view button:disabled{
+      color:#526577!important;
+      background:#dce5ec!important;
+      border-color:#b6c4cf!important;
+      opacity:1!important;
+    }
+    #builder-view button.primary,
+    #builder-view .builder-category-tabs button.active{
+      color:#172f45!important;
+      background:#f0c85d!important;
+      border:1px solid #c69b2e!important;
+      font-weight:900!important;
+    }
+    #builder-view .builder-count button{
+      color:#fff!important;
+      background:#087f9e!important;
+      border-color:#08647d!important;
+    }
+    #builder-view .rule-warning{color:#a32132!important;font-weight:800!important}
+    #builder-view .status.good{color:#17613b!important;font-weight:800!important}
+    #builder-view .status.bad{color:#a32132!important;font-weight:800!important}
+    #builder-view .builder-filter-panel{border-radius:12px!important}
+
     /* ACG HUB Persona-style home */
     body.acg-home-active{background:#071b43;overflow:hidden}
     body.acg-home-active>header,body.acg-home-active>main{visibility:hidden}
