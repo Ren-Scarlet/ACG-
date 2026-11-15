@@ -24,14 +24,13 @@
   function activate(tab){view.querySelectorAll(".pc-sidebar .pc-tabs [data-page],.pc-tabs [data-page]").forEach(x=>x.classList.toggle("active",x===tab));}
   if(playerTabs&&!playerTabs.querySelector('[data-page="item-box"]')){const tab=button("道具箱");tab.dataset.page="item-box";tab.addEventListener("click",()=>{activate(tab);void loadItemBox();});playerTabs.appendChild(tab);}
   if(playerTabs&&!playerTabs.querySelector('[data-page="mail"]')){const tab=button("邮件箱");tab.dataset.page="mail";tab.addEventListener("click",()=>{activate(tab);void loadMailbox();});playerTabs.appendChild(tab);}
-  const pendingUse=new Map();
   async function loadItemBox(){
     const host=$("#pc-personal-content");host.replaceChildren(el("h3","","我的道具箱"),el("p","pc-muted","活动奖励、消耗品和重要道具统一存放在这里。"));
     const list=el("div","pc-inventory-grid");host.appendChild(list);list.appendChild(el("div","pc-empty","正在读取道具……"));
     try{
       const inv=await client.from("card_inventory").select("card_id,quantity").gt("quantity",0);if(inv.error)throw inv.error;await loadItems();
-      const owned=new Map((inv.data||[]).map(x=>[x.card_id,Number(x.quantity)])),rows=items.filter(x=>owned.has(x.item_id));list.replaceChildren();
-      if(!rows.length){list.appendChild(el("div","pc-empty","你还没有获得道具。活动奖励可以通过邮件领取。"));return;}
+      const owned=new Map((inv.data||[]).map(x=>[x.card_id,Number(x.quantity)])),rows=items.filter(x=>owned.has(x.item_id)&&x.item_id!=="consumable_tree_fruit_ticket");list.replaceChildren();
+      if(!rows.length){list.appendChild(el("div","pc-empty","你还没有获得其他道具。树果卷仍可在「玩家仓库 → 消耗品」中使用；活动奖励可以通过邮件领取。"));return;}
       rows.forEach(item=>{
         const row=el("article","pc-inventory-card"),icon=el("div","pc-consumable-icon",item.icon||"🎁");
         icon.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
@@ -43,10 +42,10 @@
     }catch(error){list.replaceChildren(el("div","pc-empty","读取道具失败："+error.message));}
   }
   async function useItem(item,btn){
-    if(btn.disabled)return;let request=pendingUse.get(item.item_id);if(!request){request=crypto.randomUUID();pendingUse.set(item.item_id,request);}
+    if(btn.disabled)return;let request,key;try{const session=await client.auth.getSession();const uid=session.data?.session?.user?.id||"unknown";key="acg-item-use:"+uid+":"+item.item_id;request=localStorage.getItem(key);if(!request){request=crypto.randomUUID();localStorage.setItem(key,request);}}catch(_){request=crypto.randomUUID();}
     btn.disabled=true;const msg=el("p","status","正在使用「"+item.name+"」……");$("#pc-personal-content").prepend(msg);
     try{
-      const {data,error}=await client.rpc("use_inventory_item",{p_item_id:item.item_id,p_request_id:request});if(error)throw error;pendingUse.delete(item.item_id);
+      const {data,error}=await client.rpc("use_inventory_item",{p_item_id:item.item_id,p_request_id:request});if(error)throw error;try{if(key)localStorage.removeItem(key);}catch(_){}
       const result=Array.isArray(data)?data[0]:data;
       if(result?.cards?.length){const pack=packs.find(x=>x.id===result.result?.pack_id)||{id:result.result?.pack_id||"pack_010",name:result.result?.pack_name||"奖励卡包"};msg.textContent="使用成功，获得："+result.cards.map(x=>cardName(x.card_id)).join("、");window.acgShowItemPackOpening?.({...pack,pack_name:pack.name,draw_mode:pack.category==="berry"?"uniform":"rarity",price_tokens:0},result);}
       else if(result?.result?.kind==="tokens")msg.textContent="使用成功，获得 "+result.result.amount+" 代币。";
