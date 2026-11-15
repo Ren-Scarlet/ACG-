@@ -130,7 +130,7 @@
         else if(effect.value==="random_reward")cfg=JSON.parse(cf.json.value);
       }catch(error){status(msg,"效果配置格式错误："+error.message,true);return;}
       save.disabled=true;status(msg,"正在保存道具……");
-      try{const {error}=await client.rpc("admin_save_item",{p_item_id:id.value.trim(),p_name:name.value.trim(),p_icon:icon.value.trim()||"🎁",p_description:desc.value.trim(),p_category:category.value,p_effect_type:effect.value,p_effect_config:cfg,p_is_active:active.checked});if(error)throw error;status(msg,"道具已保存。玩家道具箱和邮件附件目录会使用这份资料。");await loadItems();renderItems();refreshAttachmentOptions();}
+      try{const {error}=await client.rpc("admin_save_item",{p_item_id:id.value.trim(),p_name:name.value.trim(),p_icon:icon.value.trim()||"🎁",p_description:desc.value.trim(),p_category:category.value,p_effect_type:effect.value,p_effect_config:cfg,p_is_active:active.checked});if(error)throw error;status(msg,"道具已保存。玩家道具箱和邮件附件目录会使用这份资料。");await loadItems();renderItems();const mailPane=admin.querySelector('[data-admin-category="mail"]');if(mailPane?._refresh)await mailPane._refresh();}
       catch(error){status(msg,"保存失败："+error.message,true);}finally{save.disabled=false;}
     });
     pane.appendChild(form);
