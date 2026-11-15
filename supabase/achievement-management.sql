@@ -200,7 +200,7 @@ begin
   perform public.refresh_player_achievements(u.id)
   from auth.users u;
 end;
-$;
+$$;
 
 revoke all on function public.admin_save_achievement(text,text,text,bigint,boolean,text,numeric,integer) from public, anon, authenticated;
 grant execute on function public.admin_save_achievement(text,text,text,bigint,boolean,text,numeric,integer) to authenticated;
