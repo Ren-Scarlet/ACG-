@@ -285,17 +285,22 @@
   function renderDrawLobby(pools,stats,history,drawCount,packNames){
     closeDrawLobby();
     const root=node("div");root.id="acg-draw-lobby";drawLobbyRoot=root;
+    const forceStyle=(el,styles)=>Object.entries(styles).forEach(([k,v])=>el.style.setProperty(k,v,"important"));
+    forceStyle(root,{position:"fixed",inset:"0",zIndex:"999990",display:"block",overflowY:"auto",overflowX:"hidden",background:"radial-gradient(ellipse at 50% -15%,#263958 0,#101827 34%,#080b12 72%)",color:"#edf2fa",boxSizing:"border-box"});
     const top=node("header","adl-top"),brand=node("div","adl-brand");brand.innerHTML='ACG <b>PACK LAB</b>';
     const right=node("div","adl-topright"),token=node("div","adl-token","代币："+(stats?.tokens??0)),close=node("button","adl-close","返回玩家中心");
     close.type="button";close.addEventListener("click",closeDrawLobby);right.append(token,close);top.append(brand,right);
     const main=node("main","adl-main"),eyebrow=node("div","adl-eyebrow","CARD PACK COLLECTION"),hero=node("div","adl-hero");
+    forceStyle(main,{display:"block",position:"relative",width:"min(1180px,100%)",maxWidth:"1180px",margin:"0 auto",padding:"34px 22px 70px",background:"transparent",border:"0",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
     const hgroup=node("div");hgroup.append(node("h1","","卡包抽卡"),node("p","","选择你的卡包，开启下一张传说。每包 5 张卡，十连共 50 张。"));
     const tokenbox=node("div","adl-tokenbox");tokenbox.append(document.createTextNode("当前代币"),node("b","",String(stats?.tokens??0)));hero.append(hgroup,tokenbox);
     const section=node("div","adl-section");section.append(document.createTextNode("选择卡包"),node("small","","SELECT YOUR PACK"));
     const grid=node("div","adl-pools");let selectedPool=pools[0]||null;
+    forceStyle(grid,{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:"15px",width:"100%",margin:"0",padding:"0",background:"transparent",border:"0",boxShadow:"none",boxSizing:"border-box"});
     const cards=Object.values(cardsById);
     pools.forEach((pool,index)=>{
       const tile=node("article","adl-pool"+(index===0?" active":""));tile.dataset.packId=pool.pack_id;
+      forceStyle(tile,{display:"block",minWidth:"0",minHeight:"260px",background:"linear-gradient(150deg,#1b2a40,#0d1420 68%)",border:index===0?"2px solid #e7bd65":"1px solid #35445a",borderRadius:"8px",overflow:"hidden",cursor:"pointer",boxSizing:"border-box"});
       const cover=node("div","adl-cover");
       const coverCard=(cards.find(c=>c.id===pool.cover_card_id&&c.pack_id===pool.pack_id&&c.image)||cards.filter(c=>c.pack_id===pool.pack_id&&c.image).sort((a,b)=>Number(b.star||0)-Number(a.star||0))[0]);
       // CSS background avoids image-translation extensions intercepting artwork clicks.
