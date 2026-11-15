@@ -2003,8 +2003,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       }
     }
     function showMainView(viewId, tabId, title) {
-      ["library-view","builder-view","admin-view","account-view","shared-deck-view"].forEach(id => document.getElementById(id).classList.toggle("hidden", id !== viewId));
-      ["tab-library","tab-builder","tab-admin","tab-account"].forEach(id => document.getElementById(id).classList.toggle("active", id === tabId));
+      ["library-view","builder-view","admin-view","account-view","shared-deck-view","player-center-view"].forEach(id => document.getElementById(id)?.classList.toggle("hidden", id !== viewId));
+      ["tab-library","tab-builder","tab-admin","tab-account","tab-player-center"].forEach(id => document.getElementById(id)?.classList.toggle("active", id === tabId));
       packName.textContent = title;
     }
     document.getElementById("tab-library").addEventListener("click", () => showMainView("library-view","tab-library","概念礼装图鉴"));
@@ -2258,6 +2258,10 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
           // Never fall back to opening the player-center overview while its module is still loading.
           if(typeof window.acgOpenPlayerCenterPage==="function")window.acgOpenPlayerCenterPage("draw");
           else window.acgPendingPlayerCenterPage="draw";
+        }else if(target==="room"){
+          // Open the personal overview directly; do not route through the account/system tab.
+          if(typeof window.acgOpenPlayerCenterPage==="function")window.acgOpenPlayerCenterPage("overview");
+          else window.acgPendingPlayerCenterPage="overview";
         }else if(pcTab)pcTab.click();
         else{document.getElementById("tab-account").click();document.getElementById("account-status").textContent="玩家中心正在加载，请稍后点击菜单入口。";}
       }
