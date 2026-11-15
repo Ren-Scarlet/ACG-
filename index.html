@@ -754,6 +754,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     const LAST_PLAYER_STORAGE_KEY = "acg_card_builder_last_player_v1";
     const authStatus = document.getElementById("auth-status");
     let githubToken = "";
+    // Bind the image-upload action immediately so unrelated startup/render errors cannot leave the button inert.
+    document.getElementById("upload-card-images").addEventListener("click", uploadCardImages);
     let editingCardId = null;
     let editingPackId = null;
     let cardDataDirty = false;
@@ -1803,7 +1805,6 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     document.getElementById("verify-token").addEventListener("click", verifyToken);
     document.getElementById("admin-tab-cards").addEventListener("click", () => switchAdminPanel("cards"));
     document.getElementById("admin-tab-packs").addEventListener("click", () => switchAdminPanel("packs"));
-    document.getElementById("upload-card-images").addEventListener("click", uploadCardImages);
     document.getElementById("import-card-json").addEventListener("click", importCardsFromJson);
     document.getElementById("save-card").addEventListener("click", submitCardForm);
     document.getElementById("cancel-card-edit").addEventListener("click", resetCardForm);
