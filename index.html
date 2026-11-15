@@ -727,6 +727,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             <p class="hint">卡包 ID 由系统自动生成；删除卡包前，必须先将其中的卡牌移至其他卡包或删除。</p>
             <div class="admin-form-grid">
               <div class="field"><label for="edit-pack-name">卡包名称</label><input id="edit-pack-name" maxlength="100" placeholder="输入卡包名称"></div>
+              <div class="field"><label for="edit-pack-category">卡包用途</label><select id="edit-pack-category"><option value="normal">普通卡包</option><option value="battle_item">对战道具包</option><option value="berry">树果包</option></select><small class="hint">用途决定玩家仓库分类；对战道具包和树果包中的物品在构筑时合并为「对战道具」。</small></div>
             </div>
             <div class="save-row">
               <button id="save-pack" class="primary" type="button">新增卡包</button>
@@ -1449,6 +1450,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     function resetPackForm() {
       editingPackId = null;
       document.getElementById("edit-pack-name").value = "";
+      document.getElementById("edit-pack-category").value = "normal";
       document.getElementById("pack-editor-title").textContent = "新增卡包";
       document.getElementById("save-pack").textContent = "新增卡包";
       setStatus(document.getElementById("pack-editor-status"), "填写名称后保存。");
@@ -1509,12 +1511,15 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         const row = document.createElement("article"); row.className = "admin-record";
         const main = document.createElement("div"); main.className = "admin-record-main";
         const title = document.createElement("strong"); title.textContent = pack.name;
-        const detail = document.createElement("div"); detail.className = "hint"; detail.textContent = pack.id + " · " + count + " 张卡牌";
+        const categoryLabels = { normal: "普通卡包", battle_item: "对战道具包", berry: "树果包" };
+        const category = categoryLabels[pack.category || "normal"] || "普通卡包";
+        const detail = document.createElement("div"); detail.className = "hint"; detail.textContent = pack.id + " · " + category + " · " + count + " 张卡牌";
         main.append(title, detail);
         const actions = document.createElement("div"); actions.className = "admin-record-actions";
         const edit = document.createElement("button"); edit.type = "button"; edit.textContent = "编辑";
         edit.addEventListener("click", () => {
           editingPackId = pack.id; document.getElementById("edit-pack-name").value = pack.name;
+          document.getElementById("edit-pack-category").value = pack.category || "normal";
           document.getElementById("pack-editor-title").textContent = "编辑卡包 · " + pack.id;
           document.getElementById("save-pack").textContent = "保存卡包修改";
           setStatus(document.getElementById("pack-editor-status"), "正在编辑 " + pack.id + "。");
@@ -1776,6 +1781,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     }
     function submitPackForm() {
       const name = document.getElementById("edit-pack-name").value.trim();
+      const category = document.getElementById("edit-pack-category").value;
+      if (!["normal","battle_item","berry"].includes(category)) { setStatus(document.getElementById("pack-editor-status"), "请选择有效的卡包用途。", "bad"); return; }
       if (!name) { setStatus(document.getElementById("pack-editor-status"), "卡包名称不能为空。", "bad"); return; }
       if (allPacks.some(pack => pack.name.trim().toLowerCase() === name.toLowerCase() && pack.id !== editingPackId)) {
         setStatus(document.getElementById("pack-editor-status"), "已经存在同名卡包。", "bad"); return;
@@ -1784,7 +1791,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         const pack = allPacks.find(item => item.id === editingPackId);
         if (!pack) { setStatus(document.getElementById("pack-editor-status"), "找不到正在编辑的卡包。", "bad"); return; }
         pack.name = name;
-      } else allPacks.push({ id: nextDataId(allPacks, "pack"), name });
+        pack.category = category;
+      } else allPacks.push({ id: nextDataId(allPacks, "pack"), name, category });
       markPackDataDirty(); resetPackForm(); rebuildCatalogFilters(); renderCatalogPacks(); renderCatalogCards(); renderCards();
       setStatus(document.getElementById("pack-editor-status"), "资料已暂存。记得点击下方「保存卡包资料到 GitHub」。", "good");
     }
