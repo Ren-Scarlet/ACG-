@@ -174,7 +174,7 @@
   playerCenterScript.defer = true;
   playerCenterScript.onload = () => {
     const itemMailScript = document.createElement("script");
-    itemMailScript.src = "./item-mail.js?v=14";
+    itemMailScript.src = "./item-mail.js?v=15";
     itemMailScript.defer = true;
     document.body.appendChild(itemMailScript);
   };
