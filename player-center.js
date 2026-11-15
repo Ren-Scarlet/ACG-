@@ -409,7 +409,7 @@
     setStatus("正在使用树果卷并抽取树果……",false);
     try{
       const requestId=getTicketUseRequestId();
-      const {data,error}=await withTimeout(client.rpc("use_tree_fruit_ticket",{p_request_id:requestId}),30000,"使用请求超时。请重试，系统会沿用同一请求编号，避免重复扣除树果卷。");
+      const {data,error}=await withTimeout(client.rpc("use_inventory_item",{p_item_id:TREE_FRUIT_TICKET.id,p_request_id:requestId}),30000,"使用请求超时。请重试，系统会沿用同一请求编号，避免重复扣除树果卷。");
       if(error)throw error;
       const result=Array.isArray(data)?data[0]:data;
       if(!result?.cards||result.cards.length!==5)throw new Error("服务器未返回完整的 5 颗树果结果，请重试。");
