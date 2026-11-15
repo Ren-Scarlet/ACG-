@@ -3,6 +3,68 @@
   const client=window.acgSupabaseClient,view=document.getElementById("player-center-view");
   if(!client||!view||view.dataset.itemMailReady==="1")return;
   view.dataset.itemMailReady="1";
+  if(!document.getElementById("acg-item-mail-contrast-style")){
+    const style=document.createElement("style");
+    style.id="acg-item-mail-contrast-style";
+    style.textContent=`
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"],
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"]{
+        color:#17324b!important;
+        background:linear-gradient(145deg,#ffffff,#edf7fc)!important;
+        border:1px solid #9bbdce!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] :is(h3,h4,p,label,strong,span,small),
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] :is(h3,h4,p,label,strong,span,small){
+        color:#17324b!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] .pc-muted,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] .pc-muted{
+        color:#405a70!important;
+        opacity:1!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] .status.good,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] .status.good{color:#17613b!important;font-weight:700}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] .status.bad,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] .status.bad{color:#a32132!important;font-weight:700}
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] input:not([type="checkbox"]),
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] select,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] textarea,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] input:not([type="checkbox"]),
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] select,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] textarea{
+        color:#172d42!important;
+        background:#fff!important;
+        border:1px solid #7899ae!important;
+        border-radius:6px!important;
+        padding:9px 11px!important;
+        opacity:1!important;
+        font-size:14px!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] input::placeholder,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] textarea::placeholder,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] input::placeholder,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] textarea::placeholder{
+        color:#687d8e!important;opacity:1!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] option,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] option{
+        color:#172d42!important;background:#fff!important;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] button:not(.primary),
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] button:not(.primary){
+        color:#123650!important;background:#e4f1f7!important;border:1px solid #8eafc2!important;font-weight:700;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] button.primary,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] button.primary{
+        color:#fff!important;background:#145578!important;border:1px solid #0e4565!important;font-weight:700;
+      }
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="items"] .pc-row,
+      #player-center-view #pc-admin-panel .pc-admin-category-pane[data-admin-category="mail"] .pc-row{
+        border-bottom:1px solid #c4d8e3!important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
   const $=(s,r=view)=>r.querySelector(s);
   const el=(tag,cls,value)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(value!==undefined)n.textContent=value;return n;};
   const input=(type,placeholder)=>{const n=el("input");n.type=type||"text";n.placeholder=placeholder||"";return n;};
