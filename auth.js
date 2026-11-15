@@ -32,7 +32,9 @@
     return /^[a-zA-Z0-9_]{3,20}$/.test(username);
   }
 
+  let sessionRenderVersion = 0;
   async function renderSession(session) {
+    const renderVersion = ++sessionRenderVersion;
     if (!session) {
       formsEl.classList.remove("hidden");
       profileEl.classList.add("hidden");
@@ -53,6 +55,7 @@
       .eq("id", session.user.id)
       .maybeSingle();
 
+    if (renderVersion !== sessionRenderVersion) return;
     if (error) {
       showStatus("已登录，但暂时无法读取玩家资料：" + error.message, "bad");
       return;
@@ -153,17 +156,19 @@
     await renderSession(null);
   });
 
+  // Supabase Auth callbacks must stay synchronous. Defer database reads until
+  // after the callback returns, and let the latest session render win.
   client.auth.onAuthStateChange((_event, session) => {
-    renderSession(session);
+    setTimeout(() => { void renderSession(session); }, 0);
   });
 
   client.auth.getSession().then(({ data, error }) => {
     if (error) showStatus("读取登录状态失败：" + error.message, "bad");
-    renderSession(data?.session || null);
+    setTimeout(() => { void renderSession(data?.session || null); }, 0);
   });
 
   const playerCenterScript = document.createElement("script");
-  playerCenterScript.src = "./player-center.js?v=38";
+  playerCenterScript.src = "./player-center.js?v=39";
   playerCenterScript.defer = true;
   document.body.appendChild(playerCenterScript);
 })();
