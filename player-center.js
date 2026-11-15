@@ -414,9 +414,9 @@
       const result=Array.isArray(data)?data[0]:data;
       if(!result?.cards||result.cards.length!==5)throw new Error("服务器未返回完整的 5 颗树果结果，请重试。");
       pendingTicketUseId=null;try{localStorage.removeItem("acg-tree-fruit-ticket-request");}catch(_){}
-      await loadPage("inventory");
       showSinglePackOpening({pack_id:"pack_010",pack_name:"树果包",price_tokens:0,draw_mode:"uniform"},result);
-      setStatus("树果卷使用成功，获得 5 颗树果。",false);
+      try{await loadPage("inventory");setStatus("树果卷使用成功，获得 5 颗树果。",false);}
+      catch(refreshError){setStatus("抽卡已成功，但仓库刷新失败；重新打开仓库即可看到最新数量。",true);}
     }catch(error){setStatus("树果卷使用失败："+error.message,true);}
     finally{consumableUseBusy=false;}
   }
@@ -1096,8 +1096,9 @@
     cards.slice(page.start,page.end).forEach(card=>{
       const quantity=adminInventory[card.id]||0;
       const item=node("article","pc-inventory-card");
-      const img=node("img");img.src=card.image||"";img.alt=card.name;img.loading="lazy";
-      img.onerror=()=>{img.style.visibility="hidden";};
+      let img;
+      if(card.icon){img=node("div","pc-consumable-icon",card.icon);img.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";}
+      else{img=node("img");img.src=card.image||"";img.alt=card.name;img.loading="lazy";img.onerror=()=>{img.style.visibility="hidden";};}
       const info=node("div","pc-card-info");
       info.append(node("strong","",card.name),node("small","",card.description||((card.star?card.star+" 星 · ":"")+(card.type||"")+" · "+card.id)));
       const controls=node("div","pc-quantity-controls");
