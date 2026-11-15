@@ -1142,5 +1142,135 @@
     "pack_id": "pack_007",
     "effect": "等级10 暗属性\n贯穿，对0-4格内一名目标造成5点伤害。\n①弃除你场上一张暗属性攻击卡将此卡打出的场合，选择场上一张卡发动，将那张卡放回牌库底，若那张卡是暗属性攻击卡对一名敌方目标造成3点效果伤害。",
     "image": "./images/card_103.jpg"
+  },
+  {
+    "id": "card_104",
+    "name": "橙橙果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "当你的生命值低于最大生命值一半时发动，恢复2点生命值。",
+    "image": "./images/card_104.jpg"
+  },
+  {
+    "id": "card_105",
+    "name": "乐芭果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "陷入束缚或止步状态时发动，解除束缚或止步状态。",
+    "image": "./images/card_105.jpg"
+  },
+  {
+    "id": "card_106",
+    "name": "利木果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "陷入冰冻状态时发动，解除冰冻状态。",
+    "image": "./images/card_106.jpg"
+  },
+  {
+    "id": "card_107",
+    "name": "零余果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "陷入睡眠状态时发动，解除睡眠状态。",
+    "image": "./images/card_107.jpg"
+  },
+  {
+    "id": "card_108",
+    "name": "芒芒果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "当你移动力为0时发动，获得2点移动力。",
+    "image": "./images/card_108.jpg"
+  },
+  {
+    "id": "card_109",
+    "name": "莓莓果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "陷入烧伤状态时发动，解除烧伤状态。",
+    "image": "./images/card_109.jpg"
+  },
+  {
+    "id": "card_110",
+    "name": "木子果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "当你被赋予异常状态时，消除异常状态。",
+    "image": "./images/card_110.jpg"
+  },
+  {
+    "id": "card_111",
+    "name": "苹野果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "当能量低于3时，恢复1点能量。",
+    "image": "./images/card_111.jpg"
+  },
+  {
+    "id": "card_112",
+    "name": "桃桃果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "陷入中毒或剧毒状态时发动，解除中毒或剧毒状态。",
+    "image": "./images/card_112.jpg"
+  },
+  {
+    "id": "card_113",
+    "name": "文柚果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "当你的生命值低于最大生命值一半时发动，恢复4点生命值。",
+    "image": "./images/card_113.jpg"
+  },
+  {
+    "id": "card_114",
+    "name": "勿花果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "当手牌低于3张时发动，抽一张牌。",
+    "image": "./images/card_114.jpg"
+  },
+  {
+    "id": "card_115",
+    "name": "异奇果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "当能量为0时，恢复2点能量。",
+    "image": "./images/card_115.jpg"
+  },
+  {
+    "id": "card_116",
+    "name": "樱子果",
+    "star": null,
+    "type": "树果",
+    "tags": [],
+    "pack_id": "pack_010",
+    "effect": "陷入麻痹状态时发动，解除麻痹状态。",
+    "image": "./images/card_116.jpg"
   }
 ]
