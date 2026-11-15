@@ -14,7 +14,7 @@ create table if not exists public.item_catalog (
   description text not null default '',
   category text not null check (category in ('important','consumable')),
   effect_type text not null check (effect_type in (
-    'none','draw_pack','grant_tokens','grant_card','grant_item','random_reward'
+    'none','draw_pack','grant_tokens','grant_card','grant_item','random_reward','choose_reward'
   )),
   effect_config jsonb not null default '{}'::jsonb,
   is_active boolean not null default true,
@@ -88,7 +88,7 @@ begin
   if p_category='important' and p_effect_type<>'none' then
     raise exception '重要道具暂不支持直接使用效果，请选择消耗品类别';
   end if;
-  if p_effect_type is null or p_effect_type not in ('none','draw_pack','grant_tokens','grant_card','grant_item','random_reward') then
+  if p_effect_type is null or p_effect_type not in ('none','draw_pack','grant_tokens','grant_card','grant_item','random_reward','choose_reward') then
     raise exception '暂不支持这种道具效果';
   end if;
   if jsonb_typeof(v_config)<>'object' then
@@ -116,22 +116,22 @@ begin
        or coalesce((v_config->>'amount')::bigint,0)>2147483647 then
       raise exception '道具奖励需要指定道具编号和有效的正整数数量';
     end if;
-  elsif p_effect_type='random_reward' then
+  elsif p_effect_type in ('random_reward','choose_reward') then
     if coalesce(jsonb_typeof(v_config->'options'),'')<>'array'
        or coalesce(jsonb_array_length(v_config->'options'),0)<2
-       or coalesce(jsonb_array_length(v_config->'options'),0)>20 then
-      raise exception '随机奖励需要配置 2 至 20 个奖励选项';
+       or coalesce(jsonb_array_length(v_config->'options'),0)>case when p_effect_type='random_reward' then 20 else 10 end then
+      raise exception '奖励选项数量不正确';
     end if;
     if exists (
       select 1 from jsonb_array_elements(v_config->'options') as opt(value)
       where coalesce(opt.value->>'reward_type','') not in ('tokens','card','item')
          or coalesce((opt.value->>'amount')::bigint,0)<=0
-         or coalesce((opt.value->>'weight')::numeric,0)<=0
+         or (p_effect_type='random_reward' and coalesce((opt.value->>'weight')::numeric,0)<=0)
          or (opt.value->>'reward_type' in ('card','item') and coalesce((opt.value->>'amount')::bigint,0)>2147483647)
          or (opt.value->>'reward_type' in ('card','item')
              and nullif(opt.value->>'reward_id','') is null)
     ) then
-      raise exception '随机奖励选项必须包含有效类型、数量、权重及对应编号';
+      raise exception '奖励选项必须包含有效类型、数量及对应编号；随机奖励还需填写正数权重';
     end if;
   end if;
 
@@ -168,9 +168,11 @@ grant execute on function public.admin_save_item(text,text,text,text,text,text,j
 alter table public.consumable_use_history
   add column if not exists result_data jsonb not null default '{}'::jsonb;
 
-create or replace function public.use_inventory_item(
+drop function if exists public.use_inventory_item(text,uuid);
+create function public.use_inventory_item(
   p_item_id text,
-  p_request_id uuid
+  p_request_id uuid,
+  p_choice_index integer default null
 )
 returns jsonb
 language plpgsql
@@ -334,15 +336,25 @@ begin
       set quantity=public.card_inventory.quantity+excluded.quantity,updated_at=now();
     v_result := jsonb_build_object('kind','item','reward_id',v_reward_id,'amount',v_amount);
 
-  elsif v_item.effect_type='random_reward' then
-    select sum((value->>'weight')::numeric) into v_total_weight
-    from jsonb_array_elements(v_item.effect_config->'options');
-    v_pick := random()*v_total_weight;
-    v_running := 0;
-    for v_option in select value from jsonb_array_elements(v_item.effect_config->'options') loop
-      v_running := v_running+(v_option.value->>'weight')::numeric;
-      if v_pick<=v_running then exit; end if;
-    end loop;
+  elsif v_item.effect_type in ('random_reward','choose_reward') then
+    if v_item.effect_type='random_reward' then
+      select sum((value->>'weight')::numeric) into v_total_weight
+      from jsonb_array_elements(v_item.effect_config->'options');
+      v_pick := random()*v_total_weight;
+      v_running := 0;
+      for v_option in select value from jsonb_array_elements(v_item.effect_config->'options') loop
+        v_running := v_running+(v_option.value->>'weight')::numeric;
+        if v_pick<=v_running then exit; end if;
+      end loop;
+    else
+      if p_choice_index is null or p_choice_index<1
+         or p_choice_index>jsonb_array_length(v_item.effect_config->'options') then
+        raise exception '请先选择一项奖励';
+      end if;
+      select value into v_option
+      from jsonb_array_elements(v_item.effect_config->'options') with ordinality as options(value,position)
+      where position=p_choice_index;
+    end if;
     v_reward_type := v_option.value->>'reward_type';
     v_reward_id := v_option.value->>'reward_id';
     v_amount := (v_option.value->>'amount')::bigint;
@@ -367,7 +379,8 @@ begin
         set quantity=public.card_inventory.quantity+excluded.quantity,updated_at=now();
     end if;
     v_result := jsonb_build_object(
-      'kind',v_reward_type,'reward_id',v_reward_id,'amount',v_amount
+      'kind',v_reward_type,'reward_id',v_reward_id,'amount',v_amount,
+      'choice_label',coalesce(v_option.value->>'label','')
     );
   end if;
 
@@ -391,8 +404,8 @@ begin
 end;
 $$;
 
-revoke all on function public.use_inventory_item(text,uuid) from public,anon;
-grant execute on function public.use_inventory_item(text,uuid) to authenticated;
+revoke all on function public.use_inventory_item(text,uuid,integer) from public,anon;
+grant execute on function public.use_inventory_item(text,uuid,integer) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 3. Internal mailbox. Sending creates a fixed recipient snapshot. Rewards are
