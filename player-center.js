@@ -179,6 +179,20 @@
     input.disabled=!hasAlt;
     input.title=hasAlt?"当前卡包包含异画卡，可以设置异画概率。":"当前卡包没有异画卡，异画概率固定为 0%。";
   }
+  function syncPoolModeControls(packId){
+    const isUniform=packCatalog.find(item=>item.id===packId)?.category==="berry";
+    ["#pc-pool-alt","#pc-pool-r5","#pc-pool-r4","#pc-pool-r3"].forEach(selector=>{
+      const input=view.querySelector(selector);
+      if(!input)return;
+      const field=input.closest(".field");
+      if(field)field.hidden=isUniform;
+      input.required=!isUniform;
+    });
+    const priceLabel=view.querySelector('label[for="pc-pool-price"]');
+    if(priceLabel)priceLabel.textContent=isUniform?"树果包价格（代币）":"单包价格（代币）";
+    const submit=view.querySelector('#pc-pool-form button[type="submit"]');
+    if(submit)submit.textContent=isUniform?"保存价格并开放树果包":"保存并开放卡池";
+  }
   function fillPoolCoverOptions(packId,selectedId=""){
     const select=view.querySelector("#pc-pool-cover");
     if(!select)return;
@@ -1309,6 +1323,7 @@
       status.className="status good";
       await loadAdminPools();
       view.querySelector("#pc-pool-id").value=packId;
+      syncPoolModeControls(packId);
       fillPoolCoverOptions(packId);
       syncAltProbabilityControl(packId);
     }catch(error){
@@ -1321,6 +1336,7 @@
     const packId=view.querySelector("#pc-pool-id").value;
     fillPoolCoverOptions(packId);
     syncAltProbabilityControl(packId);
+    syncPoolModeControls(packId);
     const pack=packCatalog.find(item=>item.id===packId);
     const count=Object.values(cardsById).filter(card=>card.pack_id===packId).length;
     const status=view.querySelector("#pc-sync-pack-status");
@@ -1353,6 +1369,7 @@
     packSelect.value=selectedPool.pack_id;
     fillPoolCoverOptions(selectedPool.pack_id,selectedPool.cover_card_id||"");
     syncAltProbabilityControl(selectedPool.pack_id);
+    syncPoolModeControls(selectedPool.pack_id);
     data.forEach(pool=>{
       const row=node("div","pc-row"),info=node("div"),actions=node("div");
       const ready=pool.price_tokens!==null&&(pool.draw_mode==="uniform"||(pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null));
@@ -1367,6 +1384,7 @@
         view.querySelector("#pc-pool-id").value=pool.pack_id;
         fillPoolCoverOptions(pool.pack_id,pool.cover_card_id||"");
         syncAltProbabilityControl(pool.pack_id);
+        syncPoolModeControls(pool.pack_id);
         view.querySelector("#pc-pool-price").value=pool.price_tokens??"";
         view.querySelector("#pc-pool-alt").value=pool.rate_alt??0;
         view.querySelector("#pc-pool-r3").value=pool.rate_3??"";
