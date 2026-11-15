@@ -149,6 +149,14 @@
     tab.classList.remove("active");
   }));
 
+  function syncAltProbabilityControl(packId){
+    const input=view.querySelector("#pc-pool-alt");
+    if(!input)return;
+    const hasAlt=Object.values(cardsById).some(card=>card.pack_id===packId&&/（异画）|\\(异画\\)/.test(card.name||""));
+    if(!hasAlt)input.value="0";
+    input.disabled=!hasAlt;
+    input.title=hasAlt?"当前卡包包含异画卡，可以设置异画概率。":"当前卡包没有异画卡，异画概率固定为 0%。";
+  }
   function fillPoolCoverOptions(packId,selectedId=""){
     const select=view.querySelector("#pc-pool-cover");
     if(!select)return;
@@ -1095,13 +1103,16 @@
       await loadAdminPools();
       view.querySelector("#pc-pool-id").value=packId;
       fillPoolCoverOptions(packId);
+      syncAltProbabilityControl(packId);
     }catch(error){
       status.textContent="同步失败："+error.message;
       status.className="status bad";
     }finally{button.disabled=false;}
   });
   view.querySelector("#pc-pool-id").addEventListener("change",()=>{
-    fillPoolCoverOptions(view.querySelector("#pc-pool-id").value);
+    const packId=view.querySelector("#pc-pool-id").value;
+    fillPoolCoverOptions(packId);
+    syncAltProbabilityControl(packId);
   });
   view.querySelector("#pc-pool-cover").addEventListener("change",updatePoolCoverPreview);
   async function loadAdminPools(){
@@ -1128,6 +1139,7 @@
     const selectedPool=poolRows.find(pool=>pool.pack_id===packSelect.value)||poolRows[0];
     packSelect.value=selectedPool.pack_id;
     fillPoolCoverOptions(selectedPool.pack_id,selectedPool.cover_card_id||"");
+    syncAltProbabilityControl(selectedPool.pack_id);
     data.forEach(pool=>{
       const row=node("div","pc-row"),info=node("div"),actions=node("div");
       const ready=pool.price_tokens!==null&&pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null;
@@ -1141,6 +1153,7 @@
       edit.addEventListener("click",()=>{
         view.querySelector("#pc-pool-id").value=pool.pack_id;
         fillPoolCoverOptions(pool.pack_id,pool.cover_card_id||"");
+        syncAltProbabilityControl(pool.pack_id);
         view.querySelector("#pc-pool-price").value=pool.price_tokens??"";
         view.querySelector("#pc-pool-alt").value=pool.rate_alt??0;
         view.querySelector("#pc-pool-r3").value=pool.rate_3??"";
