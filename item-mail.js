@@ -8,8 +8,9 @@
     const style=document.createElement("style");
     style.id="acg-item-mail-admin-style";
     style.textContent=`
-      #player-center-view #pc-admin-panel .pc-admin-category-nav{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(145px,1fr))!important;gap:9px!important;width:100%!important;align-items:stretch!important}
-      #player-center-view #pc-admin-panel .pc-admin-category-nav button{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;width:100%!important;min-height:46px!important;padding:9px 12px!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;line-height:1.3!important}
+      /* The five original admin tabs define the column width. The two new tabs wrap onto row two at the exact same width. */
+      #player-center-view #pc-admin-panel .pc-admin-category-nav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important;width:100%!important;align-items:stretch!important}
+      #player-center-view #pc-admin-panel .pc-admin-category-nav button{display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;width:100%!important;min-height:46px!important;padding:8px 6px!important;white-space:normal!important;overflow-wrap:anywhere!important;text-align:center!important;line-height:1.25!important}
       #player-center-view #pc-admin-panel .pc-admin-pane-host{display:block!important;width:100%!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane{display:block!important;float:none!important;clear:both!important;width:100%!important;max-width:none!important;min-width:0!important;margin:12px 0!important;padding:clamp(14px,2vw,22px)!important;box-sizing:border-box!important}
       #player-center-view #pc-admin-panel .pc-admin-category-pane.hidden{display:none!important}
