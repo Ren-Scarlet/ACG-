@@ -126,13 +126,20 @@
   tab.addEventListener("click",()=>showCenter("overview"));
   // Direct entry from the homepage avoids showing the overview before the requested page.
   window.acgOpenPlayerCenterPage = page => showCenter(page==="draw"?"draw":"overview");
-  window.acgOpenPlayerAdminPanel = () => {
+  window.acgOpenPlayerAdminPanel = async () => {
+    if (!currentUser) {
+      setStatus("请先登录玩家账号，再进入玩家管理。",true);
+      document.getElementById("tab-account")?.click();
+      return;
+    }
     showCenter("overview");
-    setTimeout(()=>{
-      const panel=view.querySelector("#pc-admin-panel");
-      if(panel&&!panel.classList.contains("hidden"))panel.scrollIntoView({behavior:"smooth",block:"start"});
-      else setStatus("当前账号没有玩家管理权限。",true);
-    },120);
+    const allowed = await checkAdmin();
+    const panel=view.querySelector("#pc-admin-panel");
+    if(allowed && panel && !panel.classList.contains("hidden")) {
+      panel.scrollIntoView({behavior:"smooth",block:"start"});
+    } else if(currentUser) {
+      setStatus("当前账号没有玩家管理权限，或管理员资料读取失败。",true);
+    }
   };
   if(window.acgPendingPlayerCenterPage){const pendingPage=window.acgPendingPlayerCenterPage;delete window.acgPendingPlayerCenterPage;showCenter(pendingPage);}
   knownTabs.forEach(id => document.getElementById(id)?.addEventListener("click", () => {
@@ -678,26 +685,40 @@
     adminPlayers.forEach(player=>tokenSelect.add(new Option(player.username,player.id)));
     if(adminPlayers.some(player=>player.id===previousToken))tokenSelect.value=previousToken;
   }
+  let adminCheckPromise = null;
   async function checkAdmin() {
-    try {
-      const {data,error}=await client.from("profiles").select("is_admin").eq("id",currentUser.id).maybeSingle();
-      if(error)throw error;
-      if(!data?.is_admin){adminPanel.classList.add("hidden");return;}
-      adminPanel.classList.remove("hidden");
-      const {data:players,error:playersError}=await client.from("profiles").select("id,username,player_number").order("username");
-      if(playersError)throw playersError;
-      adminPlayers=players||[];
-      fillPlayerSelects();
-      await loadCardNames();
-      fillInventoryAdminSelects();
-      await loadAdminBindings();
-      await loadAdminMatches();
-      await loadAdminAchievements();
-      await loadAdminPools();
-    } catch(error) {
+    if (!currentUser) {
       adminPanel.classList.add("hidden");
-      setStatus("管理员资料读取失败："+error.message,true);
+      return false;
     }
+    if (adminCheckPromise) return adminCheckPromise;
+    const checkedUserId = currentUser.id;
+    adminCheckPromise = (async () => {
+      try {
+        const {data,error}=await client.from("profiles").select("is_admin").eq("id",checkedUserId).maybeSingle();
+        if(error)throw error;
+        if(currentUser?.id!==checkedUserId)return false;
+        if(!data?.is_admin){adminPanel.classList.add("hidden");return false;}
+        adminPanel.classList.remove("hidden");
+        const {data:players,error:playersError}=await client.from("profiles").select("id,username,player_number").order("username");
+        if(playersError)throw playersError;
+        if(currentUser?.id!==checkedUserId)return false;
+        adminPlayers=players||[];
+        fillPlayerSelects();
+        await loadCardNames();
+        fillInventoryAdminSelects();
+        await loadAdminBindings();
+        await loadAdminMatches();
+        await loadAdminAchievements();
+        await loadAdminPools();
+        return true;
+      } catch(error) {
+        adminPanel.classList.add("hidden");
+        setStatus("管理员资料读取失败："+error.message,true);
+        return false;
+      }
+    })().finally(() => { adminCheckPromise = null; });
+    return adminCheckPromise;
   }
   let adminInventory = {};
   let inventoryBusy = new Set();
@@ -1132,9 +1153,12 @@
   });
 
     loadCardNames();
-  client.auth.onAuthStateChange((event,session)=>{onSession(session,event);});
+  // Keep Supabase Auth callbacks synchronous; load player data after the callback exits.
+  client.auth.onAuthStateChange((event,session)=>{
+    setTimeout(()=>{ void onSession(session,event); },0);
+  });
   client.auth.getSession().then(({data,error})=>{
-    if(error){setStatus("无法读取登录状态："+error.message,true);return;}
-    onSession(data?.session||null);
+    if(error){setStatus("无法读取登录状态："+error.message,true);markInitialSessionReady();return;}
+    void onSession(data?.session||null,"INITIAL_SESSION");
   });
 })();
