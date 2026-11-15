@@ -41,11 +41,11 @@
       });
     }catch(error){list.replaceChildren(el("div","pc-empty","读取道具失败："+error.message));}
   }
-  async function useItem(item,btn){
-    if(btn.disabled)return;let request,key;try{const session=await client.auth.getSession();const uid=session.data?.session?.user?.id||"unknown";key="acg-item-use:"+uid+":"+item.item_id;request=localStorage.getItem(key);if(!request){request=crypto.randomUUID();localStorage.setItem(key,request);}}catch(_){request=crypto.randomUUID();}
+  async function useItem(item,btn,choiceIndex){
+    if(btn.disabled)return;if(item.effect_type==="choose_reward"&&!choiceIndex){alert("请先选择一项奖励。");return;}let request,key;try{const session=await client.auth.getSession();const uid=session.data?.session?.user?.id||"unknown";key="acg-item-use:"+uid+":"+item.item_id;request=localStorage.getItem(key);if(!request){request=crypto.randomUUID();localStorage.setItem(key,request);}}catch(_){request=crypto.randomUUID();}
     btn.disabled=true;const msg=el("p","status","正在使用「"+item.name+"」……");$("#pc-personal-content").prepend(msg);
     try{
-      const {data,error}=await client.rpc("use_inventory_item",{p_item_id:item.item_id,p_request_id:request});if(error)throw error;try{if(key)localStorage.removeItem(key);}catch(_){}
+      const {data,error}=await client.rpc("use_inventory_item",{p_item_id:item.item_id,p_request_id:request,p_choice_index:choiceIndex?Number(choiceIndex):null});if(error)throw error;try{if(key)localStorage.removeItem(key);}catch(_){}
       const result=Array.isArray(data)?data[0]:data;
       if(result?.cards?.length){const pack=packs.find(x=>x.id===result.result?.pack_id)||{id:result.result?.pack_id||"pack_010",name:result.result?.pack_name||"奖励卡包"};msg.textContent="使用成功，获得："+result.cards.map(x=>cardName(x.card_id)).join("、");window.acgShowItemPackOpening?.({...pack,pack_name:pack.name,draw_mode:pack.category==="berry"?"uniform":"rarity",price_tokens:0},result);}
       else if(result?.result?.kind==="tokens")msg.textContent="使用成功，获得 "+result.result.amount+" 代币。";
@@ -102,7 +102,7 @@
     const icon=input("text","例如：🎟️");icon.maxLength=12;
     const desc=el("textarea");desc.rows=2;desc.maxLength=500;desc.placeholder="玩家可见说明";
     const category=select([["消耗品","consumable"],["重要道具","important"]]);
-    const effect=select([["无效果（仅收藏）","none"],["抽取指定卡包","draw_pack"],["增加代币","grant_tokens"],["发放指定卡牌","grant_card"],["发放指定道具","grant_item"],["随机奖励（高级配置）","random_reward"]]);
+    const effect=select([["无效果（仅收藏）","none"],["抽取指定卡包","draw_pack"],["增加代币","grant_tokens"],["发放指定卡牌","grant_card"],["发放指定道具","grant_item"],["随机奖励（高级配置）","random_reward"],["选择奖励","choose_reward"]]);
     const config=el("div",""),cf={};
     function buildConfig(){
       config.replaceChildren();
@@ -111,7 +111,7 @@
       else if(effect.value==="grant_tokens"){const n=input("number");n.min="1";n.step="1";n.value="100";add("amount","代币数量",n);}
       else if(effect.value==="grant_card"){add("card_id","指定卡牌",select(Object.values(cardsById).map(x=>[x.name+" · "+x.id,x.id])));const n=input("number");n.min="1";n.step="1";n.value="1";add("amount","发放数量",n);}
       else if(effect.value==="grant_item"){add("item_id","指定道具",select(items.map(x=>[x.name+" · "+x.item_id,x.item_id])));const n=input("number");n.min="1";n.step="1";n.value="1";add("amount","发放数量",n);}
-      else if(effect.value==="random_reward"){const j=el("textarea");j.rows=7;j.value=JSON.stringify({options:[{reward_type:"tokens",amount:100,weight:1},{reward_type:"card",reward_id:"card_001",amount:1,weight:1}]},null,2);add("json","随机奖励 JSON",j);config.appendChild(el("p","pc-muted",'格式：{"options":[{"reward_type":"tokens","amount":100,"weight":1},{"reward_type":"card","reward_id":"card_001","amount":1,"weight":1}]}。weight 为相对权重。'));}
+      else if(effect.value==="random_reward"||effect.value==="choose_reward"){const j=el("textarea");j.rows=7;j.value=JSON.stringify({options:[{reward_type:"tokens",amount:100,weight:1},{reward_type:"card",reward_id:"card_001",amount:1,weight:1}]},null,2);add("json","奖励选项 JSON",j);config.appendChild(el("p","pc-muted","请填写 options 数组。随机奖励的每个选项需要 weight；选择奖励不需要 weight。")) ;}
       else config.appendChild(el("p","pc-muted","该道具不会执行自动效果。"));
     }
     effect.addEventListener("change",buildConfig);category.addEventListener("change",()=>{const important=category.value==="important";effect.disabled=important;if(important)effect.value="none";buildConfig();});buildConfig();
@@ -126,7 +126,7 @@
         else if(effect.value==="grant_tokens")cfg={amount:Number(cf.amount.value)};
         else if(effect.value==="grant_card")cfg={card_id:cf.card_id.value,amount:Number(cf.amount.value)};
         else if(effect.value==="grant_item")cfg={item_id:cf.item_id.value,amount:Number(cf.amount.value)};
-        else if(effect.value==="random_reward")cfg=JSON.parse(cf.json.value);
+        else if(effect.value==="random_reward"||effect.value==="choose_reward")cfg=JSON.parse(cf.json.value);
       }catch(error){status(msg,"效果配置格式错误："+error.message,true);return;}
       save.disabled=true;status(msg,"正在保存道具……");
       try{const {error}=await client.rpc("admin_save_item",{p_item_id:id.value.trim(),p_name:name.value.trim(),p_icon:icon.value.trim()||"🎁",p_description:desc.value.trim(),p_category:category.value,p_effect_type:effect.value,p_effect_config:cfg,p_is_active:active.checked});if(error)throw error;status(msg,"道具已保存。玩家道具箱和邮件附件目录会使用这份资料。");await loadItems();renderItems();const mailPane=admin.querySelector('[data-admin-category="mail"]');if(mailPane?._refresh)await mailPane._refresh();}
