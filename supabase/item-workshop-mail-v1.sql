@@ -103,7 +103,8 @@ begin
     end if;
   elsif p_effect_type='grant_card' then
     if nullif(v_config->>'card_id','') is null
-       or coalesce((v_config->>'amount')::integer,0)<=0 then
+       or coalesce((v_config->>'amount')::bigint,0)<=0
+       or coalesce((v_config->>'amount')::bigint,0)>2147483647 then
       raise exception '卡牌奖励需要指定卡牌编号和正整数数量';
     end if;
   elsif p_effect_type='grant_item' then
@@ -490,7 +491,8 @@ begin
     v_type := v_attachment->>'reward_type';
     v_reward_id := nullif(v_attachment->>'reward_id','');
     v_amount := (v_attachment->>'amount')::bigint;
-    if v_type not in ('tokens','card','item') or v_amount is null or v_amount<=0 then
+    if v_type not in ('tokens','card','item') or v_amount is null or v_amount<=0
+       or (v_type in ('card','item') and v_amount>2147483647) then
       raise exception '邮件附件类型或数量无效';
     end if;
     if v_type='tokens' and v_reward_id is not null then
