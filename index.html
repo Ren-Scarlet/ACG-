@@ -1659,6 +1659,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         authorized = true;
         document.getElementById("admin-workspace").classList.remove("hidden");
         rebuildCatalogFilters(); renderCatalogCards(); renderCatalogPacks();
+        switchAdminPanel("cards");
         setStatus(authStatus, "授权成功，已读取卡牌和卡包资料。玩家库存请在玩家中心管理。", "good");
       } catch (error) {
         githubToken = ""; authorized = false;
@@ -1971,7 +1972,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
  function selectCategory(key,button){
   side.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b===button));
   if(key==='all'){const f=document.getElementById('type-filter');if(f){f.value='';f.dispatchEvent(new Event('change',{bubbles:true}))}}
-  else if(current==='library-view'){const f=document.getElementById('type-filter');if(f){const o=[...f.options].find(x=>x.text.includes(key)||x.value===key);if(o){f.value=o.value;f.dispatchEvent(new Event('change',{bubbles:true}))}}}
+  else if(current==='library-view'){const f=document.getElementById('type-filter');if(f){const o=[...f.options].find(x=>x.value===key)||[...f.options].find(x=>x.text===key);if(o){f.value=o.value;f.dispatchEvent(new Event('change',{bubbles:true}))}}}
   else if(key.startsWith('deck')){const sel=document.getElementById('saved-deck-select');if(sel&&sel.options.length>1){const ix=Number(key.slice(4))+1;if(sel.options[ix]){sel.selectedIndex=ix;document.getElementById('load-local-deck')?.click()}}}
   else if(current==='account-view'){
    if(key==='admin-auth'){document.getElementById('tab-admin')?.click();return;}
@@ -1980,8 +1981,18 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
   }else if(current==='admin-view'){
    if(key==='account'){document.getElementById('tab-account')?.click();return;}
    if(key==='players'){window.acgOpenPlayerAdminPanel?.();return;}
-   const ids={auth:'github-admin-auth-panel',cards:'admin-cards-panel',packs:'admin-packs-panel'};
-   const target=document.getElementById(ids[key]);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+   if(key==='cards'||key==='packs'){
+    if(!document.getElementById('admin-workspace')?.classList.contains('hidden')){
+     document.getElementById('admin-tab-'+key)?.click();
+     document.getElementById('admin-'+key+'-panel')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }else{
+     const status=document.getElementById('auth-status');
+     if(status)status.textContent='请先完成 GitHub 授权，授权成功后即可使用'+(key==='cards'?'卡牌管理':'卡包管理')+'。';
+     document.getElementById('github-admin-auth-panel')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    return;
+   }
+   const target=document.getElementById('github-admin-auth-panel');if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
   }
  }
  function update(){
