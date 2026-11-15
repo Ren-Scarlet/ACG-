@@ -59,6 +59,20 @@
   const loginHint = view.querySelector("#pc-login-hint");
   const contentEl = view.querySelector("#pc-personal-content");
   let currentUser = null, currentPage = "overview", cardsById = {};
+  let resolveInitialSession;
+  const initialSessionReady = new Promise(resolve => { resolveInitialSession = resolve; });
+  let initialSessionResolved = false;
+  let drawSessionGatePending = false;
+  function markInitialSessionReady() {
+    if (!initialSessionResolved) { initialSessionResolved = true; resolveInitialSession(); }
+  }
+  function withTimeout(promise, ms, message) {
+    let timer;
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(message)), ms); })
+    ]).finally(() => clearTimeout(timer));
+  }
   function compareCardsByStar(a,b) {
     return Number(b.star||0)-Number(a.star||0) || String(a.name||"").localeCompare(String(b.name||""),"zh-CN");
   }
@@ -85,7 +99,15 @@
     // even while Supabase is still restoring the existing login session.
     if (page==="draw") {
       view.classList.add("hidden");
-      if (currentUser) loadPage("draw");
+      drawSessionGatePending = true;
+      renderDrawNotice("正在确认玩家登录状态……");
+      (async()=>{
+        await initialSessionReady;
+        if (currentPage!=="draw") { drawSessionGatePending=false; return; }
+        drawSessionGatePending = false;
+        if (currentUser) await loadPage("draw");
+        else renderDrawNotice("抽卡功能需要先登录当前 ACG 卡牌网站账号。",false);
+      })();
       return;
     }
     view.classList.remove("hidden");
@@ -289,6 +311,25 @@
   }
   let drawLobbyRoot=null;
   function closeDrawLobby(){if(drawLobbyRoot){drawLobbyRoot.remove();drawLobbyRoot=null;}}
+  function renderDrawNotice(message,canRetry=true){
+    closeDrawLobby();
+    const root=node("div");root.id="acg-draw-lobby";drawLobbyRoot=root;
+    root.style.cssText="position:fixed;inset:0;z-index:999990;overflow:auto;background:radial-gradient(ellipse at 50% -15%,#263958 0,#101827 34%,#080b12 72%);color:#edf2fa;font-family:Inter,'Microsoft YaHei',sans-serif;display:block";
+    const top=node("header","adl-top"),brand=node("div","adl-brand");brand.innerHTML='ACG <b>PACK LAB</b>';
+    const back=node("button","adl-close","返回玩家中心");back.type="button";
+    back.addEventListener("click",()=>{closeDrawLobby();showCenter("overview");});
+    top.append(brand,back);
+    const main=node("main","adl-main");
+    main.style.cssText="max-width:1160px;margin:auto;padding:70px 22px;text-align:center";
+    const msg=node("div","adl-status",message);msg.style.cssText="padding:28px;border:1px solid #34445c;background:#111b2b;color:#dcecff";
+    main.appendChild(msg);
+    if(canRetry){
+      const retry=node("button","adl-btn primary","重新连接抽卡系统");retry.type="button";
+      retry.style.marginTop="18px";retry.addEventListener("click",()=>loadPage("draw"));
+      main.appendChild(retry);
+    }
+    root.append(top,main);document.body.appendChild(root);
+  }
   function renderDrawLobby(pools,stats,history,drawCount,packNames){
     closeDrawLobby();
     const root=node("div");root.id="acg-draw-lobby";drawLobbyRoot=root;
@@ -296,7 +337,7 @@
     forceStyle(root,{position:"fixed",inset:"0",zIndex:"999990",display:"block",overflowY:"auto",overflowX:"hidden",background:"radial-gradient(ellipse at 50% -15%,#263958 0,#101827 34%,#080b12 72%)",color:"#edf2fa",boxSizing:"border-box"});
     const top=node("header","adl-top"),brand=node("div","adl-brand");brand.innerHTML='ACG <b>PACK LAB</b>';
     const right=node("div","adl-topright"),token=node("div","adl-token","代币："+(stats?.tokens??0)),close=node("button","adl-close","返回玩家中心");
-    close.type="button";close.addEventListener("click",closeDrawLobby);right.append(token,close);top.append(brand,right);
+    close.type="button";close.addEventListener("click",()=>{closeDrawLobby();showCenter("overview");});right.append(token,close);top.append(brand,right);
     const main=node("main","adl-main"),eyebrow=node("div","adl-eyebrow","CARD PACK COLLECTION"),hero=node("div","adl-hero");
     forceStyle(main,{display:"block",position:"relative",width:"min(1180px,100%)",maxWidth:"1180px",margin:"0 auto",padding:"34px 22px 70px",background:"transparent",border:"0",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
     const hgroup=node("div");hgroup.append(node("h1","","卡包抽卡"),node("p","","选择你的卡包，开启下一张传说。每包 5 张卡，十连共 50 张。"));
@@ -353,7 +394,7 @@
     if(historyError)throw historyError;if(packError)throw packError;
     const packNames=Object.fromEntries((packRows||[]).map(pack=>[pack.pack_id,pack.pack_name]));
     contentEl.replaceChildren();
-    if(!drawPools.length){contentEl.appendChild(node("div","pc-empty","目前没有开放的卡池。请等待管理员完成卡池设置。"));return;}
+    if(!drawPools.length){renderDrawNotice("目前没有开放的卡池。请等待管理员完成卡池设置。",false);return;}
     renderDrawLobby(drawPools,stats,history,drawCount,packNames);
   }
 
@@ -439,7 +480,7 @@
     const loading=node("div","adl-status","正在抽取 "+(packCount*5)+" 张卡，请稍候……");
     if(drawLobbyRoot)drawLobbyRoot.querySelector(".adl-main").appendChild(loading);
     try{
-      const {data,error}=await client.rpc("draw_packages",{p_pack_id:pool.pack_id,p_request_id:requestId,p_pack_count:packCount});
+      const {data,error}=await withTimeout(client.rpc("draw_packages",{p_pack_id:pool.pack_id,p_request_id:requestId,p_pack_count:packCount}),30000,"抽卡服务器响应超时。请稍后重试；本次请求编号已保留，不会因重复点击重复扣费。");
       if(error)throw error;const result=Array.isArray(data)?data[0]:data;
       if(!result?.cards||result.cards.length!==packCount*5)throw new Error("服务器没有返回完整抽卡结果；请重试，系统会沿用同一请求编号避免重复扣费。");
       clearDrawRequestId(pool.pack_id,packCount);
@@ -542,6 +583,13 @@
 
   async function loadPage(page) {
     currentPage=page;
+    if(page==="draw"&&!initialSessionResolved){
+      drawSessionGatePending = true;
+      renderDrawNotice("正在确认玩家登录状态……");
+      await initialSessionReady;
+      drawSessionGatePending = false;
+      if(currentPage!=="draw")return;
+    }
     view.querySelectorAll("[data-page]").forEach(button=>button.classList.toggle("active",button.dataset.page===page));
     contentEl.replaceChildren(node("p","pc-muted","正在读取……"));
     try {
@@ -554,13 +602,14 @@
       else if(page==="matches")await loadMatches();
       else if(page==="tokens")await loadTokens();
       else if(page==="inventory")await loadInventory();
-      else if(page==="draw")await loadDraw();
+      else if(page==="draw")await withTimeout(loadDraw(),25000,"抽卡大厅初始化超时，请检查网络后重试。");
       else if(page==="dismantle")await loadDismantle();
       else if(page==="achievements")await loadAchievements();
-      await loadDisplayChoices();
+      if(page!=="draw") await loadDisplayChoices();
       setStatus("玩家中心已连接。",false);
     } catch(error) {
-      contentEl.replaceChildren(node("div","pc-empty","读取失败："+error.message));
+      if(page==="draw") renderDrawNotice("抽卡系统连接失败："+error.message,true);
+      else contentEl.replaceChildren(node("div","pc-empty","读取失败："+error.message));
       setStatus("部分数据暂时无法读取，请稍后重试。",true);
     }
   }
@@ -568,12 +617,14 @@
 
   let lastSessionUserId=null;
   async function onSession(session,event="INITIAL_SESSION") {
+    markInitialSessionReady();
     currentUser=session?.user||null;
     const nextUserId=currentUser?.id||null;
     const userChanged=nextUserId!==lastSessionUserId;
     lastSessionUserId=nextUserId;
     if(!currentUser){
       closeDrawLobby();
+      if(currentPage==="draw") renderDrawNotice("抽卡功能需要先登录当前 ACG 卡牌网站账号。",false);
       personalEl.classList.add("hidden");
       pcLayout.classList.add("hidden");
       loginHint.textContent="登录后可查看自己的对战记录、代币、收藏和成就。公开主页仍可供访客查询。";
@@ -585,7 +636,7 @@
     loginHint.textContent="已登录。以下内容仅本人可查看。";
     view.querySelector("#pc-public-name").value=currentUser.user_metadata?.username||"";
     // Only a real sign-in / account switch initializes data. Token refreshes must not reopen the last page.
-    if (userChanged && (currentPage==="draw" || !view.classList.contains("hidden"))) await loadPage(currentPage);
+    if (userChanged && !drawSessionGatePending && (currentPage==="draw" || !view.classList.contains("hidden"))) await loadPage(currentPage);
     if (userChanged) await checkAdmin();
   }
 
