@@ -1073,7 +1073,7 @@
     const payload=cards.map(card=>({
       card_id:card.id,
       rarity:Number(card.star),
-      is_alt:/（异画）|\\(异画\\)/.test(card.name||"")
+      is_alt:/（异画）|\(异画\)/.test(card.name||"")
     }));
     if(payload.some(card=>!card.card_id||!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)){
       status.textContent="同步中止：卡牌编号或星级资料不完整，请先检查卡牌资料。";
