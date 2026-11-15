@@ -160,10 +160,10 @@
   function fillPoolCoverOptions(packId,selectedId=""){
     const select=view.querySelector("#pc-pool-cover");
     if(!select)return;
-    const candidates=Object.values(cardsById).filter(card=>card.pack_id===packId&&card.image)
+    const candidates=Object.values(cardsById).filter(card=>card.pack_id===packId)
       .sort((a,b)=>Number(b.star||0)-Number(a.star||0)||String(a.name||"").localeCompare(String(b.name||""),"zh-CN"));
     select.replaceChildren(new Option("自动选择本卡包最高星卡（默认）",""));
-    candidates.forEach(card=>select.add(new Option(card.name+" · "+(card.star||0)+"星"+(card.name.includes("异画")?" · 异画":""),card.id)));
+    candidates.forEach(card=>select.add(new Option(card.name+" · "+(card.star||0)+"星"+(card.name.includes("异画")?" · 异画":"")+(card.image?"":" · 缺少卡图"),card.id)));
     select.value=candidates.some(card=>card.id===selectedId)?selectedId:"";
     updatePoolCoverPreview();
   }
@@ -171,7 +171,9 @@
     const select=view.querySelector("#pc-pool-cover"),preview=view.querySelector("#pc-pool-cover-preview");
     if(!select||!preview)return;
     preview.replaceChildren();
-    const card=cardsById[select.value]||Object.values(cardsById).filter(c=>c.pack_id===view.querySelector("#pc-pool-id").value&&c.image).sort((a,b)=>Number(b.star||0)-Number(a.star||0))[0];
+    const selectedCard=cardsById[select.value];
+    if(selectedCard&&!selectedCard.image){preview.appendChild(node("span","pc-muted","这张卡没有卡图，不能用作卡池封面；仍可用于抽卡。"));return;}
+    const card=selectedCard||Object.values(cardsById).filter(c=>c.pack_id===view.querySelector("#pc-pool-id").value&&c.image).sort((a,b)=>Number(b.star||0)-Number(a.star||0))[0];
     if(card?.image){
       const img=node("img");img.src=card.image;img.alt=card.name;img.style.cssText="width:66px;height:92px;object-fit:contain;background:#111827;border:1px solid #52627a;border-radius:4px";
       const label=node("div");label.append(node("strong","",card.name),node("div","pc-muted",(card.star||0)+" 星 · "+(select.value?"自定义封面":"自动推荐封面")));
@@ -1072,8 +1074,11 @@
     finally{submit.disabled=false;}
   });
   view.querySelector("#pc-sync-pack-catalog").addEventListener("click",async()=>{
-    const packId=view.querySelector("#pc-pool-id").value;
     const status=view.querySelector("#pc-sync-pack-status");
+    status.textContent="正在重新读取最新卡包和卡牌资料……";
+    status.className="status";
+    await loadCardNames();
+    const packId=view.querySelector("#pc-pool-id").value;
     const button=view.querySelector("#pc-sync-pack-catalog");
     const pack=packCatalog.find(item=>item.id===packId);
     const cards=Object.values(cardsById).filter(card=>card.pack_id===packId);
@@ -1109,10 +1114,16 @@
       status.className="status bad";
     }finally{button.disabled=false;}
   });
-  view.querySelector("#pc-pool-id").addEventListener("change",()=>{
+  view.querySelector("#pc-pool-id").addEventListener("change",async()=>{
+    await loadCardNames();
     const packId=view.querySelector("#pc-pool-id").value;
     fillPoolCoverOptions(packId);
     syncAltProbabilityControl(packId);
+    const pack=packCatalog.find(item=>item.id===packId);
+    const count=Object.values(cardsById).filter(card=>card.pack_id===packId).length;
+    const status=view.querySelector("#pc-sync-pack-status");
+    status.textContent=(pack?.name||packId)+"：读取到 "+count+" 张卡牌。可以同步到抽卡系统。";
+    status.className=count?"status":"status bad";
   });
   view.querySelector("#pc-pool-cover").addEventListener("change",updatePoolCoverPreview);
   async function loadAdminPools(){
