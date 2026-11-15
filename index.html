@@ -532,7 +532,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
           <div class="builder-section panel" style="margin:14px 0">
             <h3>当前卡组清单</h3>
             <p class="hint" id="deck-list-summary">尚未加入卡牌。</p>
-            <section id="current-deck-list" class="grid"></section>
+            <section id="current-deck-list" class="grid"></section><div id="current-deck-pagination" class="list-pagination" aria-label="当前卡组分页"></div>
           </div>
           <input id="builder-card-search" type="search" placeholder="搜索你拥有的卡牌……">
           <div class="save-row">
@@ -582,17 +582,17 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         <div class="builder-section">
           <h3>礼装卡（主卡组）</h3>
           <p class="hint">从已拥有的非特殊攻击卡中选择，数量必须符合当前规则。</p>
-          <section id="relic-builder-list" class="grid"></section>
+          <section id="relic-builder-list" class="grid"></section><div id="relic-builder-list-pagination" class="list-pagination" aria-label="礼装卡分页"></div>
         </div>
         <div class="builder-section">
           <h3>超越／调律／共鸣攻击卡（单独放置）</h3>
           <p class="hint">三种特殊攻击卡合计最多放入规定数量，不计入礼装卡数量。</p>
-          <section id="special-builder-list" class="grid"></section>
+          <section id="special-builder-list" class="grid"></section><div id="special-builder-list-pagination" class="list-pagination" aria-label="特殊攻击卡分页"></div>
         </div>
         <div class="builder-section">
           <h3>对战道具（独立构筑区）</h3>
           <p class="hint">对战道具独立放置，不计入礼装卡或特殊攻击卡数量限制。加入卡组不会消耗道具，也不会扣除收藏数量。</p>
-          <section id="battle-item-builder-list" class="grid"></section>
+          <section id="battle-item-builder-list" class="grid"></section><div id="battle-item-builder-list-pagination" class="list-pagination" aria-label="对战道具分页"></div>
         </div>
       </div>
     </section>
@@ -762,6 +762,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     const CARD_PAGE_SIZE = 20;
     let libraryPage = 1;
     let catalogCardPage = 1;
+    let selectedDeckPage = 1;
+    const builderPages = { relic:1, special:1, battleItem:1 };
 
     const apiHeaders = () => ({
       "Accept": "application/vnd.github+json",
@@ -911,7 +913,9 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         list.innerHTML = '<div class="empty">当前卡组还没有加入卡牌。</div>';
         return;
       }
-      selected.forEach(card => {
+      const deckPageCount=Math.max(1,Math.ceil(selected.length/CARD_PAGE_SIZE));
+      selectedDeckPage=Math.min(selectedDeckPage,deckPageCount);
+      selected.slice((selectedDeckPage-1)*CARD_PAGE_SIZE,selectedDeckPage*CARD_PAGE_SIZE).forEach(card => {
         const row = document.createElement("article"); row.className = "builder-card";
         const img = document.createElement("img"); img.src = card.image ? new URL(card.image, document.baseURI).href : ""; img.alt = card.name; img.loading = "lazy";
         const info = document.createElement("div"); info.className = "builder-card-main";
@@ -933,6 +937,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         row.append(img, info, controls);
         list.appendChild(row);
       });
+      renderListPagination("current-deck-pagination",selected.length,selectedDeckPage,CARD_PAGE_SIZE,next=>{selectedDeckPage=next;renderCurrentDeckList();});
     }
     function renderBuilder() {
       if (!builderPlayer) return;
@@ -967,12 +972,18 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
         plus.addEventListener("click", () => { deckDraft[card.id] = deckCardCount(card.id)+1; renderBuilder(); });
         counter.append(minus, number, plus); row.append(img, info, counter); return row;
       };
-      ownedCards.filter(isRelicCard).forEach(card => relicList.appendChild(makeCard(card)));
-      ownedCards.filter(isSpecialAttack).forEach(card => specialList.appendChild(makeCard(card)));
-      ownedCards.filter(isBattleItem).forEach(card => battleItemList.appendChild(makeCard(card)));
-      if (!relicList.children.length) relicList.innerHTML = '<div class="empty">你目前没有可构筑的礼装卡，或搜索无匹配结果。</div>';
-      if (!specialList.children.length) specialList.innerHTML = '<div class="empty">你目前没有超越、调律或共鸣攻击卡。</div>';
-      if (!battleItemList.children.length) battleItemList.innerHTML = '<div class="empty">你目前没有对战道具。</div>';
+      const renderOwnedCategory=(cards,list,key,emptyText)=>{
+        list.replaceChildren();
+        if(!cards.length){list.innerHTML='<div class="empty">'+emptyText+'</div>';return;}
+        const pageCount=Math.max(1,Math.ceil(cards.length/CARD_PAGE_SIZE));
+        builderPages[key]=Math.min(builderPages[key],pageCount);
+        cards.slice((builderPages[key]-1)*CARD_PAGE_SIZE,builderPages[key]*CARD_PAGE_SIZE).forEach(card=>list.appendChild(makeCard(card)));
+        renderListPagination(list.id+"-pagination",cards.length,builderPages[key],CARD_PAGE_SIZE,next=>{builderPages[key]=next;renderBuilder();});
+      };
+      renderOwnedCategory(ownedCards.filter(isRelicCard),relicList,"relic","你目前没有可构筑的礼装卡，或搜索无匹配结果。");
+      renderOwnedCategory(ownedCards.filter(isSpecialAttack),specialList,"special","你目前没有超越、调律或共鸣攻击卡。");
+      renderOwnedCategory(ownedCards.filter(isBattleItem),battleItemList,"battleItem","你目前没有对战道具。");
+
       const counts = deckCounts(), issues = builderIssues();
       document.getElementById("relic-count").textContent = counts.relic;
       document.getElementById("special-count").textContent = counts.special;
@@ -1772,7 +1783,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     document.getElementById("tab-admin").addEventListener("click", () => showMainView("admin-view","tab-admin","卡牌资料管理"));
     document.getElementById("tab-account").addEventListener("click", () => showMainView("account-view","tab-account","玩家账号"));
     document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
-    document.getElementById("builder-card-search").addEventListener("input", renderBuilder);
+    document.getElementById("builder-card-search").addEventListener("input", () => { builderPages.relic=builderPages.special=builderPages.battleItem=1; renderBuilder(); });
     document.getElementById("clear-builder").addEventListener("click", () => { deckDraft = {}; renderBuilder(); document.getElementById("deck-share-area").classList.add("hidden"); });
     document.getElementById("generate-deck-link").addEventListener("click", generateDeckLink);
     document.getElementById("copy-deck-link").addEventListener("click", copyDeckLink);
