@@ -77,6 +77,32 @@
   }
 }
 `;
+  style.textContent += `
+#player-center-view .pc-profile-hero{display:flex;align-items:center;gap:18px;padding:18px;margin:10px 0 18px;background:linear-gradient(115deg,#082b49,#145a7b 68%,#0b3455);color:#f4fbff;border:1px solid #63c8e0;box-shadow:5px 5px 0 #e83c63;position:relative;overflow:hidden}
+#player-center-view .pc-profile-hero:after{content:"";position:absolute;width:190px;height:190px;right:-65px;top:-105px;border:1px solid #8eeaff55;transform:rotate(35deg);box-shadow:0 0 0 12px #8eeaff0d,0 0 0 26px #8eeaff0a;pointer-events:none}
+#player-center-view .pc-avatar-frame-slot{position:relative;display:grid;place-items:center;flex:0 0 94px;width:94px;height:94px;padding:5px;background:linear-gradient(145deg,#ffe89a,#c39a45 42%,#e8faff 65%,#4fc4e0);clip-path:polygon(50% 0,88% 12%,100% 50%,88% 88%,50% 100%,12% 88%,0 50%,12% 12%);filter:drop-shadow(0 0 9px #55d7f5aa)}
+#player-center-view .pc-avatar-core{display:grid;place-items:center;width:100%;height:100%;background:radial-gradient(circle at 35% 25%,#5b9dbb,#163958 70%);clip-path:polygon(50% 0,88% 12%,100% 50%,88% 88%,50% 100%,12% 88%,0 50%,12% 12%);border:1px solid #fff8;font-size:31px;font-weight:1000;letter-spacing:-2px;color:#f7fbff;text-shadow:0 2px 8px #001a33}
+#player-center-view .pc-profile-meta{position:relative;z-index:1;min-width:0;flex:1}
+#player-center-view .pc-profile-kicker{font-size:9px;letter-spacing:3px;color:#8deaff;font-weight:900}
+#player-center-view .pc-profile-name{font-size:clamp(20px,3vw,28px);font-weight:1000;color:#fff!important;margin:4px 0!important;font-style:italic}
+#player-center-view .pc-profile-sub{font-size:11px;color:#c5e8f2;line-height:1.7}
+#player-center-view .pc-profile-title{display:inline-block;margin-top:7px;padding:5px 10px;border:1px solid #f0d17c;background:linear-gradient(100deg,#fff0b5,#d5aa50);color:#24364a;font-size:11px;font-weight:900;clip-path:polygon(0 0,100% 0,94% 100%,0 100%)}
+#player-center-view .pc-badge-shelf{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}
+#player-center-view .pc-badge-card{display:flex;align-items:center;gap:9px;min-width:0;flex:1 1 175px;max-width:260px;padding:9px 11px;background:linear-gradient(135deg,#f8fdff,#d9f1f8);border:1px solid #83bfd2;box-shadow:3px 3px 0 #b1d9e5;color:#123d5a}
+#player-center-view .pc-badge-seal{position:relative;display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;background:linear-gradient(145deg,var(--badge-light),var(--badge-main) 55%,var(--badge-dark));clip-path:polygon(50% 0,63% 12%,82% 8%,88% 27%,100% 40%,91% 57%,94% 77%,72% 82%,50% 100%,28% 82%,6% 77%,9% 57%,0 40%,12% 27%,18% 8%,37% 12%);filter:drop-shadow(0 2px 2px #183b55aa)}
+#player-center-view .pc-badge-seal:before{content:"";position:absolute;inset:5px;border:1px solid #fff9;clip-path:inherit}
+#player-center-view .pc-badge-glyph{font-size:21px;font-weight:1000;color:#fff;text-shadow:0 1px 4px #10283e;z-index:1}
+#player-center-view .pc-badge-copy{min-width:0}
+#player-center-view .pc-badge-copy strong{display:block;font-size:12px;line-height:1.35;color:#123d5a}
+#player-center-view .pc-badge-copy small{display:block;margin-top:3px;font-size:10px;line-height:1.4;color:#55768a}
+#player-center-view .pc-badge-empty{padding:12px 14px;border:1px dashed #8dbccc;color:#55768a;font-size:12px;background:#f2fbfe}
+#player-center-view #pc-badge-choices .pc-badge-choice{display:flex;align-items:center;gap:10px;padding:10px;background:#f5fcff;border:1px solid #8bbdce;color:#153d59;cursor:pointer}
+#player-center-view #pc-badge-choices .pc-badge-choice input{flex:0 0 auto}
+#player-center-view #pc-badge-choices .pc-badge-choice .pc-badge-seal{flex-basis:42px;width:42px;height:42px}
+#player-center-view #pc-badge-choices .pc-badge-choice strong{display:block;font-size:12px}
+#player-center-view #pc-badge-choices .pc-badge-choice small{display:block;font-size:10px;color:#55768a;margin-top:2px}
+@media(max-width:520px){#player-center-view .pc-profile-hero{align-items:flex-start;gap:12px;padding:14px}#player-center-view .pc-avatar-frame-slot{flex-basis:76px;width:76px;height:76px}#player-center-view .pc-badge-card{max-width:none;flex-basis:100%}}
+`;
   document.head.appendChild(style);
 
   const tab = document.createElement("button");
@@ -162,6 +188,50 @@
     if (cls) item.className = cls;
     if (text !== undefined) item.textContent = text;
     return item;
+  }
+  const BADGE_THEMES = [
+    {glyph:"⚔",light:"#bcecff",main:"#2988b8",dark:"#12466e"},
+    {glyph:"✦",light:"#fff0b0",main:"#d7a638",dark:"#80531e"},
+    {glyph:"♛",light:"#f6d6ff",main:"#9c69c8",dark:"#533778"},
+    {glyph:"◆",light:"#c7f4e7",main:"#299b8a",dark:"#14594f"},
+    {glyph:"♜",light:"#ffd4d9",main:"#d85c78",dark:"#762b4a"}
+  ];
+  function badgeTheme(item,index=0) {
+    const key=String(item?.id||item?.name||"");
+    if(/win|match|battle|game|胜|战|连胜/i.test(key))return BADGE_THEMES[0];
+    if(/draw|collection|card|抽|收集|收藏/i.test(key))return BADGE_THEMES[2];
+    if(/rate|season|rank|率|赛季|段位/i.test(key))return BADGE_THEMES[3];
+    if(/streak|first|初|首|连续/i.test(key))return BADGE_THEMES[4];
+    return BADGE_THEMES[index%BADGE_THEMES.length];
+  }
+  function createBadgeSeal(item,index=0) {
+    const theme=badgeTheme(item,index),seal=node("span","pc-badge-seal");
+    seal.style.setProperty("--badge-light",theme.light);seal.style.setProperty("--badge-main",theme.main);seal.style.setProperty("--badge-dark",theme.dark);
+    seal.appendChild(node("span","pc-badge-glyph",theme.glyph));
+    return seal;
+  }
+  function renderBadgeShelf(host,badgeIds,achievementRows) {
+    const shelf=node("div","pc-badge-shelf");
+    const byId=Object.fromEntries((achievementRows||[]).map(item=>[item.id,item]));
+    (badgeIds||[]).slice(0,3).forEach((id,index)=>{
+      const item=byId[id]||{id,name:id,description:"已获得的成就徽章"};
+      const card=node("div","pc-badge-card");
+      card.append(createBadgeSeal(item,index));
+      const copy=node("div","pc-badge-copy");copy.append(node("strong","",item.name||id),node("small","",item.description||"成就纪念徽章"));
+      card.appendChild(copy);shelf.appendChild(card);
+    });
+    if(!shelf.children.length)shelf.appendChild(node("div","pc-badge-empty","尚未选择主页徽章。解锁成就后，可以在主页展示设置中选择。"));
+    host.appendChild(shelf);
+  }
+  function renderProfileHero(host,{name,number,title,joined}) {
+    const hero=node("section","pc-profile-hero"),avatar=node("div","pc-avatar-frame-slot"),core=node("div","pc-avatar-core");
+    const initials=String(name||"A").trim().slice(0,1).toUpperCase()||"A";
+    core.textContent=initials;avatar.appendChild(core);
+    const meta=node("div","pc-profile-meta");
+    meta.append(node("div","pc-profile-kicker","ACG CARD HUB · PLAYER PROFILE"),node("h2","pc-profile-name",name||"玩家"));
+    meta.appendChild(node("div","pc-profile-sub",(number?number+"　·　":"")+"玩家档案"+(joined?"　·　加入于 "+joined:"")));
+    if(title)meta.appendChild(node("span","pc-profile-title","✦ "+title));
+    hero.append(avatar,meta);host.appendChild(hero);
   }
   function setStatus(message, bad) {
     statusEl.textContent = message;
@@ -300,8 +370,11 @@
     result.replaceChildren();
     if (error) { result.appendChild(node("p","pc-empty","查询失败："+error.message)); return; }
     if (!data) { result.appendChild(node("p","pc-empty","没有找到这个玩家。请确认中文 ID 或登录昵称是否正确。")); return; }
-    result.appendChild(node("h3","",data.player_id||data.username));
-    result.appendChild(node("p","pc-muted",(data.player_number?data.player_number+" · ":"")+(data.selected_title||"尚未设置称号")+" · 登录昵称："+data.username+" · 加入于 "+new Date(data.created_at).toLocaleDateString("zh-CN")));
+    renderProfileHero(result,{name:data.player_id||data.username,number:data.player_number,title:data.selected_title||"",joined:new Date(data.created_at).toLocaleDateString("zh-CN")});
+    const {data:achievementRows,error:achievementError}=await client.from("achievements").select("id,name,description");
+    if(achievementError)throw achievementError;
+    renderBadgeShelf(result,Array.isArray(data.selected_badges)?data.selected_badges:[],achievementRows||[]);
+    result.appendChild(node("p","pc-muted","登录昵称："+data.username));
     const grid=node("div","pc-grid");
     [["总场次",data.games_played],["胜场",data.wins],["败场",data.losses],["胜率",Number(data.win_rate).toFixed(1)+"%"]].forEach(([label,value])=>{
       const item=node("div","pc-stat"); item.append(node("span","pc-muted",label),node("strong","",String(value))); grid.appendChild(item);
@@ -331,8 +404,12 @@
     const publicIdResponse=await client.from("public_profiles").select("player_id").eq("username",profile?.username||"").maybeSingle();
     if(publicIdResponse?.error)throw publicIdResponse.error;
     const publicIdData=publicIdResponse?.data??null;
-    contentEl.replaceChildren(node("h3","",(publicIdData?.player_id||profile?.username||"玩家")+(profile?.player_number?" · "+profile.player_number:"")));
-    contentEl.appendChild(node("p","pc-muted",titleName+" · 加入于 "+(profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):"未知")));
+    contentEl.replaceChildren();
+    renderProfileHero(contentEl,{name:publicIdData?.player_id||profile?.username||"玩家",number:profile?.player_number||"",title:titleName==="尚未设置称号"?"":titleName,joined:profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):""});
+    const badgeIds=Array.isArray(profile?.selected_badges)?profile.selected_badges:[];
+    const {data:achievementRows,error:achievementError}=await client.from("achievements").select("id,name,description");
+    if(achievementError)throw achievementError;
+    renderBadgeShelf(contentEl,badgeIds,achievementRows||[]);
     const rate=s.games_played?(s.wins*100/s.games_played).toFixed(1)+"%":"0.0%";
     const grid=node("div","pc-grid");
     [["代币",s.tokens],["总场次",s.games_played],["胜场",s.wins],["败场",s.losses],["胜率",rate]].forEach(([label,value])=>{
@@ -624,16 +701,16 @@
     titleSelect.value=profile?.selected_title||"";
     badgeWrap.replaceChildren();
     const selected=new Set(profile?.selected_badges||[]);
-    available.forEach(item=>{
-      const label=node("label","pc-stat");
-      label.style.display="flex";label.style.alignItems="center";label.style.gap="8px";
+    available.forEach((item,index)=>{
+      const label=node("label","pc-badge-choice");
       const checkbox=node("input");checkbox.type="checkbox";checkbox.value=item.id;checkbox.checked=selected.has(item.id);
       checkbox.addEventListener("change",()=>{
         const checked=[...badgeWrap.querySelectorAll('input[type="checkbox"]:checked')];
         if(checked.length>3){checkbox.checked=false;status.textContent="主页徽章最多选择三个。";status.className="status bad";}
         else{status.textContent="";status.className="status";}
       });
-      label.append(checkbox,node("span","",item.name));
+      const copy=node("span","");copy.append(node("strong","",item.name),node("small","",item.description||"成就纪念徽章"));
+      label.append(checkbox,createBadgeSeal(item,index),copy);
       label.title=item.description||"";
       badgeWrap.appendChild(label);
     });
