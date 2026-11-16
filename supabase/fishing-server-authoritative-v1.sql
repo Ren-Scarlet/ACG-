@@ -54,10 +54,10 @@ begin
   v_elapsed:=greatest(0,floor(extract(epoch from (v_now-v_started))*1000)::integer);
   return jsonb_build_object(
     'status','reeling',
-    'reel_duration_ms',1700,
+    'reel_duration_ms',3000,
     'reel_elapsed_ms',v_elapsed,
-    'zone_start_pct',40,
-    'zone_width_pct',20,
+    'zone_start_pct',25,
+    'zone_width_pct',50,
     'duplicate_request',v_session.reel_started_at is not null
   );
 end;
@@ -97,10 +97,10 @@ begin
   -- The database clock, not a client-provided boolean or score, decides where
   -- the moving needle is when the finish request reaches the server.
   v_elapsed_ms:=greatest(0,floor(extract(epoch from (clock_timestamp()-v_session.reel_started_at))*1000)::integer);
-  v_phase:=mod(v_elapsed_ms,1700)::numeric/1700;
+  v_phase:=mod(v_elapsed_ms,3000)::numeric/3000;
   v_needle:=case when v_phase<0.5 then v_phase*200 else (1-v_phase)*200 end;
   v_score:=greatest(0,least(100,round(100-abs(v_needle-50)*2)::integer));
-  v_caught:=v_needle between 40 and 60;
+  v_caught:=v_needle between 25 and 75;
 
   if not v_caught then
     update public.fishing_sessions set status='escaped',resolved_at=clock_timestamp()
