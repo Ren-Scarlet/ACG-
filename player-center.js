@@ -88,7 +88,7 @@
   view.innerHTML = [
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家昵称</label><input id="pc-public-name" maxlength="20" placeholder="输入游戏昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
-    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">玩家仓库</button><button type="button" data-page="draw">🎴 抽卡</button><button type="button" data-page="dismantle">卡牌分解</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
+    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="seasons">月度赛季</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">玩家仓库</button><button type="button" data-page="draw">🎴 抽卡</button><button type="button" data-page="dismantle">卡牌分解</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
     '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 玩家管理</h3><p class="pc-muted">新玩家先注册账号，再由管理员把账号绑定到现有玩家编号。绑定后会自动导入该编号原有的收藏数据。</p><div class="pc-grid"><div class="field"><label for="pc-bind-number">待分配玩家编号</label><select id="pc-bind-number"></select></div><div class="field"><label for="pc-bind-user">绑定到已注册账号</label><select id="pc-bind-user"></select></div></div><button id="pc-bind-submit" type="button">绑定玩家编号并导入旧收藏</button><p id="pc-bind-status" class="status"></p><div id="pc-bind-list" class="pc-muted"></div><h4 style="margin-top:22px">玩家收藏管理</h4><p class="pc-muted">先选择玩家，再按物品类别管理库存。普通卡牌、对战道具和树果可直接调整；尚未接入的类别会明确标记。</p><div class="pc-grid"><div class="field"><label for="pc-inventory-user">选择玩家账号</label><select id="pc-inventory-user"><option value="">请选择玩家</option></select></div><div class="field"><label for="pc-inventory-reason">调整记录备注</label><input id="pc-inventory-reason" maxlength="120" value="管理员库存调整" placeholder="例如：活动奖励"></div></div><div id="pc-inventory-category-tabs" class="pc-tabs" role="group" aria-label="库存类别"><button type="button" data-inventory-category="cards" class="active">普通卡牌</button><button type="button" data-inventory-category="battle">对战道具</button><button type="button" data-inventory-category="berries">树果</button><button type="button" data-inventory-category="important" disabled>重要道具 · 未接入</button><button type="button" data-inventory-category="consumables">消耗品</button></div><div id="pc-inventory-filters" class="pc-search pc-inventory-filters"><div class="field"><label for="pc-inventory-search">关键词搜索</label><input id="pc-inventory-search" placeholder="输入卡牌名称或编号"></div><div class="field"><label for="pc-inventory-pack-filter">卡包</label><select id="pc-inventory-pack-filter"><option value="">全部卡包</option></select></div><div class="field"><label for="pc-inventory-star-filter">星级</label><select id="pc-inventory-star-filter"><option value="">全部星级</option></select></div><div class="field"><label for="pc-inventory-type-filter">卡牌类型</label><select id="pc-inventory-type-filter"><option value="">全部类型</option></select></div><div class="field"><label for="pc-inventory-owned-filter">库存状态</label><select id="pc-inventory-owned-filter"><option value="all">全部卡牌</option><option value="owned">只看已拥有</option><option value="unowned">只看未拥有</option></select></div></div><p id="pc-inventory-status" class="status"></p><div id="pc-inventory-summary" class="pc-muted"></div><div id="pc-inventory-cards" class="pc-inventory-grid"><div class="pc-empty">请先选择玩家。</div></div><h3 style="margin-top:24px">管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><section id="pc-legacy-import" style="margin-top:22px;padding:16px;border:1px solid var(--border-color,#9bb);border-radius:12px;background:var(--surface,#fff)"><h4 style="margin-top:0">历史累计战绩导入</h4><p class="pc-muted">只导入过去累计胜场和败场，不会创建虚假的比赛记录。每行格式：玩家编号、胜场、败场。支持从 Excel 直接复制粘贴。</p><div class="field"><label for="pc-legacy-data">批量数据（每行一名玩家）</label><textarea id="pc-legacy-data" rows="7" style="width:100%;box-sizing:border-box" placeholder="玩家编号&#9;胜场&#9;败场&#10;P001&#9;25&#9;12&#10;P002&#9;18&#9;9"></textarea></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="pc-legacy-preview">检查导入数据</button><button type="button" class="primary" id="pc-legacy-submit" disabled>确认导入历史战绩</button></div><p id="pc-legacy-status" class="status"></p><div id="pc-legacy-preview-list" class="pc-muted"></div><h4 style="margin-top:18px">已导入的历史战绩</h4><div id="pc-legacy-list" class="pc-muted">正在读取……</div></section><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">设置每包价格及每张卡的稀有度概率。每包 5 张；十连为 10 包共 50 张。异画概率独立设置。</p><div id="pc-admin-pool-list" class="pc-muted">正在读取卡池状态……</div><div class="field" style="margin:12px 0"><button id="pc-sync-pack-catalog" type="button">同步所选卡包到抽卡系统</button><p id="pc-sync-pack-status" class="status">新增卡包或卡牌后，先同步一次抽卡目录；之后无需再执行 SQL。</p></div><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="">正在读取卡包……</option></select></div><div class="field"><label for="pc-pool-cover">卡包封面（选择本卡包内任意卡牌）</label><select id="pc-pool-cover"><option value="">正在读取卡牌……</option></select><div id="pc-pool-cover-preview" style="display:flex;align-items:center;gap:12px;margin-top:8px"></div></div><div class="field"><label for="pc-pool-price">单包价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-alt">异画概率（%）</label><input id="pc-pool-alt" type="number" min="0" max="100" step="0.01" value="0.1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="0.01" value="1.2" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="0.01" value="5" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="0.01" value="93.7" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币余额修正</h4><p class="pc-muted">此处用于后台纠错或即时补正。活动奖励、补偿和日常发放请使用「邮件管理」，由玩家自行领取。</p><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
@@ -916,6 +916,33 @@
     });
   }
 
+  async function loadMySeasons() {
+    const [{data:current,error:currentError},{data:history,error:historyError}]=await Promise.all([
+      client.rpc("player_get_current_season"),
+      client.rpc("player_list_my_seasons")
+    ]);
+    if(currentError)throw currentError;if(historyError)throw historyError;
+    contentEl.replaceChildren();
+    const season=current?.[0];
+    if(season){
+      const card=node("section","pc-stat");
+      card.append(node("h3","","本月赛季 · "+season.season_key),
+        node("p","pc-muted","赛季时间："+new Date(season.starts_at).toLocaleDateString("zh-CN")+" 至 "+new Date(season.ends_at).toLocaleDateString("zh-CN")),
+        node("div","pc-row","场次："+season.games_played+"　胜场："+season.wins+"　败场："+season.losses),
+        node("p","pc-muted",season.rank_name?"当前段位："+season.rank_name:"当前尚未达到段位门槛"));
+      contentEl.appendChild(card);
+    }
+    contentEl.appendChild(node("h4","","历史赛季"));
+    if(!history?.length){contentEl.appendChild(node("div","pc-empty","还没有月度赛季记录。"));return;}
+    history.forEach(item=>{
+      const row=node("article","pc-stat"),head=node("div","pc-row");
+      head.append(node("strong","",item.season_key),node("span","pc-muted",item.season_status==="settled"?"已结算":"进行中"));
+      row.append(head,node("p","","战绩："+item.wins+" 胜 / "+item.losses+" 败 · "+item.games_played+" 场"),
+        node("p","pc-muted",item.rank_name?"段位："+item.rank_name:"未获得段位"));
+      contentEl.appendChild(row);
+    });
+  }
+
   async function loadPage(page) {
     currentPage=page;
     if(page==="draw"&&!initialSessionResolved){
@@ -936,6 +963,7 @@
       }
       if(page==="overview")await loadOverview();
       else if(page==="matches")await loadMatches();
+      else if(page==="seasons")await loadMySeasons();
       else if(page==="tokens")await loadTokens();
       else if(page==="inventory")await loadInventory();
       else if(page==="draw")await withTimeout(loadDraw(),25000,"抽卡大厅初始化超时，请检查网络后重试。");
@@ -1045,6 +1073,115 @@
   const matchForm = view.querySelector("#pc-match-form");
   const matchStatus = view.querySelector("#pc-match-status");
   const matchList = view.querySelector("#pc-admin-match-list");
+  const seasonAdminPane=adminPanel.querySelector('[data-admin-category="matches"]');
+  if(seasonAdminPane&&!seasonAdminPane.querySelector("#pc-season-admin")){
+    const section=node("section","");
+    section.id="pc-season-admin";
+    section.style.cssText="margin-top:24px;padding:16px;border:1px solid var(--border-color,#9bb);border-radius:12px;";
+    section.append(node("h3","","月度赛季管理"),node("p","pc-muted","段位按月胜场门槛判定；奖励会以邮件发送，玩家手动领取。赛季按北京时间自然月计算。"));
+    const form=node("form","");form.id="pc-season-rank-form";
+    const fields=[
+      ["段位编号","pc-season-rank-code","text","例如 bronze"],
+      ["段位名称","pc-season-rank-name","text","例如 青铜"],
+      ["最低胜场","pc-season-rank-wins","number","0"],
+      ["邮件标题","pc-season-mail-title","text","月度赛季奖励"],
+    ];
+    fields.forEach(([label,id,type,placeholder])=>{
+      const wrap=node("div","field"),lab=node("label","",label),input=node("input");
+      input.id=id;input.type=type;input.placeholder=placeholder;if(type==="number"){input.min="0";input.step="1";input.required=true;}
+      if(id==="pc-season-rank-code"||id==="pc-season-rank-name")input.required=true;
+      lab.htmlFor=id;wrap.append(lab,input);form.appendChild(wrap);
+    });
+    const bodyWrap=node("div","field"),bodyLabel=node("label","","邮件正文（可用 {player}、{rank}）"),body=node("textarea");
+    body.id="pc-season-mail-body";body.rows=2;body.value="恭喜获得本月 {rank} 段位奖励！";bodyLabel.htmlFor=body.id;bodyWrap.append(bodyLabel,body);form.append(bodyWrap);
+    const rewardWrap=node("div","field"),rewardLabel=node("label","","奖励附件 JSON"),reward=node("textarea");
+    reward.id="pc-season-rewards";reward.rows=4;reward.value='[{"reward_type":"tokens","reward_id":null,"amount":100}]';
+    rewardLabel.htmlFor=reward.id;rewardWrap.append(rewardLabel,reward,node("p","pc-muted",'代币示例：{"reward_type":"tokens","reward_id":null,"amount":100}；卡牌/道具需填写对应 reward_id。'));form.append(rewardWrap);
+    const enabledWrap=node("label","pc-row"),enabled=node("input");enabled.type="checkbox";enabled.checked=true;enabled.id="pc-season-enabled";enabledWrap.append(enabled,node("span","","启用该段位"));
+    const save=node("button","primary","保存段位奖励");save.type="submit";form.append(enabledWrap,save);
+    const status=node("p","status");status.id="pc-season-config-status";form.append(status);
+    section.append(form,node("h4","","现有段位配置"));
+    const configList=node("div","pc-muted");configList.id="pc-season-config-list";section.append(configList);
+    section.append(node("h4","","赛季结算"));
+    const seasonSelect=node("select");seasonSelect.id="pc-season-select";
+    const refresh=node("button","","刷新赛季");refresh.type="button";
+    const settle=node("button","primary","执行结算");settle.type="button";
+    const settleStatus=node("p","status");settleStatus.id="pc-season-settle-status";
+    const snapshots=node("div","pc-muted");snapshots.id="pc-season-snapshots";
+    section.append(seasonSelect,refresh,settle,settleStatus,snapshots);
+    seasonAdminPane.appendChild(section);
+    async function loadSeasonAdmin(){
+      configList.textContent="正在读取段位配置……";seasonSelect.replaceChildren(new Option("选择赛季",""));
+      try{
+        const [{data:configs,error:ce},{data:seasons,error:se}]=await Promise.all([client.rpc("admin_list_season_rank_rewards"),client.rpc("admin_list_seasons")]);
+        if(ce)throw ce;if(se)throw se;
+        configList.replaceChildren();
+        (configs||[]).forEach(item=>{
+          const row=node("div","pc-row"),info=node("div","");
+          info.append(node("strong","",item.rank_name+" · "+item.min_wins+" 胜起"),node("div","pc-muted","奖励："+JSON.stringify(item.reward_attachments)+" · "+(item.is_enabled?"启用":"停用")));
+          const edit=node("button","","编辑");edit.type="button";edit.addEventListener("click",()=>{
+            form.querySelector("#pc-season-rank-code").value=item.rank_code;
+            form.querySelector("#pc-season-rank-name").value=item.rank_name;
+            form.querySelector("#pc-season-rank-wins").value=item.min_wins;
+            form.querySelector("#pc-season-mail-title").value=item.mail_title;
+            form.querySelector("#pc-season-mail-body").value=item.mail_body;
+            form.querySelector("#pc-season-rewards").value=JSON.stringify(item.reward_attachments,null,2);
+            enabled.checked=item.is_enabled;
+            form.scrollIntoView({behavior:"smooth",block:"center"});
+          });row.append(info,edit);configList.appendChild(row);
+        });
+        (seasons||[]).forEach(item=>seasonSelect.add(new Option(item.season_key+" · "+(item.status==="settled"?"已结算":"进行中")+" · "+item.players_count+" 人",item.season_key)));
+      }catch(error){configList.textContent="读取失败："+error.message;}
+    }
+    form.addEventListener("submit",async event=>{
+      event.preventDefault();save.disabled=true;status.textContent="正在保存……";
+      try{
+        const attachments=JSON.parse(reward.value||"[]");
+        const {error}=await client.rpc("admin_save_season_rank_reward",{
+          p_rank_code:form.querySelector("#pc-season-rank-code").value.trim(),
+          p_rank_name:form.querySelector("#pc-season-rank-name").value.trim(),
+          p_min_wins:Number(form.querySelector("#pc-season-rank-wins").value),
+          p_attachments:attachments,
+          p_mail_title:form.querySelector("#pc-season-mail-title").value||"月度赛季奖励",
+          p_mail_body:body.value,
+          p_is_enabled:enabled.checked
+        });
+        if(error)throw error;status.textContent="保存成功。";await loadSeasonAdmin();
+      }catch(error){status.textContent="保存失败："+error.message;}
+      finally{save.disabled=false;}
+    });
+    refresh.addEventListener("click",loadSeasonAdmin);
+    settle.addEventListener("click",async()=>{
+      const key=seasonSelect.value;if(!key){settleStatus.textContent="请先选择赛季。";return;}
+      if(!confirm("确定结算 "+key+" 吗？结算快照和奖励邮件将被保存，不能重复发放。"))return;
+      settle.disabled=true;settleStatus.textContent="正在结算……";
+      try{
+        const {data,error}=await client.rpc("admin_settle_monthly_season",{p_season_key:key});
+        if(error)throw error;settleStatus.textContent="结算结果："+JSON.stringify(data);
+        await loadSeasonAdmin();await loadSeasonSnapshots();
+      }catch(error){settleStatus.textContent="结算失败："+error.message;}
+      finally{settle.disabled=false;}
+    });
+    async function loadSeasonSnapshots(){
+      const key=seasonSelect.value;if(!key){snapshots.textContent="请选择赛季查看结算快照。";return;}
+      const {data,error}=await client.rpc("admin_list_season_settlements",{p_season_key:key});
+      if(error){snapshots.textContent="读取失败："+error.message;return;}
+      snapshots.replaceChildren();
+      (data||[]).forEach(item=>{
+        const row=node("div","pc-row"),info=node("div","");
+        info.append(node("strong","",item.player_number+" · "+item.username),node("div","pc-muted",item.wins+" 胜 / "+item.losses+" 败 · "+(item.rank_name||"无段位")));
+        row.append(info);
+        if(item.mail_id){const resend=node("button","","补发邮件");resend.type="button";resend.addEventListener("click",async()=>{
+          if(!confirm("确定向 "+item.username+" 补发原赛季奖励邮件吗？"))return;
+          resend.disabled=true;try{const {data,error}=await client.rpc("admin_resend_season_reward",{p_season_key:key,p_user_id:item.user_id});if(error)throw error;settleStatus.textContent="补发成功，新邮件编号："+data;}catch(error){settleStatus.textContent="补发失败："+error.message;}finally{resend.disabled=false;}
+        });row.appendChild(resend);}
+        snapshots.appendChild(row);
+      });
+      if(!data?.length)snapshots.textContent="该赛季尚无结算快照。";
+    }
+    seasonSelect.addEventListener("change",loadSeasonSnapshots);
+    loadSeasonAdmin();
+  }
   const matchSelectIds = ["pc-blue-1","pc-blue-2","pc-red-1","pc-red-2"];
 
   function setMatchStatus(message,bad) {
