@@ -1109,7 +1109,7 @@
     const settleStatus=node("p","status");settleStatus.id="pc-season-settle-status";
     const snapshots=node("div","pc-muted");snapshots.id="pc-season-snapshots";
     section.append(seasonSelect,refresh,settle,settleStatus,snapshots);
-    seasonAdminPane.appendChild(section);
+    seasonAdminPane.prepend(section);
     async function loadSeasonAdmin(){
       configList.textContent="正在读取段位配置……";seasonSelect.replaceChildren(new Option("选择赛季",""));
       try{
