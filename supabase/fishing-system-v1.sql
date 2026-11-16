@@ -429,6 +429,7 @@ create table if not exists public.fishing_sessions (
 alter table public.fishing_sessions enable row level security;
 revoke all on public.fishing_sessions from public,anon,authenticated;
 create index if not exists fishing_sessions_user_created_idx on public.fishing_sessions(user_id,created_at desc);
+create unique index if not exists fishing_one_open_session_per_user on public.fishing_sessions(user_id) where status='waiting';
 
 create or replace function public.fishing_start_cast(p_bait_id text,p_request_id uuid)
 returns jsonb
@@ -472,7 +473,7 @@ begin
   -- Select fish only from the pool attached to the selected bait.
   select * into v_fish from public.fishing_fish_catalog
   where bait_id=p_bait_id and is_active=true
-  order by random()*appearance_weight desc limit 1;
+  order by (-ln(greatest(random(),0.000001))/appearance_weight) asc limit 1;
   if not found then raise exception '该鱼饵暂时没有可钓鱼种'; end if;
 
   v_roll:=random()*100;
