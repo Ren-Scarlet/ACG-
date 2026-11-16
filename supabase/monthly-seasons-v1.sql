@@ -388,3 +388,117 @@ begin
   end if;
 end;
 $$;
+
+
+-- Player-facing current and historical season records.
+create or replace function public.player_list_my_seasons()
+returns table(
+  season_key text,games_played integer,wins integer,losses integer,
+  rank_name text,season_status text,settled_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null then raise exception '请先登录'; end if;
+  return query
+  select ps.season_key,ps.games_played,ps.wins,ps.losses,
+    coalesce(sp.rank_name,rr.rank_name),
+    s.status,s.settled_at
+  from public.season_player_stats ps
+  join public.match_seasons s on s.season_key=ps.season_key
+  left join public.season_player_settlements sp
+    on sp.season_key=ps.season_key and sp.user_id=ps.user_id
+  left join lateral (
+    select r.rank_name from public.season_rank_rewards r
+    where r.is_enabled and r.min_wins<=ps.wins
+    order by r.min_wins desc limit 1
+  ) rr on true
+  where ps.user_id=auth.uid()
+  order by ps.season_key desc;
+end;
+$$;
+
+create or replace function public.player_get_current_season()
+returns table(
+  season_key text,starts_at timestamptz,ends_at timestamptz,
+  games_played integer,wins integer,losses integer,rank_name text
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare v_key text;
+begin
+  if auth.uid() is null then raise exception '请先登录'; end if;
+  v_key:=public.ensure_monthly_season((now() at time zone 'Asia/Shanghai')::date);
+  return query
+  select s.season_key,s.starts_at,s.ends_at,
+    coalesce(ps.games_played,0),coalesce(ps.wins,0),coalesce(ps.losses,0),rr.rank_name
+  from public.match_seasons s
+  left join public.season_player_stats ps on ps.season_key=s.season_key and ps.user_id=auth.uid()
+  left join lateral (
+    select r.rank_name from public.season_rank_rewards r
+    where r.is_enabled and r.min_wins<=coalesce(ps.wins,0)
+    order by r.min_wins desc limit 1
+  ) rr on true
+  where s.season_key=v_key;
+end;
+$$;
+
+create or replace function public.admin_list_season_settlements(p_season_key text)
+returns table(
+  user_id uuid,player_number text,username text,games_played integer,
+  wins integer,losses integer,rank_code text,rank_name text,mail_id bigint
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null or not public.is_admin() then raise exception '只有管理员可以查看结算快照'; end if;
+  return query
+  select x.user_id,x.player_number,x.username,x.games_played,x.wins,x.losses,
+    x.rank_code,x.rank_name,x.mail_id
+  from public.season_player_settlements x
+  where x.season_key=p_season_key
+  order by x.wins desc,x.losses asc,x.player_number;
+end;
+$$;
+
+-- Resend an existing settlement reward by copying its original attachments.
+-- The original mail and snapshot remain intact; every resend is a new mail item.
+create or replace function public.admin_resend_season_reward(p_season_key text,p_user_id uuid)
+returns bigint
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare v_old public.season_player_settlements%rowtype; v_old_mail public.mail_messages%rowtype; v_new_id bigint;
+begin
+  if auth.uid() is null or not public.is_admin() then raise exception '只有管理员可以补发赛季奖励'; end if;
+  select * into v_old from public.season_player_settlements
+    where season_key=p_season_key and user_id=p_user_id;
+  if not found or v_old.mail_id is null then raise exception '该玩家没有可补发的赛季奖励邮件'; end if;
+  select * into v_old_mail from public.mail_messages where id=v_old.mail_id;
+  if not found then raise exception '原奖励邮件不存在'; end if;
+  insert into public.mail_messages(title,body,created_by)
+  values(v_old_mail.title||'（补发）',v_old_mail.body,auth.uid())
+  returning id into v_new_id;
+  insert into public.mail_recipients(mail_id,user_id) values(v_new_id,p_user_id);
+  insert into public.mail_attachments(mail_id,reward_type,reward_id,amount,sort_order)
+  select v_new_id,reward_type,reward_id,amount,sort_order
+  from public.mail_attachments where mail_id=v_old.mail_id order by sort_order,id;
+  return v_new_id;
+end;
+$$;
+
+revoke all on function public.player_list_my_seasons() from public,anon,authenticated;
+revoke all on function public.player_get_current_season() from public,anon,authenticated;
+revoke all on function public.admin_list_season_settlements(text) from public,anon,authenticated;
+revoke all on function public.admin_resend_season_reward(text,uuid) from public,anon,authenticated;
+grant execute on function public.player_list_my_seasons() to authenticated;
+grant execute on function public.player_get_current_season() to authenticated;
+grant execute on function public.admin_list_season_settlements(text) to authenticated;
+grant execute on function public.admin_resend_season_reward(text,uuid) to authenticated;
