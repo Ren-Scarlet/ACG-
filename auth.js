@@ -214,12 +214,6 @@
     const itemMailScript = document.createElement("script");
     itemMailScript.src = "./item-mail.js?v=23";
     itemMailScript.defer = true;
-    itemMailScript.onload = () => {
-      const fishingScript = document.createElement("script");
-      fishingScript.src = "./fishing.js?v=1";
-      fishingScript.defer = true;
-      document.body.appendChild(fishingScript);
-    };
     document.body.appendChild(itemMailScript);
   };
   document.body.appendChild(playerCenterScript);
