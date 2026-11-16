@@ -88,58 +88,23 @@
   }
   function renderOverview(){
     const host=$("fish-overview");host.replaceChildren();
-    const intro=panel("钓场","带上鱼饵，等待鱼咬钩。鱼种与尺寸由服务器在抛竿时决定，操作只影响是否成功收获。");
-    const grid=el("div","fish-stat-grid");
-    [["钓鱼积分",$("fish-points").textContent],["累计钓获",$("fish-catches").textContent],["已发现鱼种",$("fish-species").textContent]].forEach(([k,v])=>{
-      const c=el("div","fish-stat");c.append(el("small","",k),el("strong","",v));grid.append(c);
-    });
-    intro.append(grid);
-    const baitList=el("div","fish-bait-grid");
-    state.baits.forEach(b=>{
-      const qty=(state.dashboard.baits||[]).find(x=>x.bait_id===b.bait_id)?.quantity||0;
-      const c=el("article","fish-bait-card");
-      c.append(el("strong","",b.icon+" "+b.bait_name),el("p","hint",b.description),el("div","fish-bait-qty","持有：×"+qty));
-      const choose=el("button","", "选择并抛竿");choose.type="button";choose.disabled=qty<1||!b.is_active;
-      choose.addEventListener("click",()=>startCast(b.bait_id));c.append(choose);baitList.append(c);
-    });
-    intro.append(baitList);
-    host.append(intro);
+    const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
+    head.append(el("p","fish-kicker","WELCOME TO QINGLAN LAKE"),el("h2","","今日的湖面，正等待新的相遇"),el("p","","挑选鱼饵，在湖畔享受片刻宁静。鱼种与尺寸由服务器决定，操作只影响是否成功收获。"));
+    const stats=el("div","fish-game-stats");
+    [["钓鱼积分",$("fish-points").textContent],["累计钓获",$("fish-catches").textContent],["已发现鱼种",$("fish-species").textContent]].forEach(([k,v])=>{const c=el("article","fish-game-stat");c.append(el("span","",k),el("strong","",v));stats.append(c);});
+    const title=el("div","fish-subtitle-row");title.append(el("h3","","选择你的鱼饵"),el("small","","SELECT BAIT"));
+    const grid=el("div","fish-game-grid");
+    state.baits.forEach((b,i)=>{const qty=(state.dashboard.baits||[]).find(x=>x.bait_id===b.bait_id)?.quantity||0,c=el("article","fish-bait-tile"),art=el("div","fish-bait-tile-art");art.append(el("span","","✦  BAIT 0"+(i+1)),el("b","",b.icon||"🪱"));const body=el("div","fish-bait-tile-body");body.append(el("h4","",b.bait_name),el("p","",b.description),el("strong","","持有 ×"+qty));const btn=el("button","fish-ui-button",qty?"抛竿垂钓":"前往工坊");btn.type="button";btn.disabled=!b.is_active||(qty<1&&!b.craftable);btn.addEventListener("click",()=>qty?startCast(b.bait_id):setSubpage("craft"));c.append(art,body,btn);grid.append(c);});
+    shell.append(head,stats,title,grid);host.append(shell);
   }
   function renderCraft(){
     const host=$("fish-craft");host.replaceChildren();
-    const box=panel("鱼饵工坊","树果取自玩家仓库中的树果库存。合成成功后扣除树果并增加鱼饵，操作由数据库事务完成。");
-    const form=el("div","fish-craft-grid");
-    state.baits.forEach(b=>{
-      const card=el("article","fish-bait-card");
-      card.append(el("h4","",b.icon+" "+b.bait_name),el("p","hint",b.description));
-      if(!b.craftable){card.append(el("p","hint","配方尚未开放"));form.append(card);return;}
-      const selects=[];
-      for(let i=0;i<b.ingredient_count;i++){
-        const wrap=el("label","fish-field","树果 "+(i+1));
-        const sel=el("select");sel.append(new Option("选择树果",""));
-        state.berries.forEach(berry=>{const opt=new Option(berry.name+"（持有 ×"+berry.quantity+"）",berry.id);sel.append(opt);});
-        wrap.append(sel);card.append(wrap);selects.push(sel);
-      }
-      const qty=el("input");qty.type="number";qty.min="1";qty.max="1";qty.value="1";
-      const qtyWrap=el("label","fish-field","合成数量");qtyWrap.append(qty);card.append(qtyWrap);
-      const button=el("button","primary","制作鱼饵");button.type="button";
-      button.disabled=state.berries.length<b.ingredient_count;
-      button.addEventListener("click",async()=>{
-        const ids=selects.map(x=>x.value);
-        if(ids.some(x=>!x)){status("请先选择完整的树果配方。",true);return;}
-        if(new Set(ids).size!==b.distinct_ingredients){status("所选树果种类不符合配方要求。",true);return;}
-        const count=1;
-        button.disabled=true;
-        try{
-          let last;
-          for(let n=0;n<count;n++)last=await rpc("fishing_craft_bait",{p_bait_id:b.bait_id,p_berry_ids:ids,p_request_id:uuid()});
-          status("制作完成，获得 "+count+" 个"+b.bait_name+"。");
-          await loadDashboard();renderCraft();renderOverview();
-        }catch(e){status("制作失败："+e.message,true);button.disabled=false;}
-      });
-      card.append(button);form.append(card);
-    });
-    box.append(form);host.append(box);
+    const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
+    head.append(el("p","fish-kicker","BERRY WORKSHOP · CRAFTING"),el("h2","","鱼饵工坊"),el("p","","收集树果，调配适合不同鱼种的鱼饵。制作成功后会从仓库扣除材料。"));
+    const inv=el("div","fish-berry-stock");inv.append(el("strong","","树果库存"),el("span","",state.berries.length+" 种可用"));state.berries.forEach(b=>inv.append(el("small","","🌳 "+b.name+" ×"+b.quantity)));
+    const grid=el("div","fish-game-grid");
+    state.baits.forEach((b,i)=>{const c=el("article","fish-recipe-card"),art=el("div","fish-recipe-art");art.append(el("small","","RECIPE 0"+(i+1)),el("b","",b.icon||"🪱"));const body=el("div","fish-recipe-body");body.append(el("h3","",b.bait_name),el("p","",b.description));if(!b.craftable)body.append(el("div","fish-locked-note","配方尚未开放"));else{const selects=[];for(let n=0;n<b.ingredient_count;n++){const label=el("label","fish-field","树果 "+(n+1)),sel=el("select");sel.append(new Option("选择树果",""));state.berries.forEach(x=>sel.append(new Option(x.name+"（×"+x.quantity+"）",x.id)));label.append(sel);body.append(label);selects.push(sel);}const btn=el("button","fish-ui-button","制作鱼饵");btn.type="button";btn.disabled=state.berries.length<b.ingredient_count;btn.addEventListener("click",async()=>{const ids=selects.map(x=>x.value);if(ids.some(x=>!x)){status("请先选择完整的树果配方。",true);return;}if(new Set(ids).size!==b.distinct_ingredients){status("所选树果种类不符合配方要求。",true);return;}btn.disabled=true;try{await rpc("fishing_craft_bait",{p_bait_id:b.bait_id,p_berry_ids:ids,p_request_id:uuid()});status("制作完成，获得 1 个"+b.bait_name+"。");await loadDashboard();renderCraft();renderOverview();}catch(e){status("制作失败："+e.message,true);btn.disabled=false;}});body.append(btn);}c.append(art,body);grid.append(c);});
+    shell.append(head,inv,grid);host.append(shell);
   }
   async function startCast(baitId){
     if(state.phase!=="idle"){status("当前还有一轮钓鱼没有结束。",true);return;}
@@ -288,34 +253,26 @@
     shell.append(head,progress,filters,grid);host.append(shell);renderCards();
   }
   function renderAchievements(){
-    const host=$("fish-achievements");host.replaceChildren();
-    (state.dashboard.achievements||[]).forEach(a=>{
-      const c=el("article","fish-bait-card");
-      c.append(el("strong","",a.name),el("p","hint",a.description),el("p","",a.unlocked?"已达成":"尚未达成"));
-      host.append(c);
-    });
-    if(!host.children.length)host.append(el("p","hint","钓鱼成就目录尚未配置。"));
+    const host=$("fish-achievements");host.replaceChildren();const rows=state.dashboard.achievements||[],stats=state.dashboard.stats||{},book=state.dashboard.fishbook||[];
+    const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");head.append(el("p","fish-kicker","ANGLER'S RECORD · TROPHIES"),el("h2","","钓鱼成就"),el("p","","记录每一次探索与收获。达成条件后，成就将由服务器自动登记。"));
+    const done=rows.filter(a=>a.unlocked).length,summary=el("div","fish-achievement-total");summary.append(el("strong","",done+" / "+rows.length),el("span","","项成就已解锁"));
+    const grid=el("div","fish-achievement-grid");rows.forEach((a,i)=>{let current=null;if(a.condition_type==="catches")current=Number(stats.total_catches||0);if(a.condition_type==="points")current=Number(stats.points||0);if(a.condition_type==="distinct_fish")current=Number(stats.distinct_fish||book.length);const card=el("article","fish-achievement-tile"+(a.unlocked?" unlocked":"")),icon=el("span","fish-achievement-icon",a.unlocked?"✦":(["🎣","🐟","🏅"][i%3])),info=el("div","");info.append(el("small","",a.unlocked?"已解锁":"挑战中"),el("h3","",a.name),el("p","",a.description));if(current!==null){const bar=el("div","fish-achievement-track"),fill=el("i","");fill.style.width=Math.min(100,current/Math.max(1,Number(a.threshold))*100)+"%";bar.append(fill);info.append(bar,el("small","",Math.min(current,Number(a.threshold))+" / "+a.threshold));}else if(!a.unlocked)info.append(el("small","","完成对应挑战即可解锁"));card.append(icon,info);grid.append(card);});
+    if(!rows.length)grid.append(el("div","fish-empty-state","成就目录尚未配置。成就条件确认后，这里会显示挑战目标和解锁记录。"));
+    shell.append(head,summary,grid);host.append(shell);
   }
   function renderShop(){
-    const host=$("fish-shop");host.replaceChildren();
-    (state.dashboard.shop||[]).forEach(p=>{
-      const c=el("article","fish-bait-card");
-      c.append(el("strong","",p.icon+" "+p.product_name),el("p","hint",p.description),el("p","","兑换需要 "+p.price_points+" 钓鱼积分"));
-      c.append(el("p","hint","商店商品将在商品配置完成后开放兑换。"));host.append(c);
-    });
-    if(!host.children.length)host.append(el("p","hint","钓场商店商品尚未上架。"));
+    const host=$("fish-shop");host.replaceChildren();const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
+    head.append(el("p","fish-kicker","LAKESIDE TRADING POST · EXCHANGE"),el("h2","","钓场商店"),el("p","","使用独立钓鱼积分兑换特别商品，不会消耗网站普通代币。"));
+    const balance=el("div","fish-shop-balance");balance.append(el("span","","当前钓鱼积分"),el("strong","",Number(state.dashboard.stats?.points||0).toLocaleString("zh-CN")+" P"));
+    const grid=el("div","fish-game-grid"),products=state.dashboard.shop||[];products.forEach((p,i)=>{const c=el("article","fish-recipe-card"),art=el("div","fish-recipe-art");art.append(el("small","","SPECIAL ITEM 0"+(i+1)),el("b","",p.icon||"🎁"));const body=el("div","fish-recipe-body");body.append(el("h3","",p.product_name),el("p","",p.description),el("strong","","价格 "+Number(p.price_points).toLocaleString("zh-CN")+" P"),el("small","",p.stock_limit==null?"不限库存":"剩余库存 "+Math.max(0,p.stock_limit-p.stock_sold)),el("div","fish-locked-note","兑换功能尚未开放"));c.append(art,body);grid.append(c);});
+    if(!products.length)grid.append(el("div","fish-empty-state","商店货架暂时空着。商品内容与奖励配置完成后即可上架。"));
+    shell.append(head,balance,grid);host.append(shell);
   }
   async function renderLeaderboard(){
-    const host=$("fish-leaderboard");host.replaceChildren(el("p","hint","正在读取排行榜……"));
-    try{
-      const rows=await rpc("fishing_get_leaderboard",{p_limit:50});
-      const table=el("table","fish-table"),head=el("tr");
-      ["排名","玩家","钓鱼积分","钓获","鱼种"].forEach(x=>head.append(el("th","",x)));
-      table.append(head);
-      rows.forEach(r=>{const tr=el("tr");[r.rank,r.username,r.points,r.total_catches,r.distinct_fish].forEach(v=>tr.append(el("td","",String(v))));table.append(tr);});
-      host.replaceChildren(table);
-      if(!rows.length)host.append(el("p","hint","还没有钓鱼记录。"));
-    }catch(e){host.replaceChildren(el("p","hint","排行榜读取失败："+e.message));}
+    const host=$("fish-leaderboard");host.replaceChildren();const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
+    head.append(el("p","fish-kicker","ANGLER RANKINGS · ALL PLAYERS"),el("h2","","钓场排行榜"),el("p","","与所有钓手比较垂钓积分、收获数量和鱼种发现记录。"));
+    shell.append(head,el("div","fish-empty-state","正在读取排行榜……"));host.append(shell);
+    try{const rows=await rpc("fishing_get_leaderboard",{p_limit:50}),content=el("div","fish-ranking-content");if(!rows.length)content.append(el("div","fish-empty-state","还没有钓鱼记录。成为第一个登上榜单的钓手吧！"));else{const podium=el("div","fish-ranking-podium");rows.slice(0,3).forEach(r=>{const rank=Number(r.rank),c=el("article","fish-podium-card rank-"+rank);c.append(el("span","fish-podium-medal",["","冠","亚","季"][rank]||rank),el("strong","",r.username||"钓手"),el("b","",Number(r.points||0).toLocaleString("zh-CN")+" P"),el("small","","钓获 "+Number(r.total_catches||0)));podium.append(c);});const table=el("table","fish-ranking-table"),tr=el("tr");["排名","钓手","积分","钓获","鱼种"].forEach(x=>tr.append(el("th","",x)));table.append(tr);rows.forEach(r=>{const row=el("tr");[r.rank,r.username,Number(r.points||0).toLocaleString("zh-CN"),r.total_catches,r.distinct_fish].forEach(v=>row.append(el("td","",String(v))));table.append(row);});content.append(podium,table);}shell.replaceChildren(head,content);}catch(e){shell.replaceChildren(head,el("div","fish-empty-state","排行榜读取失败："+e.message));}
   }
   client.auth.onAuthStateChange((_event,session)=>{
     if(session?.user){
