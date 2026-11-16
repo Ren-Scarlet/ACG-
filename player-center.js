@@ -1077,6 +1077,58 @@
 
 
   const adminPanel = view.querySelector("#pc-admin-panel");
+
+  // Dedicated card-grant panel. It uses the existing admin-only inventory RPC,
+  // so every grant is server-authorized and written to card_inventory_adjustments.
+  function buildAdminCardGrantPanel(){
+    if(view.querySelector("#pc-card-grant-panel"))return;
+    const panel=node("section","panel");
+    panel.id="pc-card-grant-panel";
+    panel.style.marginTop="18px";
+    panel.append(
+      node("h4","","指定卡牌发放"),
+      node("p","pc-muted","从完整卡牌资料目录中选择卡牌。此处不检查卡牌是否开放抽取，因此未进入任何卡池的限定卡、活动卡也可以直接发给玩家。每次发放都会记录管理员、数量和原因。")
+    );
+    const grid=node("div","pc-grid");
+    const makeField=(labelText,control)=>{
+      const wrap=node("div","field");
+      wrap.append(node("label","",labelText),control);
+      return wrap;
+    };
+    const player=node("select");player.id="pc-card-grant-player";
+    player.add(new Option("请选择玩家",""));
+    const category=node("select");category.id="pc-card-grant-category";
+    [["all","全部卡牌"],["cards","普通卡牌"],["battle","对战道具"],["berries","树果"]]
+      .forEach(([value,label])=>category.add(new Option(label,value)));
+    const search=node("input");search.id="pc-card-grant-search";search.type="search";
+    search.placeholder="按卡牌名称或编号搜索";
+    const card=node("select");card.id="pc-card-grant-card";card.size=6;
+    card.add(new Option("请先读取卡牌目录",""));
+    const amount=node("input");amount.id="pc-card-grant-amount";amount.type="number";
+    amount.min="1";amount.max="2147483647";amount.step="1";amount.value="1";
+    const reason=node("input");reason.id="pc-card-grant-reason";reason.maxLength=120;
+    reason.value="管理员指定卡牌发放";reason.placeholder="例如：活动限定卡奖励";
+    grid.append(
+      makeField("接收玩家",player),
+      makeField("卡牌类别",category),
+      makeField("搜索卡牌",search),
+      makeField("选择卡牌（可滚动）",card),
+      makeField("发放数量",amount),
+      makeField("发放原因（写入管理记录）",reason)
+    );
+    panel.appendChild(grid);
+    const actions=node("div","save-row");
+    const submit=node("button","primary","确认发放卡牌");
+    submit.type="button";submit.id="pc-card-grant-submit";
+    const status=node("p","status","请选择玩家和卡牌。");
+    status.id="pc-card-grant-status";
+    actions.append(submit);
+    panel.append(actions,status);
+    const inventoryHost=view.querySelector("#pc-inventory-cards");
+    if(inventoryHost)inventoryHost.insertAdjacentElement("afterend",panel);
+    else adminPanel.appendChild(panel);
+  }
+
   // Turn the long administrator form into clear button-based work areas.
   (function buildAdminCategoryNavigation(){
     if(!adminPanel || adminPanel.querySelector(".pc-admin-category-nav"))return;
@@ -1299,6 +1351,7 @@
         adminPlayers=players||[];
         fillPlayerSelects();
         await loadCardNames();
+        initializeAdminCardGrant();
         initializeAdminInventoryFilters();
         fillInventoryAdminSelects();
         await loadAdminBindings();
@@ -1450,6 +1503,89 @@
       inventoryBusy.delete(card.id);renderAdminInventory();
     }
   }
+
+  function initializeAdminCardGrant(){
+    const playerSelect=view.querySelector("#pc-card-grant-player");
+    const categorySelect=view.querySelector("#pc-card-grant-category");
+    const searchInput=view.querySelector("#pc-card-grant-search");
+    const cardSelect=view.querySelector("#pc-card-grant-card");
+    const submit=view.querySelector("#pc-card-grant-submit");
+    const status=view.querySelector("#pc-card-grant-status");
+    if(!playerSelect||!categorySelect||!searchInput||!cardSelect||!submit||!status)return;
+    const previousPlayer=playerSelect.value;
+    playerSelect.replaceChildren(new Option("请选择玩家",""));
+    adminPlayers.forEach(player=>{
+      playerSelect.add(new Option(
+        player.username+(player.player_number?" · "+player.player_number:" · 未绑定"),
+        player.id
+      ));
+    });
+    if(adminPlayers.some(player=>player.id===previousPlayer))playerSelect.value=previousPlayer;
+
+    function renderGrantCardOptions(){
+      const previous=cardSelect.value;
+      const query=searchInput.value.trim().toLocaleLowerCase();
+      const category=categorySelect.value;
+      const catalog=Object.values(cardsById)
+        .filter(card=>card&&card.id&&card.name)
+        .filter(card=>category==="all"||getAdminInventoryCategory(card)===category)
+        .filter(card=>!query||String(card.name).toLocaleLowerCase().includes(query)||String(card.id).toLocaleLowerCase().includes(query))
+        .sort(compareCardsByStar);
+      cardSelect.replaceChildren(new Option(catalog.length?"请选择卡牌":"没有符合条件的卡牌",""));
+      catalog.forEach(card=>{
+        const pack=packCatalog.find(item=>item.id===card.pack_id);
+        const label=card.name+" · "+card.id+(pack?" · "+pack.name:"");
+        cardSelect.add(new Option(label,card.id));
+      });
+      if(catalog.some(card=>card.id===previous))cardSelect.value=previous;
+      status.textContent="当前可发放 "+catalog.length+" 张卡牌资料；此目录不受卡池开放状态限制。";
+      status.className="status";
+    }
+    searchInput.addEventListener("input",renderGrantCardOptions);
+    categorySelect.addEventListener("change",renderGrantCardOptions);
+    renderGrantCardOptions();
+
+    submit.addEventListener("click",async()=>{
+      const userId=playerSelect.value;
+      const cardId=cardSelect.value;
+      const amount=Number(view.querySelector("#pc-card-grant-amount").value);
+      const reason=view.querySelector("#pc-card-grant-reason").value.trim();
+      const card=cardsById[cardId];
+      const player=adminPlayers.find(item=>item.id===userId);
+      if(!userId||!player||!cardId||!card){
+        status.textContent="请选择接收玩家和有效的卡牌。";status.className="status bad";return;
+      }
+      if(!Number.isSafeInteger(amount)||amount<1||amount>2147483647){
+        status.textContent="发放数量必须是 1 至 2,147,483,647 的整数。";status.className="status bad";return;
+      }
+      if(!reason||reason.length>120){
+        status.textContent="请填写发放原因，最多 120 个字符。";status.className="status bad";return;
+      }
+      if(!confirm("确认向「"+player.username+"」发放「"+card.name+"」× "+amount+"？\n原因："+reason)){
+        return;
+      }
+      submit.disabled=true;
+      status.textContent="正在发放并写入管理记录……";status.className="status";
+      try{
+        const {data,error}=await client.rpc("admin_adjust_card_inventory",{
+          p_user_id:userId,p_card_id:cardId,p_delta:amount,p_reason:reason
+        });
+        if(error)throw error;
+        const next=Number(data);
+        if(!Number.isSafeInteger(next)||next<amount){
+          throw new Error("服务器返回的库存数量异常，请重新读取玩家库存确认。");
+        }
+        status.textContent="发放成功：已向「"+player.username+"」发放「"+card.name+"」× "+amount+"；该玩家当前拥有 × "+next+"。";
+        status.className="status good";
+        if(view.querySelector("#pc-inventory-user").value===userId)await loadAdminInventory();
+      }catch(error){
+        status.textContent="发放失败："+error.message;status.className="status bad";
+      }finally{
+        submit.disabled=false;
+      }
+    });
+  }
+
   function initializeAdminInventoryFilters(){
     const packSelect=view.querySelector("#pc-inventory-pack-filter");
     const starSelect=view.querySelector("#pc-inventory-star-filter");
