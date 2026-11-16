@@ -454,6 +454,10 @@ begin
   perform 1 from public.player_stats where user_id=v_user for update;
   if not found then raise exception '玩家资料尚未初始化'; end if;
 
+  -- Abandoned casts are released after ten minutes so a disconnected player is not locked out.
+  update public.fishing_sessions set status='escaped',resolved_at=now()
+  where user_id=v_user and status='waiting' and created_at < now()-interval '10 minutes';
+
   select * into v_existing from public.fishing_sessions
   where user_id=v_user and request_id=p_request_id;
   if found then
