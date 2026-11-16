@@ -2368,12 +2368,12 @@
   });
 
     loadCardNames();
-  // Keep Supabase Auth callbacks synchronous; load player data after the callback exits.
-  client.auth.onAuthStateChange((event,session)=>{
-    setTimeout(()=>{ void onSession(session,event); },0);
+  // Subscribe to the single auth state published by auth.js. Do not call
+  // getSession() or register a second Supabase auth listener in this module.
+  window.addEventListener("acg-auth-session",event=>{
+    void onSession(event.detail?.session||null,"AUTH_SESSION_EVENT");
   });
-  client.auth.getSession().then(({data,error})=>{
-    if(error){setStatus("无法读取登录状态："+error.message,true);markInitialSessionReady();return;}
-    void onSession(data?.session||null,"INITIAL_SESSION");
-  });
+  if(window.acgAuthSessionReady){
+    void onSession(window.acgAuthSession||null,"INITIAL_SESSION");
+  }
 })();
