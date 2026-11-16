@@ -208,7 +208,7 @@
   });
 
   const playerCenterScript = document.createElement("script");
-  playerCenterScript.src = "./player-center.js?v=83";
+  playerCenterScript.src = "./player-center.js?v=84";
   playerCenterScript.defer = true;
   playerCenterScript.onload = () => {
     const itemMailScript = document.createElement("script");
