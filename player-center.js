@@ -1415,12 +1415,12 @@
     const lines=raw.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
     const errors=[],seen=new Set();
     lines.forEach((line,index)=>{
-      const cleanLine=line.replace(/^\\uFEFF/,"");
-      const parts=cleanLine.includes("\\t")
-        ? cleanLine.split("\\t")
+      const cleanLine=line.replace(/^\uFEFF/,"");
+      const parts=cleanLine.includes("\t")
+        ? cleanLine.split("\t")
         : /[,，;；]/.test(cleanLine)
           ? cleanLine.split(/[,，;；]/)
-          : cleanLine.split(/\\s+/);
+          : cleanLine.split(/\s+/);
       const values=parts.map(value=>value.trim());
       if(index===0&&/玩家编号|编号|player_number/i.test(values[0]||""))return;
       if(values.length!==3){errors.push("第 "+(index+1)+" 行：需要三列（玩家编号、胜场、败场）。");return;}
