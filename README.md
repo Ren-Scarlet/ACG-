@@ -44,3 +44,8 @@
 3. 按 [今晚部署步骤](docs/tonight-launch.md) 绑定玩家账号、核对旧收藏并进行 TTS 验收。
 
 不要在预检未通过时直接执行迁移，也不要在确认旧收藏迁移成功前删除旧收藏快照。
+
+
+## 钓鱼系统（开发中）
+
+钓鱼系统数据库部署与操作说明：[`docs/fishing-system-v1.md`](docs/fishing-system-v1.md)。服务器判定修复需在 Supabase 中按文档执行新增迁移；仅提交 GitHub 代码不会自动更新数据库。
