@@ -155,6 +155,7 @@ begin
           updated_by = auth.uid();
 
     perform public.recalculate_player_stats(v_user_id);
+    perform public.refresh_player_achievements(v_user_id);
     v_count := v_count + 1;
     v_user_id := null;
   end loop;
