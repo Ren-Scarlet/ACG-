@@ -13,7 +13,7 @@ where reward_type='item'
 
 alter table public.fishing_shop_catalog
   add constraint fishing_shop_catalog_reward_type_check
-  check (reward_type in ('bait','tokens','card','item'));
+  check (reward_type in ('bait','tokens','card','item','title','cosmetic'));
 
 create or replace function public.fishing_admin_list_shop()
 returns jsonb
