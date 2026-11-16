@@ -36,7 +36,7 @@ create table if not exists public.season_rank_rewards (
 
 create table if not exists public.season_player_settlements (
   season_key text not null references public.match_seasons(season_key) on delete restrict,
-  user_id uuid not null references public.profiles(id) on delete cascade,
+  user_id uuid not null,
   player_number text,
   username text,
   games_played integer not null,
@@ -96,6 +96,10 @@ declare
   v_key text;
   v_status text;
 begin
+  if tg_op='UPDATE' and (old.match_id is distinct from new.match_id or old.user_id is distinct from new.user_id) then
+    raise exception '比赛参与玩家不能直接修改，请通过管理员比赛更正功能重新登记';
+  end if;
+
   if tg_op='DELETE' then
     v_match_id := old.match_id;
     v_user_id := old.user_id;
@@ -153,7 +157,7 @@ $$;
 
 drop trigger if exists match_results_season_sync on public.match_results;
 create trigger match_results_season_sync
-after insert or update or delete on public.match_results
+before insert or update or delete on public.match_results
 for each row execute function public.sync_season_match_result();
 
 -- Rebuild one month from authoritative match rows. Useful for safe backfill and audit.
@@ -271,6 +275,9 @@ begin
   if v_season.status='settled' then
     return jsonb_build_object('season_key',p_season_key,'already_settled',true,'mail_count',0);
   end if;
+  if v_season.ends_at>now() then
+    raise exception '该赛季尚未结束，不能提前结算';
+  end if;
 
   perform public.rebuild_season_stats(p_season_key);
 
@@ -345,21 +352,23 @@ as $$
 declare
   v_today date := (now() at time zone 'Asia/Shanghai')::date;
   v_current text;
-  v_previous text;
   v_result jsonb;
+  v_settled jsonb := '[]'::jsonb;
+  v_old record;
 begin
-  if extract(day from v_today)<>1 then
-    v_current:=public.ensure_monthly_season(v_today);
-    return jsonb_build_object('current_season',v_current,'settlement_due',false);
-  end if;
-  v_previous:=to_char((date_trunc('month',v_today::timestamp)-interval '1 month')::date,'YYYY-MM');
-  if exists(select 1 from public.match_seasons where season_key=v_previous and status='active') then
-    v_result:=public.settle_monthly_season(v_previous);
-  else
-    v_result:=jsonb_build_object('season_key',v_previous,'already_settled',true,'mail_count',0);
-  end if;
+  -- Retry any missed rollover: settle every expired active season, not only
+  -- the immediately previous month on day 1.
+  for v_old in
+    select season_key from public.match_seasons
+    where status='active' and ends_at<=now()
+    order by ends_at
+    for update
+  loop
+    v_result:=public.settle_monthly_season(v_old.season_key);
+    v_settled:=v_settled||jsonb_build_array(v_result);
+  end loop;
   v_current:=public.ensure_monthly_season(v_today);
-  return jsonb_build_object('current_season',v_current,'previous_result',v_result);
+  return jsonb_build_object('current_season',v_current,'settled_seasons',v_settled);
 end;
 $$;
 
