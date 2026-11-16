@@ -110,8 +110,8 @@
   pcLayout.append(pcSidebar,pcMainpane);
   pcMainpane.appendChild(personalPanel);
 
-  const knownViews = ["library-view","player-view","builder-view","admin-view","account-view","shared-deck-view"];
-  const knownTabs = ["tab-library","tab-player","tab-builder","tab-admin","tab-account"];
+  const knownViews = ["library-view","player-view","builder-view","admin-view","account-view","shared-deck-view","fishing-view"];
+  const knownTabs = ["tab-library","tab-player","tab-builder","tab-admin","tab-account","tab-fishing"];
   const statusEl = view.querySelector("#pc-status");
   const personalEl = view.querySelector("#pc-personal");
   const loginHint = view.querySelector("#pc-login-hint");
