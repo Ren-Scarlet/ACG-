@@ -564,7 +564,47 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
  #fishing-view>.fish-page{padding:12px!important}
 }
 </style>
-</head>
+<style>
+/* Interactive fishing water stage */
+#fishing-view .fish-water-stage{height:clamp(190px,25vw,280px);position:relative;overflow:hidden;margin:16px 0 18px;border:1px solid #9bc9bb;background:linear-gradient(#a9dfd5 0%,#d2e9c8 43%,#57b6b5 44%,#237d91 100%);isolation:isolate}
+#fishing-view .fish-stage-sky{position:absolute;inset:0 0 48%;background:linear-gradient(180deg,#b9e9ed,#dcefd5)}
+#fishing-view .fish-stage-sun{position:absolute;width:48px;height:48px;right:13%;top:13%;border-radius:50%;background:#fff1bd;box-shadow:0 0 32px #fff1bd99}
+#fishing-view .fish-stage-hills{position:absolute;inset:12% 0 40%;overflow:hidden}
+#fishing-view .fish-stage-hill{position:absolute;bottom:0;width:65%;height:90%;border-radius:55% 55% 0 0 / 100% 100% 0 0}
+#fishing-view .fish-stage-hill.far{left:-7%;background:#8ebc9a;transform:rotate(-7deg)}
+#fishing-view .fish-stage-hill.near{right:-8%;height:80%;background:#5d9879;transform:rotate(8deg)}
+#fishing-view .fish-stage-shore{position:absolute;left:0;right:0;top:42%;height:12%;background:linear-gradient(180deg,#789b67,#527f5a);clip-path:polygon(0 15%,18% 0,32% 40%,50% 10%,72% 45%,88% 0,100% 20%,100% 100%,0 100%)}
+#fishing-view .fish-stage-water{position:absolute;left:0;right:0;top:49%;bottom:0;background:linear-gradient(180deg,#59b7b6,#25899a 65%,#176a80);overflow:hidden}
+#fishing-view .fish-stage-water:before,#fishing-view .fish-stage-water:after{content:"";position:absolute;left:-10%;width:120%;height:1px;background:#d7fff0a1;top:24%;box-shadow:0 22px #d7fff04a,0 55px #d7fff04a,0 93px #d7fff033}
+#fishing-view .fish-stage-water:after{top:60%;transform:translateX(10%);opacity:.5}
+#fishing-view .fish-stage-ripple{position:absolute;left:57%;top:39%;width:80px;height:16px;border:2px solid #d5fff0a8;border-radius:50%;transform:translate(-50%,-50%);animation:fish-ripple 3s ease-out infinite}
+#fishing-view .fish-stage-ripple.ripple-1{animation-delay:.75s}
+#fishing-view .fish-stage-ripple.ripple-2{animation-delay:1.5s}
+#fishing-view .fish-stage-ripple.ripple-3{animation-delay:2.25s}
+@keyframes fish-ripple{0%{opacity:.75;transform:translate(-50%,-50%) scale(.45)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2)}}
+#fishing-view .fish-stage-line{position:absolute;z-index:3;left:57%;top:9%;height:43%;width:1px;background:#f7f4d9;transform:rotate(-7deg);transform-origin:top}
+#fishing-view .fish-stage-float{position:absolute;z-index:4;left:calc(57% - 7px);top:47%;width:14px;height:27px;animation:fish-float 2.4s ease-in-out infinite}
+#fishing-view .fish-stage-bob{position:absolute;bottom:0;left:3px;width:8px;height:15px;border-radius:50% 50% 45% 45%;background:linear-gradient(90deg,#f7f1d7 0 48%,#e85f55 49%);border:1px solid #fff3d7}
+#fishing-view .fish-stage-float-top{position:absolute;left:5px;top:0;width:4px;height:10px;border-radius:4px;background:#e95b50}
+@keyframes fish-float{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
+#fishing-view .fish-stage-dock{position:absolute;z-index:2;right:0;bottom:0;width:25%;height:22%;background:repeating-linear-gradient(0deg,#94623b 0 8px,#b7824e 9px 13px);clip-path:polygon(12% 0,100% 0,100% 100%,0 100%)}
+#fishing-view .fish-stage-dock i{position:relative;display:inline-block;height:100%;width:2px;margin-left:20%;background:#754a30;opacity:.75}
+#fishing-view .fish-stage-caption{position:absolute;z-index:5;left:14px;bottom:12px;padding:7px 11px;background:#174d4bc9;color:#efffeb;font-size:12px;letter-spacing:.06em;border-left:3px solid #e5c37e}
+#fishing-view .fish-water-stage.bite .fish-stage-float{animation:fish-bite .25s ease-in-out infinite alternate}
+#fishing-view .fish-water-stage.bite .fish-stage-bob{background:linear-gradient(90deg,#f7f1d7 0 48%,#f0443b 49%)}
+@keyframes fish-bite{from{transform:translateY(-1px) rotate(-5deg)}to{transform:translateY(13px) rotate(5deg)}}
+#fishing-view .fish-water-stage.reeling .fish-stage-ripple{animation-duration:1.1s}
+#fishing-view .fish-water-stage.caught .fish-stage-float{animation:fish-caught .6s ease-in-out infinite alternate}
+@keyframes fish-caught{from{transform:translateY(-4px)}to{transform:translateY(-24px) rotate(10deg)}}
+#fishing-view .fish-catch-spark{position:absolute;z-index:6;left:57%;top:22%;font-size:38px;filter:drop-shadow(0 3px 3px #164d4c88);animation:fish-spark .7s ease-in-out infinite alternate}
+@keyframes fish-spark{from{transform:translateY(0) rotate(-8deg)}to{transform:translateY(-13px) rotate(8deg)}}
+#fishing-view .fish-catch-title{color:#a36d32!important}
+#fishing-view .fish-reel-rail{position:relative;overflow:hidden;margin:12px 0 14px;height:40px;border:2px solid #2c685b;background:linear-gradient(90deg,#193f49,#245b62);border-radius:2px}
+#fishing-view .fish-reel-zone{position:absolute;top:0;bottom:0;background:linear-gradient(180deg,#8af0b6,#39b981);box-shadow:inset 0 0 14px #e5ffdf88}
+#fishing-view .fish-reel-needle{position:absolute;top:-2px;bottom:-2px;width:4px;background:#fff1a6;box-shadow:0 0 12px #fff1a6;z-index:2}
+@media(max-width:600px){#fishing-view .fish-water-stage{height:205px}#fishing-view .fish-stage-dock{width:31%}#fishing-view .fish-stage-caption{font-size:10px;max-width:78%}}
+@media(prefers-reduced-motion:reduce){#fishing-view .fish-stage-ripple,#fishing-view .fish-stage-float,#fishing-view .fish-water-stage.bite .fish-stage-float,#fishing-view .fish-catch-spark{animation:none!important}}
+</style></head>
 <body>
 
 <div id="acg-home" aria-label="ACG CARD HUB 主界面">
@@ -2453,7 +2493,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 
     loadData();
   </script>
-  <script defer src="./fishing.js?v=4"></script>
+  <script defer src="./fishing.js?v=5"></script>
   <script defer src="./auth.js?v=49"></script>
 
 <script>
