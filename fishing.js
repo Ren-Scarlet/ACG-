@@ -57,7 +57,7 @@
     state.shopCards=[];state.shopItems=[];
     if(d.is_admin){
       const [drawRes,itemRes]=await Promise.all([
-        client.from("draw_card_catalog").select("card_id").eq("enabled",true),
+        rpc("fishing_admin_list_shop_cards",{}).then(data=>({data,error:null})).catch(error=>({data:[],error})),
         client.from("item_catalog").select("item_id,name").eq("is_active",true).order("name")
       ]);
       if(!drawRes.error)state.shopCards=(drawRes.data||[]).map(x=>({card_id:x.card_id,card_name:names[x.card_id]||x.card_id}));
