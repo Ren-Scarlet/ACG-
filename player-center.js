@@ -103,6 +103,24 @@
 #player-center-view #pc-badge-choices .pc-badge-choice small{display:block;font-size:10px;color:#55768a;margin-top:2px}
 @media(max-width:520px){#player-center-view .pc-profile-hero{align-items:flex-start;gap:12px;padding:14px}#player-center-view .pc-avatar-frame-slot{flex-basis:76px;width:76px;height:76px}#player-center-view .pc-badge-card{max-width:none;flex-basis:100%}}
 `;
+
+  style.textContent += `
+#player-center-view #pc-badge-choices{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr))!important;align-items:stretch!important;gap:12px!important;width:100%!important;min-width:0!important}
+#player-center-view #pc-badge-choices .pc-badge-choice{box-sizing:border-box!important;display:flex!important;flex-direction:row!important;writing-mode:horizontal-tb!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;width:100%!important;min-width:0!important;min-height:88px!important;height:auto!important;max-height:none!important;padding:12px!important;margin:0!important;overflow:hidden!important;white-space:normal!important;background:linear-gradient(135deg,#f8fdff,#dceff7)!important;border:1px solid #86bfd2!important;box-shadow:3px 3px 0 #b9dce7!important;color:#123d5a!important}
+#player-center-view #pc-badge-choices .pc-badge-choice input{display:block!important;flex:0 0 18px!important;width:18px!important;height:18px!important;margin:0!important;position:static!important}
+#player-center-view #pc-badge-choices .pc-badge-choice .pc-badge-seal{display:grid!important;flex:0 0 46px!important;width:46px!important;height:46px!important}
+#player-center-view #pc-badge-choices .pc-badge-choice>span:last-child{display:block!important;flex:1 1 auto!important;min-width:0!important;writing-mode:horizontal-tb!important;overflow-wrap:anywhere!important}
+#player-center-view #pc-badge-choices .pc-badge-choice strong{display:block!important;font-size:13px!important;line-height:1.4!important;white-space:normal!important}
+#player-center-view #pc-badge-choices .pc-badge-choice small{display:block!important;font-size:11px!important;line-height:1.5!important;white-space:normal!important}
+#player-center-view .pc-avatar-editor{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px;margin:12px 0;background:#f4fbff;border:1px solid #8bbdce}
+#player-center-view .pc-avatar-preview{width:78px;height:78px;flex:0 0 78px;object-fit:cover;border-radius:50%;border:4px solid #d8b85d;box-shadow:0 0 0 2px #287d9f}
+#player-center-view .pc-avatar-editor-copy{flex:1;min-width:180px}
+#player-center-view .pc-avatar-editor-copy strong{display:block;color:#123d5a}
+#player-center-view .pc-avatar-editor-copy small{display:block;color:#55768a;margin:4px 0 9px;line-height:1.5}
+#player-center-view .pc-profile-hero .pc-avatar-core{overflow:hidden}
+#player-center-view .pc-profile-hero .pc-avatar-core img{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:520px){#player-center-view #pc-badge-choices{grid-template-columns:1fr!important}#player-center-view #pc-badge-choices .pc-badge-choice{min-height:76px!important}}
+`;
   document.head.appendChild(style);
 
   const tab = document.createElement("button");
@@ -114,7 +132,7 @@
   view.innerHTML = [
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家中文 ID / 登录昵称</label><input id="pc-public-name" maxlength="40" placeholder="输入玩家中文 ID 或登录昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
-    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="seasons">月度赛季</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">玩家仓库</button><button type="button" data-page="draw">🎴 抽卡</button><button type="button" data-page="dismantle">卡牌分解</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
+    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="seasons">月度赛季</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">玩家仓库</button><button type="button" data-page="draw">🎴 抽卡</button><button type="button" data-page="dismantle">卡牌分解</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>个人资料装扮</h4><div class="pc-avatar-editor"><img id="pc-avatar-preview" class="pc-avatar-preview" alt="玩家头像预览"><div class="pc-avatar-editor-copy"><strong>玩家头像</strong><small>上传 JPG、PNG 或 WebP 图片，最大 2MB。头像会显示在你的公开主页。</small><input id="pc-avatar-file" type="file" accept="image/png,image/jpeg,image/webp"><button id="pc-upload-avatar" type="button">上传并更换头像</button><p id="pc-avatar-status" class="status"></p></div></div><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-badge-options"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
     '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 玩家管理</h3><p class="pc-muted">新玩家先注册账号，再由管理员把账号绑定到现有玩家编号。绑定后会自动导入该编号原有的收藏数据。</p><div class="pc-grid"><div class="field"><label for="pc-bind-number">待分配玩家编号</label><select id="pc-bind-number"></select></div><div class="field"><label for="pc-bind-user">绑定到已注册账号</label><select id="pc-bind-user"></select></div></div><button id="pc-bind-submit" type="button">绑定玩家编号并导入旧收藏</button><p id="pc-bind-status" class="status"></p><p class="pc-muted">下方中文 ID 会公开显示，所有玩家都能看到；请勿填写隐私信息。</p><div id="pc-bind-list" class="pc-muted"></div><h4 style="margin-top:22px">玩家收藏管理</h4><p class="pc-muted">先选择玩家，再按物品类别管理库存。普通卡牌、对战道具和树果可直接调整；尚未接入的类别会明确标记。</p><div class="pc-grid"><div class="field"><label for="pc-inventory-user">选择玩家账号</label><select id="pc-inventory-user"><option value="">请选择玩家</option></select></div><div class="field"><label for="pc-inventory-reason">调整记录备注</label><input id="pc-inventory-reason" maxlength="120" value="管理员库存调整" placeholder="例如：活动奖励"></div></div><div id="pc-inventory-category-tabs" class="pc-tabs" role="group" aria-label="库存类别"><button type="button" data-inventory-category="cards" class="active">普通卡牌</button><button type="button" data-inventory-category="battle">对战道具</button><button type="button" data-inventory-category="berries">树果</button><button type="button" data-inventory-category="important" disabled>重要道具 · 未接入</button><button type="button" data-inventory-category="consumables">消耗品</button></div><div id="pc-inventory-filters" class="pc-search pc-inventory-filters"><div class="field"><label for="pc-inventory-search">关键词搜索</label><input id="pc-inventory-search" placeholder="输入卡牌名称或编号"></div><div class="field"><label for="pc-inventory-pack-filter">卡包</label><select id="pc-inventory-pack-filter"><option value="">全部卡包</option></select></div><div class="field"><label for="pc-inventory-star-filter">星级</label><select id="pc-inventory-star-filter"><option value="">全部星级</option></select></div><div class="field"><label for="pc-inventory-type-filter">卡牌类型</label><select id="pc-inventory-type-filter"><option value="">全部类型</option></select></div><div class="field"><label for="pc-inventory-owned-filter">库存状态</label><select id="pc-inventory-owned-filter"><option value="all">全部卡牌</option><option value="owned">只看已拥有</option><option value="unowned">只看未拥有</option></select></div></div><p id="pc-inventory-status" class="status"></p><div id="pc-inventory-summary" class="pc-muted"></div><div id="pc-inventory-cards" class="pc-inventory-grid"><div class="pc-empty">请先选择玩家。</div></div><h3 style="margin-top:24px">管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><section id="pc-legacy-import" style="margin-top:22px;padding:16px;border:1px solid var(--border-color,#9bb);border-radius:12px;background:var(--surface,#fff)"><h4 style="margin-top:0">历史累计战绩导入</h4><p class="pc-muted">只导入过去累计胜场和败场，不会创建虚假的比赛记录。每行格式：玩家编号、胜场、败场。支持从 Excel 直接复制粘贴。</p><div class="field"><label for="pc-legacy-data">批量数据（每行一名玩家）</label><textarea id="pc-legacy-data" rows="7" style="width:100%;box-sizing:border-box" placeholder="玩家编号&#9;胜场&#9;败场&#10;P001&#9;25&#9;12&#10;P002&#9;18&#9;9"></textarea></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="pc-legacy-preview">检查导入数据</button><button type="button" class="primary" id="pc-legacy-submit" disabled>确认导入历史战绩</button></div><p id="pc-legacy-status" class="status"></p><div id="pc-legacy-preview-list" class="pc-muted"></div><h4 style="margin-top:18px">已导入的历史战绩</h4><div id="pc-legacy-list" class="pc-muted">正在读取……</div></section><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">设置每包价格及每张卡的稀有度概率。每包 5 张；十连为 10 包共 50 张。异画概率独立设置。</p><div id="pc-admin-pool-list" class="pc-muted">正在读取卡池状态……</div><div class="field" style="margin:12px 0"><button id="pc-sync-pack-catalog" type="button">同步所选卡包到抽卡系统</button><p id="pc-sync-pack-status" class="status">新增卡包或卡牌后，先同步一次抽卡目录；之后无需再执行 SQL。</p></div><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="">正在读取卡包……</option></select></div><div class="field"><label for="pc-pool-cover">卡包封面（选择本卡包内任意卡牌）</label><select id="pc-pool-cover"><option value="">正在读取卡牌……</option></select><div id="pc-pool-cover-preview" style="display:flex;align-items:center;gap:12px;margin-top:8px"></div></div><div class="field"><label for="pc-pool-price">单包价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-alt">异画概率（%）</label><input id="pc-pool-alt" type="number" min="0" max="100" step="0.01" value="0.1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="0.01" value="1.2" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="0.01" value="5" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="0.01" value="93.7" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币余额修正</h4><p class="pc-muted">此处用于后台纠错或即时补正。活动奖励、补偿和日常发放请使用「邮件管理」，由玩家自行领取。</p><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-amount">发放数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">发放原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
@@ -223,10 +241,10 @@
     if(!shelf.children.length)shelf.appendChild(node("div","pc-badge-empty","尚未选择主页徽章。解锁成就后，可以在主页展示设置中选择。"));
     host.appendChild(shelf);
   }
-  function renderProfileHero(host,{name,number,title,joined}) {
+  function renderProfileHero(host,{name,number,title,joined,avatarUrl}) {
     const hero=node("section","pc-profile-hero"),avatar=node("div","pc-avatar-frame-slot"),core=node("div","pc-avatar-core");
     const initials=String(name||"A").trim().slice(0,1).toUpperCase()||"A";
-    core.textContent=initials;avatar.appendChild(core);
+    if(avatarUrl){const image=node("img");image.src=avatarUrl;image.alt=(name||"玩家")+"的头像";core.appendChild(image);}else{core.textContent=initials;}avatar.appendChild(core);
     const meta=node("div","pc-profile-meta");
     meta.append(node("div","pc-profile-kicker","ACG CARD HUB · PLAYER PROFILE"),node("h2","pc-profile-name",name||"玩家"));
     meta.appendChild(node("div","pc-profile-sub",(number?number+"　·　":"")+"玩家档案"+(joined?"　·　加入于 "+joined:"")));
@@ -357,7 +375,7 @@
     const result = view.querySelector("#pc-public-result");
     result.replaceChildren(node("p","pc-muted","正在查询……"));
     const publicResponse = await client.from("public_profiles")
-      .select("username,player_number,player_id,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate")
+      .select("username,player_number,player_id,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate,avatar_url")
       .eq("player_id",username).maybeSingle();
     let data=publicResponse?.data??null;
     let error=publicResponse?.error??null;
@@ -370,7 +388,7 @@
     result.replaceChildren();
     if (error) { result.appendChild(node("p","pc-empty","查询失败："+error.message)); return; }
     if (!data) { result.appendChild(node("p","pc-empty","没有找到这个玩家。请确认中文 ID 或登录昵称是否正确。")); return; }
-    renderProfileHero(result,{name:data.player_id||data.username,number:data.player_number,title:data.selected_title||"",joined:new Date(data.created_at).toLocaleDateString("zh-CN")});
+    renderProfileHero(result,{name:data.player_id||data.username,number:data.player_number,title:data.selected_title||"",joined:new Date(data.created_at).toLocaleDateString("zh-CN"),avatarUrl:data.avatar_url||""});
     const {data:achievementRows,error:achievementError}=await client.from("achievements").select("id,name,description");
     if(achievementError)throw achievementError;
     renderBadgeShelf(result,Array.isArray(data.selected_badges)?data.selected_badges:[],achievementRows||[]);
@@ -394,7 +412,7 @@
 
   async function loadOverview() {
     const [{data:profile,error:pe},{data:stats,error:se}]=await Promise.all([
-      client.from("profiles").select("username,created_at,selected_title,selected_badges,player_number").eq("id",currentUser.id).maybeSingle(),
+      client.from("profiles").select("username,created_at,selected_title,selected_badges,player_number,avatar_url").eq("id",currentUser.id).maybeSingle(),
       client.from("player_stats").select("tokens,games_played,wins,losses").eq("user_id",currentUser.id).maybeSingle()
     ]);
     if(pe) throw pe; if(se) throw se;
@@ -405,7 +423,7 @@
     if(publicIdResponse?.error)throw publicIdResponse.error;
     const publicIdData=publicIdResponse?.data??null;
     contentEl.replaceChildren();
-    renderProfileHero(contentEl,{name:publicIdData?.player_id||profile?.username||"玩家",number:profile?.player_number||"",title:titleName==="尚未设置称号"?"":titleName,joined:profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):""});
+    renderProfileHero(contentEl,{name:publicIdData?.player_id||profile?.username||"玩家",number:profile?.player_number||"",title:titleName==="尚未设置称号"?"":titleName,joined:profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):"",avatarUrl:profile?.avatar_url||""});
     const badgeIds=Array.isArray(profile?.selected_badges)?profile.selected_badges:[];
     const {data:achievementRows,error:achievementError}=await client.from("achievements").select("id,name,description");
     if(achievementError)throw achievementError;
@@ -688,6 +706,7 @@
     const titleSelect=view.querySelector("#pc-title-choice");
     const badgeWrap=view.querySelector("#pc-badge-choices");
     const status=view.querySelector("#pc-display-status");
+    await loadAvatarPreview();
     const [{data:profile,error:pe},{data:unlocked,error:ue},{data:achievements,error:ae}]=await Promise.all([
       client.from("profiles").select("selected_title,selected_badges").eq("id",currentUser.id).maybeSingle(),
       client.from("player_achievements").select("achievement_id").eq("user_id",currentUser.id),
@@ -717,6 +736,39 @@
     if(!available.length)badgeWrap.appendChild(node("p","pc-muted","解锁成就后，就可以选择主页徽章。"));
     status.textContent="";
   }
+
+  const avatarFileInput=view.querySelector("#pc-avatar-file");
+  const avatarPreview=view.querySelector("#pc-avatar-preview");
+  const avatarStatus=view.querySelector("#pc-avatar-status");
+  const avatarButton=view.querySelector("#pc-upload-avatar");
+  let currentAvatarUrl="";
+  async function loadAvatarPreview(){
+    const {data,error}=await client.from("profiles").select("avatar_url").eq("id",currentUser.id).maybeSingle();
+    if(error)throw error;
+    currentAvatarUrl=data?.avatar_url||"";
+    avatarPreview.src=currentAvatarUrl||"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="#173f60"/><text x="50" y="64" text-anchor="middle" font-size="48" fill="#fff">+</text></svg>');
+  }
+  avatarButton.addEventListener("click",async()=>{
+    const file=avatarFileInput.files?.[0];
+    if(!file){avatarStatus.textContent="请先选择一张头像图片。";avatarStatus.className="status bad";return;}
+    if(!["image/jpeg","image/png","image/webp"].includes(file.type)){avatarStatus.textContent="只支持 JPG、PNG 或 WebP 图片。";avatarStatus.className="status bad";return;}
+    if(file.size>2*1024*1024){avatarStatus.textContent="图片不能超过 2MB。";avatarStatus.className="status bad";return;}
+    avatarButton.disabled=true;avatarStatus.textContent="正在上传头像……";avatarStatus.className="status";
+    try{
+      const extension=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+      const path=currentUser.id+"/avatar."+extension;
+      const {error:uploadError}=await client.storage.from("player-avatars").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"3600"});
+      if(uploadError)throw uploadError;
+      const {data:publicData}=client.storage.from("player-avatars").getPublicUrl(path);
+      const avatarUrl=publicData.publicUrl+(publicData.publicUrl.includes("?")?"&":"?")+"v="+Date.now();
+      const {error:updateError}=await client.from("profiles").update({avatar_url:avatarUrl}).eq("id",currentUser.id);
+      if(updateError)throw updateError;
+      currentAvatarUrl=avatarUrl;avatarPreview.src=avatarUrl;
+      avatarStatus.textContent="头像已更新。";avatarStatus.className="status good";
+      await loadPage("overview");
+    }catch(error){avatarStatus.textContent="头像上传失败："+error.message;avatarStatus.className="status bad";}
+    finally{avatarButton.disabled=false;}
+  });
   view.querySelector("#pc-save-display").addEventListener("click",async()=>{
     const status=view.querySelector("#pc-display-status");
     const button=view.querySelector("#pc-save-display");
