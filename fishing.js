@@ -162,7 +162,7 @@
       const hit=el("button","primary","收线");hit.type="button";box.append(hit);
       const duration=Number(result.reel_duration_ms)||3000;
       // 补偿提竿 RPC 的往返延迟，使画面指针尽量对齐服务器收到收线请求时的位置。
-      const start=performance.now()-((Number(result.reel_elapsed_ms)||0)+hookRoundTripMs);
+      const start=performance.now()-((Number(result.reel_elapsed_ms)||0)+hookRoundTripMs/2);
       const animate=now=>{
         if(state.phase!=="reeling")return;
         const phase=(((now-start)%duration)+duration)%duration/duration;
