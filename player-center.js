@@ -316,12 +316,36 @@
       return;
     }
     view.classList.remove("hidden");
-    if (currentUser) loadPage(page);
-    else {
-      contentEl.replaceChildren(node("div","pc-empty","请先登录账号，再使用抽卡和个人资料功能。"));
-      pcLayout.classList.remove("hidden");
-      personalEl.classList.remove("hidden");
-    }
+    // Re-check Supabase directly when opening the center. The account panel and
+    // player center can initialize at slightly different times during session restore.
+    contentEl.replaceChildren(node("div","pc-empty","正在确认登录状态……"));
+    pcLayout.classList.remove("hidden");
+    personalEl.classList.remove("hidden");
+    (async()=>{
+      try{
+        await withTimeout(initialSessionReady,12000,"登录状态读取超时，请刷新页面后重试。");
+        const result=await withTimeout(client.auth.getSession(),12000,"无法读取登录状态，请检查网络后重试。");
+        if(result.error)throw result.error;
+        if(currentPage!==page)return;
+        const session=result.data?.session||null;
+        if(session?.user){
+          if(currentUser?.id!==session.user.id)await onSession(session,"PLAYER_CENTER_SESSION_CHECK");
+          else currentUser=session.user;
+        }else{
+          currentUser=null;
+        }
+        if(currentPage!==page)return;
+        if(currentUser)await loadPage(page);
+        else{
+          contentEl.replaceChildren(node("div","pc-empty","请先登录账号，再使用抽卡和个人资料功能。"));
+          setStatus("尚未检测到有效登录状态，请先在账号页面确认登录。",false);
+        }
+      }catch(error){
+        if(currentPage!==page)return;
+        contentEl.replaceChildren(node("div","pc-empty","登录状态确认失败："+error.message));
+        setStatus("无法确认登录状态，请稍后重试。",true);
+      }
+    })();
   }
   tab.addEventListener("click",()=>showCenter("overview"));
   // Direct entry from the homepage avoids showing the overview before the requested page.
