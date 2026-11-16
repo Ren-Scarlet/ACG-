@@ -168,12 +168,12 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   delete from public.match_results where match_id=old.id;
   return old;
 end;
-$;
+$$;
 
 drop trigger if exists matches_season_results_before_delete on public.matches;
 create trigger matches_season_results_before_delete
