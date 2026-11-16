@@ -44,7 +44,7 @@
     try{const [c,p]=await Promise.all([fetch("./data/cards.json",{cache:"no-store"}),fetch("./data/packs.json",{cache:"no-store"})]);if(c.ok)cardsById=Object.fromEntries((await c.json()).map(x=>[x.id,x]));if(p.ok)packs=await p.json();}catch(_){}
   }
   async function loadItems(){const {data,error}=await client.from("item_catalog").select("item_id,name,icon,description,category,effect_type,effect_config,is_active,created_at").order("created_at",{ascending:false});if(error)throw error;items=data||[];return items;}
-  async function loadPlayers(){const {data,error}=await client.rpc("admin_list_mail_recipients");if(error)throw error;players=data||[];}
+  async function loadPlayers(){let timer;try{const result=await Promise.race([client.rpc("admin_list_mail_recipients"),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("读取玩家名单超时（15秒）。请检查数据库函数是否已执行，以及 Supabase 网络连接。")),15000);})]);if(result.error)throw result.error;players=result.data||[];return players;}finally{clearTimeout(timer);}}
 
   const playerTabs=$(".pc-sidebar .pc-tabs")||$(".pc-tabs");
   function activate(tab){view.querySelectorAll(".pc-sidebar .pc-tabs [data-page],.pc-tabs [data-page]").forEach(x=>x.classList.toggle("active",x===tab));}
@@ -244,7 +244,7 @@
   }
   async function refreshAdmin(){
     if(!admin)return;
-    try{await Promise.all([loadStatic(),loadItems()]);const ip=admin.querySelector('[data-admin-category="items"]'),mp=admin.querySelector('[data-admin-category="mail"]');if(ip?._refresh)await ip._refresh();if(mp?._refresh)await mp._refresh();}catch(error){const mp=admin.querySelector('[data-admin-category="mail"]');const recipient=mp?.querySelector('select[multiple]');if(recipient&&!recipient.options.length)recipient.add(new Option("读取玩家失败："+(error?.message||String(error)),""));}
+    try{await Promise.all([loadStatic(),loadItems()]);const ip=admin.querySelector('[data-admin-category="items"]'),mp=admin.querySelector('[data-admin-category="mail"]');const results=await Promise.allSettled([ip?._refresh?.(),mp?._refresh?.()]);const mailResult=results[1];if(mailResult?.status==="rejected"){const recipient=mp?.querySelector('select[multiple]');if(recipient)recipient.replaceChildren(new Option("读取玩家失败："+(mailResult.reason?.message||String(mailResult.reason)),""));}}catch(error){const mp=admin.querySelector('[data-admin-category="mail"]');const recipient=mp?.querySelector('select[multiple]');if(recipient)recipient.replaceChildren(new Option("邮件管理初始化失败："+(error?.message||String(error)),""));}
   }
   client.auth.onAuthStateChange((_event,session)=>{if(session?.user)setTimeout(()=>{void refreshAdmin();},0);});
   void refreshAdmin();void loadStatic();void loadItems().catch(()=>{});
