@@ -59,6 +59,7 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   window.acgSupabaseClient = client;
+  window.dispatchEvent(new Event("acg-supabase-ready"));
 
   function showStatus(message, kind) {
     statusEl.textContent = message;
