@@ -32,6 +32,24 @@ begin
 end;
 $$;
 
+create or replace function public.fishing_admin_list_shop_cards()
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if auth.uid() is null or not public.is_admin() then
+    raise exception '只有管理员可以读取卡牌奖励目录';
+  end if;
+  return coalesce((
+    select jsonb_agg(jsonb_build_object('card_id',card_id) order by card_id)
+    from public.draw_card_catalog
+    where enabled=true
+  ),'[]'::jsonb);
+end;
+$;
+
 create or replace function public.fishing_admin_save_shop_product(
   p_product_id text,
   p_product_name text,
@@ -333,6 +351,8 @@ begin
 end;
 $$;
 
+revoke all on function public.fishing_admin_list_shop_cards() from public,anon,authenticated;
+grant execute on function public.fishing_admin_list_shop_cards() to authenticated;
 revoke all on function public.fishing_admin_list_shop() from public,anon,authenticated;
 grant execute on function public.fishing_admin_list_shop() to authenticated;
 revoke all on function public.fishing_admin_save_shop_product(text,text,text,text,bigint,text,jsonb,integer,integer,boolean,integer) from public,anon,authenticated;
