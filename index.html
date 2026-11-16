@@ -495,6 +495,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     <button data-target="draw" data-en="PACK GACHA" data-title="PACK GACHA / 卡包抽卡" data-desc="进入卡包抽卡大厅，收集全新卡牌。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">PACK GACHA</span><span class="cn">卡包抽卡 / 收集全新卡牌</span></span></button>
     <button data-target="room" data-en="MY ROOM" data-title="MY ROOM / 玩家中心" data-desc="查看玩家资料、收藏、代币、抽卡与成就。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">MY ROOM</span><span class="cn">玩家中心 / 个人资料与收藏</span></span></button>
     <button data-target="system" data-en="SYSTEM" data-title="SYSTEM / 系统管理" data-desc="进入账号与系统管理功能。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">SYSTEM</span><span class="cn">系统管理 / 账号与管理</span></span></button>
+    <button data-target="fishing" data-en="FISHING" data-title="FISHING GROUNDS / 钓场" data-desc="制作鱼饵、抛竿收线，收集鱼类并兑换钓场奖励。"><i class="menu-marker"></i><span class="menu-copy"><span class="en">FISHING</span><span class="cn">钓场 / 垂钓与鱼类收集</span></span></button>
    </nav>
    <div class="home-player">PLAYER ONLINE<br>ACG CARD HUB</div>
    <div class="home-current" id="acg-home-current">HOME<small>↑↓ 选择菜单<br>ENTER 前往选项</small></div>
@@ -555,7 +556,35 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       <button id="tab-builder" type="button">卡组构筑</button>
       <button id="tab-admin" type="button">卡牌资料管理</button>
       <button id="tab-account" type="button">玩家账号</button>
+      <button id="tab-fishing" type="button">钓场</button>
     </nav>
+
+    <section id="fishing-view" class="hidden">
+      <div class="panel">
+        <h3>钓场 FISHING GROUNDS</h3>
+        <p class="hint">抛竿、提竿、收线。钓鱼积分独立于代币，只用于钓场商店。</p>
+        <div class="fish-stat-grid">
+          <div class="fish-stat"><small>钓鱼积分</small><strong id="fish-points">0</strong></div>
+          <div class="fish-stat"><small>累计钓获</small><strong id="fish-catches">0</strong></div>
+          <div class="fish-stat"><small>鱼类图鉴</small><strong id="fish-species">0/10</strong></div>
+        </div>
+        <div class="fish-tabs">
+          <button type="button" data-fishing-page="overview" class="active">钓场</button>
+          <button type="button" data-fishing-page="craft">鱼饵工坊</button>
+          <button type="button" data-fishing-page="book">鱼类图鉴</button>
+          <button type="button" data-fishing-page="achievements">钓鱼成就</button>
+          <button type="button" data-fishing-page="shop">钓场商店</button>
+          <button type="button" data-fishing-page="leaderboard">排行榜</button>
+        </div>
+        <p id="fish-status" class="status">正在连接钓场……</p>
+      </div>
+      <section id="fish-page-overview" class="fish-page"><div id="fish-overview"></div><div id="fish-action" class="panel hidden"></div></section>
+      <section id="fish-page-craft" class="fish-page hidden"><div id="fish-craft"></div></section>
+      <section id="fish-page-book" class="fish-page hidden"><div id="fish-book"></div></section>
+      <section id="fish-page-achievements" class="fish-page hidden"><div id="fish-achievements"></div></section>
+      <section id="fish-page-shop" class="fish-page hidden"><div id="fish-shop"></div></section>
+      <section id="fish-page-leaderboard" class="fish-page hidden"><div id="fish-leaderboard"></div></section>
+    </section>
 
     <section id="account-view" class="hidden">
       <div class="panel">
@@ -2003,14 +2032,15 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       }
     }
     function showMainView(viewId, tabId, title) {
-      ["library-view","builder-view","admin-view","account-view","shared-deck-view","player-center-view"].forEach(id => document.getElementById(id)?.classList.toggle("hidden", id !== viewId));
-      ["tab-library","tab-builder","tab-admin","tab-account","tab-player-center"].forEach(id => document.getElementById(id)?.classList.toggle("active", id === tabId));
+      ["library-view","builder-view","admin-view","account-view","fishing-view","shared-deck-view","player-center-view"].forEach(id => document.getElementById(id)?.classList.toggle("hidden", id !== viewId));
+      ["tab-library","tab-builder","tab-admin","tab-account","tab-fishing","tab-player-center"].forEach(id => document.getElementById(id)?.classList.toggle("active", id === tabId));
       packName.textContent = title;
     }
     document.getElementById("tab-library").addEventListener("click", () => showMainView("library-view","tab-library","概念礼装图鉴"));
     document.getElementById("tab-builder").addEventListener("click", () => showMainView("builder-view","tab-builder","卡组构筑"));
     document.getElementById("tab-admin").addEventListener("click", () => showMainView("admin-view","tab-admin","卡牌资料管理"));
     document.getElementById("tab-account").addEventListener("click", () => showMainView("account-view","tab-account","玩家账号"));
+    document.getElementById("tab-fishing").addEventListener("click", () => showMainView("fishing-view","tab-fishing","钓场"));
     document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
     function resetBuilderPages(){builderPages.relic=builderPages.special=builderPages.battleItem=1;}
     function applyBuilderFilter(){resetBuilderPages();renderBuilder();}
@@ -2252,6 +2282,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       if(target==="library")document.getElementById("tab-library").click();
       else if(target==="builder")document.getElementById("tab-builder").click();
       else if(target==="system")document.getElementById("tab-account").click();
+      else if(target==="fishing")document.getElementById("tab-fishing").click();
       else{
         const pcTab=document.getElementById("tab-player-center");
         if(target==="draw"){
