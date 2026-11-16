@@ -1,11 +1,48 @@
-(() => {
+(async () => {
   "use strict";
 
   const SUPABASE_URL = "https://lbyobelugnlrkwwmnske.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_tC_VrNT8t2KkWyfIhVJUkA_kwzygUoK";
-  const { createClient } = window.supabase || {};
-
   const statusEl = document.getElementById("account-status");
+
+  async function ensureSupabaseSdk() {
+    if (window.supabase?.createClient) return window.supabase;
+    const sources = [
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2",
+      "https://unpkg.com/@supabase/supabase-js@2"
+    ];
+    let lastError = null;
+    for (const src of sources) {
+      try {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.async = true;
+          script.onload = () => window.supabase?.createClient
+            ? resolve()
+            : reject(new Error("Supabase SDK 加载后未提供 createClient"));
+          script.onerror = () => reject(new Error("无法加载 " + src));
+          document.head.appendChild(script);
+        });
+        if (window.supabase?.createClient) return window.supabase;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError || new Error("Supabase SDK 不可用");
+  }
+
+  try {
+    await ensureSupabaseSdk();
+  } catch (error) {
+    if (statusEl) {
+      statusEl.textContent = "账号模块加载失败：无法连接账号服务组件。请检查网络后重试（" + (error?.message || String(error)) + "）。";
+      statusEl.className = "status bad";
+    }
+    return;
+  }
+
+  const { createClient } = window.supabase || {};
   const formsEl = document.getElementById("account-forms");
   const profileEl = document.getElementById("account-profile");
   const signupForm = document.getElementById("account-signup-form");
