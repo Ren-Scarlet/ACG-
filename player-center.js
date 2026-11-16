@@ -482,8 +482,66 @@
     }catch(error){setStatus("树果卷使用失败："+error.message,true);}
     finally{consumableUseBusy=false;}
   }
+
+  async function useSelectCardTicket(item,button){
+    if(button.disabled)return;
+    const rarity=Number(item.effect_config?.rarity);
+    if(![4,5].includes(rarity)){setStatus("自选卷星级配置无效，请联系管理员。",true);return;}
+    button.disabled=true;setStatus("正在读取可选卡牌……",false);
+    let overlay=null;
+    try{
+      const {data,error}=await client.rpc("player_list_selectable_ticket_cards",{p_rarity:rarity});
+      if(error)throw error;
+      const eligible=(data||[]).map(row=>cardsById[row.card_id]||{id:row.card_id,name:row.card_id,star:row.rarity}).filter(card=>Number(card.star||rarity)===rarity);
+      if(!eligible.length)throw new Error("目前没有已开放的"+rarity+"星卡牌，请管理员先同步卡包卡牌目录。");
+      overlay=node("div","");overlay.style.cssText="position:fixed;inset:0;z-index:100000;background:rgba(8,25,40,.78);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;";
+      const dialog=node("section","pc-stat");dialog.style.cssText="width:min(100%,980px);max-height:min(88vh,900px);overflow:auto;background:#f4fbff;border:1px solid #75b6cc;border-radius:12px;padding:20px;box-sizing:border-box;";
+      const heading=node("div","pc-row");heading.style.alignItems="center";heading.append(node("h3","",rarity===4?"SR 自选卷":"SSR 自选卷"),node("button","","取消"));const close=heading.lastChild;close.type="button";
+      const note=node("p","pc-muted","请选择一张"+rarity+"星卡牌。确认后将消耗一张自选卷，并把卡牌加入你的收藏。");
+      const search=node("input");search.type="search";search.placeholder="搜索卡牌名称或编号";search.style.cssText="width:100%;box-sizing:border-box;margin:10px 0;padding:10px;border:1px solid #9bbdcb;border-radius:6px;";
+      const count=node("p","pc-muted","可选卡牌："+eligible.length+" 张");
+      const grid=node("div","");grid.style.cssText="display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px;";
+      const footer=node("div","pc-row");footer.style.cssText="position:sticky;bottom:-20px;background:#f4fbff;padding:14px 0 0;margin-top:14px;border-top:1px solid #c5dce5;";
+      const selectedText=node("span","pc-muted","尚未选择卡牌"),confirm=node("button","primary","确认选择并使用");confirm.type="button";confirm.disabled=true;footer.append(selectedText,confirm);
+      dialog.append(heading,note,search,count,grid,footer);overlay.appendChild(dialog);document.body.appendChild(overlay);
+      let selected=null;
+      const closeDialog=()=>{overlay?.remove();overlay=null;button.disabled=false;};
+      close.addEventListener("click",closeDialog);
+      overlay.addEventListener("click",event=>{if(event.target===overlay)closeDialog();});
+      const render=()=>{
+        const q=search.value.trim().toLowerCase();grid.replaceChildren();
+        const rows=eligible.filter(card=>String(card.name||"").toLowerCase().includes(q)||String(card.id||"").toLowerCase().includes(q));
+        count.textContent="显示 "+rows.length+" / "+eligible.length+" 张卡牌";
+        rows.forEach(card=>{
+          const tile=node("button","");tile.type="button";tile.style.cssText="display:flex;flex-direction:column;gap:6px;text-align:left;padding:8px;border:2px solid "+(selected?.id===card.id?"#1599bb":"#c4dce5")+";border-radius:8px;background:#fff;cursor:pointer;min-width:0;";
+          if(card.image){const img=node("img");img.src=card.image;img.alt=card.name||card.id;img.loading="lazy";img.style.cssText="width:100%;aspect-ratio:3/4;object-fit:contain;background:#e9f2f6;border-radius:4px;";img.onerror=()=>{img.style.display="none";};tile.appendChild(img);}
+          tile.append(node("strong","",card.name||card.id),node("small","pc-muted",rarity+" 星 · "+(card.type||"卡牌")+" · "+card.id));
+          tile.addEventListener("click",()=>{selected=card;selectedText.textContent="已选择："+(card.name||card.id);confirm.disabled=false;render();});
+          grid.appendChild(tile);
+        });
+        if(!rows.length)grid.appendChild(node("p","pc-empty","没有找到符合条件的卡牌。"));
+      };
+      search.addEventListener("input",render);render();
+      confirm.addEventListener("click",async()=>{
+        if(!selected||confirm.disabled)return;
+        confirm.disabled=true;close.disabled=true;confirm.textContent="正在确认……";
+        const key="acg-select-ticket:"+currentUser.id+":"+item.item_id;
+        let requestId;try{requestId=localStorage.getItem(key);if(!requestId){requestId=crypto.randomUUID();localStorage.setItem(key,requestId);}}catch(_){requestId=crypto.randomUUID();}
+        try{
+          const {data:result,error:useError}=await client.rpc("player_use_select_card_ticket",{p_item_id:item.item_id,p_card_id:selected.id,p_request_id:requestId});
+          if(useError)throw useError;
+          try{localStorage.removeItem(key);}catch(_){}
+          overlay.remove();overlay=null;
+          setStatus("自选成功！「"+(selected.name||selected.id)+"」已加入你的卡牌收藏。",false);
+          try{await loadPage("inventory");}catch(refreshError){setStatus("卡牌已成功加入收藏，但仓库刷新失败；重新打开仓库即可看到。",true);}
+        }catch(error){confirm.disabled=false;close.disabled=false;confirm.textContent="确认选择并使用";setStatus("使用自选卷失败："+error.message,true);}
+      });
+    }catch(error){overlay?.remove();setStatus("无法打开自选卡牌界面："+error.message,true);button.disabled=false;}
+  }
+
   async function useWarehouseItem(item,button,choiceIndex=null){
     if(button.disabled)return;
+    if(item.effect_type==="select_card"){await useSelectCardTicket(item,button);return;}
     if(item.effect_type==="choose_reward"&&choiceIndex===null){
       const options=item.effect_config?.options||[];
       const menu=options.map((option,index)=>(index+1)+". "+(option.label||((option.reward_type==="tokens"?"代币":option.reward_type==="card"?"卡牌":"道具")+" ×"+option.amount))).join("\\n");
