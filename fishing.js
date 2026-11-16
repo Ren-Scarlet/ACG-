@@ -64,6 +64,28 @@
     $("fish-catches").textContent=Number(s.total_catches||0).toLocaleString("zh-CN");
     $("fish-species").textContent=Number(s.distinct_fish||0)+"/10";
   }
+  function createWaterScene(mode="waiting"){
+    const scene=el("div","fish-water-stage "+mode);
+    scene.setAttribute("aria-label","湖面钓鱼场景");
+    const sky=el("div","fish-stage-sky");
+    const sun=el("div","fish-stage-sun");
+    const hills=el("div","fish-stage-hills");
+    const far=el("div","fish-stage-hill far"),near=el("div","fish-stage-hill near");
+    hills.append(far,near);
+    const shore=el("div","fish-stage-shore");
+    const water=el("div","fish-stage-water");
+    for(let i=0;i<4;i++)water.append(el("i","fish-stage-ripple ripple-"+i));
+    const line=el("div","fish-stage-line");
+    const float=el("div","fish-stage-float");
+    const bob=el("span","fish-stage-bob");
+    const floatTop=el("span","fish-stage-float-top");
+    float.append(floatTop,bob);
+    const dock=el("div","fish-stage-dock");
+    for(let i=0;i<6;i++)dock.append(el("i",""));
+    const caption=el("div","fish-stage-caption",mode==="reeling"?"湖面泛起阵阵涟漪……":"鱼漂轻轻浮在水面上");
+    scene.append(sky,sun,hills,shore,water,line,float,dock,caption);
+    return scene;
+  }
   function renderOverview(){
     const host=$("fish-overview");host.replaceChildren();
     const intro=panel("钓场","带上鱼饵，等待鱼咬钩。鱼种与尺寸由服务器在抛竿时决定，操作只影响是否成功收获。");
@@ -126,13 +148,19 @@
       const result=await rpc("fishing_start_cast",{p_bait_id:baitId,p_request_id:uuid()});
       state.currentSession=result.session_id;
       const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
-      box.append(el("h3","","鱼线已经抛出"),el("p","hint","耐心等待鱼咬钩……"));
+      const scene=createWaterScene("waiting");
+      box.append(el("h3","","鱼线已经抛出"),el("p","hint","湖面很平静……留意水面上的鱼漂。"),scene);
       const wait=Math.max(1000,Math.min(10000,Number(result.bite_after_ms)||3000));
       window.setTimeout(()=>{
         if(state.phase!=="waiting")return;
-        box.replaceChildren(el("h3","","！鱼咬钩了！"),el("p","hint","看到提示后立刻提竿。"));
+        scene.classList.remove("waiting");scene.classList.add("bite");
+        const caption=scene.querySelector(".fish-stage-caption");
+        if(caption)caption.textContent="咬钩了！鱼漂沉下去了！";
+        const title=el("h3","","！鱼咬钩了！");
+        const hint=el("p","hint","鱼漂下沉，抓紧时机提竿！");
         const btn=el("button","primary","提竿！");btn.type="button";
-        btn.addEventListener("click",beginReel);box.append(btn);
+        btn.addEventListener("click",beginReel);
+        box.replaceChildren(title,hint,scene,btn);
       },wait);
       status("抛竿成功，已消耗 1 个鱼饵。");
       await loadDashboard();
@@ -155,10 +183,11 @@
         box.append(again);await loadDashboard();renderOverview();return;
       }
       state.phase="reeling";
+      const scene=createWaterScene("reeling");
       const rail=el("div","fish-reel-rail"),zone=el("div","fish-reel-zone"),needle=el("div","fish-reel-needle");
       const zoneStart=Number(result.zone_start_pct??15),zoneWidth=Number(result.zone_width_pct??70);
       zone.style.left=zoneStart+"%";zone.style.width=zoneWidth+"%";rail.append(zone,needle);
-      box.replaceChildren(el("h3","","收线！"),el("p","hint","服务器正在计时：指针进入绿色区域时点击收线。"),rail);
+      box.replaceChildren(el("h3","","鱼上钩了，开始收线！"),el("p","hint","盯住指针，在绿色区域内点击收线。"),scene,rail);
       const hit=el("button","primary","收线");hit.type="button";box.append(hit);
       const duration=Number(result.reel_duration_ms)||3000;
       // 补偿提竿 RPC 的往返延迟，使画面指针尽量对齐服务器收到收线请求时的位置。
@@ -187,7 +216,11 @@
       const result=await rpc("fishing_finish_reel",{p_session_id:state.currentSession});
       if(result.status==="caught"){
         const label=result.size_label||"尺寸待定";
-        $("fish-action").replaceChildren(el("h3","","🎣 "+result.fish_name),el("p","",label+" · 获得 "+result.points_awarded+" 钓鱼积分"),el("p","hint","服务器判定操作评分："+result.action_score+"。鱼种与积分由服务器决定。"));
+        const caughtScene=createWaterScene("caught");
+        const catchMark=el("div","fish-catch-spark","🎣");
+        caughtScene.append(catchMark);
+        const catchTitle=el("h3","fish-catch-title","🎉 成功钓获："+result.fish_name);
+        $("fish-action").replaceChildren(caughtScene,catchTitle,el("p","",label+" · 获得 "+result.points_awarded+" 钓鱼积分"),el("p","hint","鱼获已登记到图鉴，积分已入账。"));
         status("成功钓获 "+result.fish_name+"！");
       }else{
         $("fish-action").replaceChildren(el("h3","","鱼逃走了"),el("p","hint","收线时机不合适，这次没有收获，鱼饵不会返还。"));
