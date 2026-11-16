@@ -408,3 +408,191 @@ grant execute on function public.fishing_get_leaderboard(integer) to authenticat
 
 -- The following are intentionally not seeded until fish-size bounds, fish-pool
 -- weights and reward products have been finalized. Their tables are ready for them.
+
+
+-- Server-authoritative fishing sessions. One bait is consumed when a cast starts.
+create table if not exists public.fishing_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  request_id uuid not null,
+  bait_id text not null references public.fishing_bait_catalog(bait_id),
+  fish_id text not null references public.fishing_fish_catalog(fish_id),
+  size_tier text not null check (size_tier in ('small','medium','large')),
+  size_cm numeric(7,2),
+  points_awarded integer not null,
+  status text not null default 'waiting' check (status in ('waiting','caught','escaped')),
+  bite_after_ms integer not null,
+  created_at timestamptz not null default now(),
+  resolved_at timestamptz,
+  unique(user_id,request_id)
+);
+alter table public.fishing_sessions enable row level security;
+revoke all on public.fishing_sessions from public,anon,authenticated;
+create index if not exists fishing_sessions_user_created_idx on public.fishing_sessions(user_id,created_at desc);
+
+create or replace function public.fishing_start_cast(p_bait_id text,p_request_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user uuid := auth.uid();
+  v_existing public.fishing_sessions%rowtype;
+  v_bait public.fishing_bait_catalog%rowtype;
+  v_fish public.fishing_fish_catalog%rowtype;
+  v_tier text;
+  v_size numeric(7,2);
+  v_roll numeric;
+  v_bait_qty integer;
+  v_session public.fishing_sessions%rowtype;
+begin
+  if v_user is null then raise exception '请先登录'; end if;
+  if p_request_id is null then raise exception '抛竿请求编号缺失'; end if;
+
+  perform 1 from public.player_stats where user_id=v_user for update;
+  if not found then raise exception '玩家资料尚未初始化'; end if;
+
+  select * into v_existing from public.fishing_sessions
+  where user_id=v_user and request_id=p_request_id;
+  if found then
+    if v_existing.bait_id<>p_bait_id then raise exception '请求编号已用于其他鱼饵'; end if;
+    return jsonb_build_object('session_id',v_existing.id,'status',v_existing.status,
+      'bite_after_ms',v_existing.bite_after_ms,'duplicate_request',true);
+  end if;
+
+  select * into v_bait from public.fishing_bait_catalog
+  where bait_id=p_bait_id and is_active=true;
+  if not found then raise exception '鱼饵不存在或已停用'; end if;
+
+  select quantity into v_bait_qty from public.player_fishing_bait
+  where user_id=v_user and bait_id=p_bait_id for update;
+  if not found or v_bait_qty<1 then raise exception '鱼饵数量不足'; end if;
+
+  -- Select fish only from the pool attached to the selected bait.
+  select * into v_fish from public.fishing_fish_catalog
+  where bait_id=p_bait_id and is_active=true
+  order by random()*appearance_weight desc limit 1;
+  if not found then raise exception '该鱼饵暂时没有可钓鱼种'; end if;
+
+  v_roll:=random()*100;
+  v_tier:=case when v_roll<70 then 'small' when v_roll<95 then 'medium' else 'large' end;
+  if v_tier='small' then
+    v_size:=null;
+  elsif v_tier='medium' then
+    if v_fish.fish_id='ichigaya_fish_king_king' then
+      v_size:=round((170+random()*2)::numeric,2);
+    else
+      v_size:=v_fish.medium_cm;
+    end if;
+  else
+    v_size:=null;
+  end if;
+
+  if v_bait_qty=1 then
+    delete from public.player_fishing_bait where user_id=v_user and bait_id=p_bait_id;
+  else
+    update public.player_fishing_bait set quantity=quantity-1,updated_at=now()
+    where user_id=v_user and bait_id=p_bait_id;
+  end if;
+
+  insert into public.fishing_sessions(user_id,request_id,bait_id,fish_id,size_tier,size_cm,
+    points_awarded,bite_after_ms)
+  values(v_user,p_request_id,p_bait_id,v_fish.fish_id,v_tier,v_size,
+    case v_tier when 'small' then v_fish.small_points when 'medium' then v_fish.medium_points else v_fish.large_points end,
+    1800+floor(random()*4200)::integer)
+  returning * into v_session;
+
+  return jsonb_build_object('session_id',v_session.id,'status',v_session.status,
+    'bite_after_ms',v_session.bite_after_ms,'duplicate_request',false);
+end;
+$$;
+
+create or replace function public.fishing_resolve_cast(p_session_id uuid,p_caught boolean,p_action_score integer default 0)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_user uuid:=auth.uid();
+  v_session public.fishing_sessions%rowtype;
+  v_fish public.fishing_fish_catalog%rowtype;
+  v_stats public.player_fishing_stats%rowtype;
+  v_distinct integer;
+begin
+  if v_user is null then raise exception '请先登录'; end if;
+  if p_session_id is null or p_caught is null then raise exception '收线结果不完整'; end if;
+  if p_action_score is null or p_action_score not between 0 and 100 then raise exception '操作评分无效'; end if;
+
+  select * into v_session from public.fishing_sessions
+  where id=p_session_id and user_id=v_user for update;
+  if not found then raise exception '找不到这次钓鱼记录'; end if;
+  if v_session.status<>'waiting' then
+    return jsonb_build_object('status',v_session.status,'duplicate_request',true);
+  end if;
+
+  if not p_caught then
+    update public.fishing_sessions set status='escaped',resolved_at=now() where id=p_session_id;
+    return jsonb_build_object('status','escaped','duplicate_request',false);
+  end if;
+
+  select * into v_fish from public.fishing_fish_catalog where fish_id=v_session.fish_id;
+  update public.fishing_sessions set status='caught',resolved_at=now() where id=p_session_id;
+
+  insert into public.fishing_catches(user_id,fish_id,bait_id,size_tier,size_cm,points_awarded)
+  values(v_user,v_session.fish_id,v_session.bait_id,v_session.size_tier,
+    v_session.size_cm,v_session.points_awarded);
+  insert into public.player_fishbook(user_id,fish_id,catch_count,best_size_cm,best_points)
+  values(v_user,v_session.fish_id,1,v_session.size_cm,v_session.points_awarded)
+  on conflict(user_id,fish_id) do update set
+    catch_count=public.player_fishbook.catch_count+1,
+    best_size_cm=case
+      when excluded.best_size_cm is null then public.player_fishbook.best_size_cm
+      when public.player_fishbook.best_size_cm is null then excluded.best_size_cm
+      else greatest(public.player_fishbook.best_size_cm,excluded.best_size_cm) end,
+    best_points=greatest(public.player_fishbook.best_points,excluded.best_points);
+
+  insert into public.player_fishing_stats(user_id,points,total_catches,largest_fish_cm,updated_at)
+  values(v_user,v_session.points_awarded,1,v_session.size_cm,now())
+  on conflict(user_id) do update set
+    points=public.player_fishing_stats.points+excluded.points,
+    total_catches=public.player_fishing_stats.total_catches+1,
+    largest_fish_cm=case
+      when excluded.largest_fish_cm is null then public.player_fishing_stats.largest_fish_cm
+      when public.player_fishing_stats.largest_fish_cm is null then excluded.largest_fish_cm
+      else greatest(public.player_fishing_stats.largest_fish_cm,excluded.largest_fish_cm) end,
+    updated_at=now();
+
+  insert into public.fishing_points_ledger(user_id,amount,reason)
+  values(v_user,v_session.points_awarded,'钓获：'||v_fish.fish_name);
+
+  select count(*) into v_distinct from public.player_fishbook where user_id=v_user;
+  update public.player_fishing_stats set distinct_fish=v_distinct where user_id=v_user;
+
+  insert into public.player_fishing_achievements(user_id,achievement_id)
+  select v_user,a.achievement_id from public.fishing_achievements a
+  where a.is_active and (
+    (a.condition_type='catches' and (select total_catches from public.player_fishing_stats where user_id=v_user)>=a.threshold)
+    or (a.condition_type='points' and (select points from public.player_fishing_stats where user_id=v_user)>=a.threshold)
+    or (a.condition_type='distinct_fish' and v_distinct>=a.threshold)
+    or (a.condition_type='large_fish' and v_session.size_tier='large' and a.threshold<=1)
+    or (a.condition_type='specific_fish' and a.fish_id=v_session.fish_id)
+  ) on conflict(user_id,achievement_id) do nothing;
+
+  return jsonb_build_object('status','caught','fish_id',v_session.fish_id,
+    'fish_name',v_fish.fish_name,'size_tier',v_session.size_tier,
+    'size_cm',v_session.size_cm,'size_label',case
+      when v_session.size_tier='small' then '≤'||v_fish.small_max_cm||'cm'
+      when v_session.size_tier='medium' and v_session.size_cm is not null then v_session.size_cm||'cm'
+      when v_session.size_tier='medium' then v_fish.medium_cm||'cm'
+      else '≥'||v_fish.large_min_cm||'cm' end,
+    'points_awarded',v_session.points_awarded,'duplicate_request',false,
+    'action_score',p_action_score);
+end;
+$$;
+
+revoke all on function public.fishing_start_cast(text,uuid) from public,anon,authenticated;
+revoke all on function public.fishing_resolve_cast(uuid,boolean,integer) from public,anon,authenticated;
+grant execute on function public.fishing_start_cast(text,uuid) to authenticated;
+grant execute on function public.fishing_resolve_cast(uuid,boolean,integer) to authenticated;
