@@ -134,6 +134,13 @@
 #player-center-view .pc-avatar-crop-dialog input[type=range]{display:block;width:100%;margin-top:5px}
 #player-center-view .pc-avatar-crop-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
 `;
+
+  style.textContent += `
+#player-center-view .pc-profile-hero .pc-avatar-frame-slot{width:88px!important;height:88px!important;flex:0 0 88px!important;padding:0!important;border:0!important;border-radius:50%!important;clip-path:none!important;background:transparent!important;box-shadow:none!important;filter:none!important;overflow:hidden!important}
+#player-center-view .pc-profile-hero .pc-avatar-core{width:88px!important;height:88px!important;border:1px solid #b8dce8!important;border-radius:50%!important;clip-path:none!important;background:#173f60!important;box-shadow:none!important;overflow:hidden!important}
+#player-center-view .pc-avatar-preview{border:1px solid #9bbdcb!important;border-radius:50%!important;box-shadow:none!important;background:#173f60!important}
+#player-center-view .pc-avatar-editor{align-items:center!important}
+`;
   document.head.appendChild(style);
 
   const tab = document.createElement("button");
@@ -394,7 +401,7 @@
     let error=publicResponse?.error??null;
     if(!error&&!data){
       const fallback=await client.from("public_profiles")
-        .select("username,player_number,player_id,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate")
+        .select("username,player_number,player_id,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate,avatar_url")
         .eq("username",username.toLowerCase()).maybeSingle();
       data=fallback?.data??null;error=fallback?.error??null;
     }
