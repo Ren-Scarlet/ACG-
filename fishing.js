@@ -144,7 +144,9 @@
     const box=$("fish-action");
     box.replaceChildren(el("p","hint","正在确认提竿时机……"));
     try{
+      const hookRequestStarted=performance.now();
       const result=await rpc("fishing_hook_cast",{p_session_id:state.currentSession});
+      const hookRoundTripMs=performance.now()-hookRequestStarted;
       if(result.status==="escaped"){
         state.phase="idle";state.currentSession=null;
         box.replaceChildren(el("h3","","鱼逃走了"),el("p","hint","提竿太晚，这次没有收获，鱼饵不会返还。"));
@@ -154,12 +156,13 @@
       }
       state.phase="reeling";
       const rail=el("div","fish-reel-rail"),zone=el("div","fish-reel-zone"),needle=el("div","fish-reel-needle");
-      const zoneStart=Number(result.zone_start_pct??40),zoneWidth=Number(result.zone_width_pct??20);
+      const zoneStart=Number(result.zone_start_pct??15),zoneWidth=Number(result.zone_width_pct??70);
       zone.style.left=zoneStart+"%";zone.style.width=zoneWidth+"%";rail.append(zone,needle);
-      box.replaceChildren(el("h3","","收线！"),el("p","hint","服务器正在计时：指针进入蓝色区域时点击收线。"),rail);
+      box.replaceChildren(el("h3","","收线！"),el("p","hint","服务器正在计时：指针进入绿色区域时点击收线。"),rail);
       const hit=el("button","primary","收线");hit.type="button";box.append(hit);
-      const duration=Number(result.reel_duration_ms)||1700;
-      const start=performance.now()-(Number(result.reel_elapsed_ms)||0);
+      const duration=Number(result.reel_duration_ms)||3000;
+      // 补偿提竿 RPC 的往返延迟，使画面指针尽量对齐服务器收到收线请求时的位置。
+      const start=performance.now()-((Number(result.reel_elapsed_ms)||0)+hookRoundTripMs);
       const animate=now=>{
         if(state.phase!=="reeling")return;
         const phase=(((now-start)%duration)+duration)%duration/duration;
