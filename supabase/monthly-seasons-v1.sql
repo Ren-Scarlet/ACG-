@@ -160,6 +160,28 @@ create trigger match_results_season_sync
 before insert or update or delete on public.match_results
 for each row execute function public.sync_season_match_result();
 
+-- Delete match results while the parent match still exists, so the season
+-- trigger can correctly reverse their monthly contributions. A settled season
+-- intentionally blocks the deletion before any rows are removed.
+create or replace function public.remove_match_results_before_match_delete()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  delete from public.match_results where match_id=old.id;
+  return old;
+end;
+$;
+
+drop trigger if exists matches_season_results_before_delete on public.matches;
+create trigger matches_season_results_before_delete
+before delete on public.matches
+for each row execute function public.remove_match_results_before_match_delete();
+
+revoke all on function public.remove_match_results_before_match_delete() from public,anon,authenticated;
+
 -- Rebuild one month from authoritative match rows. Useful for safe backfill and audit.
 create or replace function public.rebuild_season_stats(p_season_key text)
 returns integer
@@ -386,9 +408,12 @@ grant execute on function public.admin_list_season_rank_rewards() to authenticat
 grant execute on function public.admin_list_seasons() to authenticated;
 grant execute on function public.admin_settle_monthly_season(text) to authenticated;
 
--- Cron setup is intentionally isolated so projects without pg_cron can still run
--- the migration; enable pg_cron and execute the schedule block after confirming it.
-do $$
+-- Enable Supabase's pg_cron extension where available, then install the daily
+-- Beijing-midnight rollover. If the managed project does not permit the extension,
+-- the season can still be settled manually from the admin panel.
+create extension if not exists pg_cron with schema pg_catalog;
+
+do $
 begin
   if exists(select 1 from pg_namespace where nspname='cron') then
     perform cron.unschedule(jobid) from cron.job where jobname='acg-monthly-season-rollover';
