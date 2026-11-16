@@ -1073,7 +1073,7 @@
   const matchForm = view.querySelector("#pc-match-form");
   const matchStatus = view.querySelector("#pc-match-status");
   const matchList = view.querySelector("#pc-admin-match-list");
-  const seasonAdminPane=adminPanel.querySelector('[data-admin-category="matches"]');
+  const seasonAdminPane=adminPanel.querySelector('.pc-admin-category-pane[data-admin-category="matches"]');
   if(seasonAdminPane&&!seasonAdminPane.querySelector("#pc-season-admin")){
     const section=node("section","");
     section.id="pc-season-admin";
