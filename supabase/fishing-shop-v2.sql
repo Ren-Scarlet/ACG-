@@ -37,7 +37,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if auth.uid() is null or not public.is_admin() then
     raise exception '只有管理员可以读取卡牌奖励目录';
@@ -48,7 +48,7 @@ begin
     where enabled=true
   ),'[]'::jsonb);
 end;
-$;
+$$;
 
 create or replace function public.fishing_admin_save_shop_product(
   p_product_id text,
