@@ -324,16 +324,8 @@
     (async()=>{
       try{
         await withTimeout(initialSessionReady,12000,"登录状态读取超时，请刷新页面后重试。");
-        const result=await withTimeout(client.auth.getSession(),12000,"无法读取登录状态，请检查网络后重试。");
-        if(result.error)throw result.error;
-        if(currentPage!==page)return;
-        const session=result.data?.session||null;
-        if(session?.user){
-          if(currentUser?.id!==session.user.id)await onSession(session,"PLAYER_CENTER_SESSION_CHECK");
-          else currentUser=session.user;
-        }else{
-          currentUser=null;
-        }
+        // onSession is the single source of truth. Calling getSession again here
+        // can contend with Supabase's auth lock while INITIAL_SESSION is restoring.
         if(currentPage!==page)return;
         if(currentUser)await loadPage(page);
         else{
@@ -1352,7 +1344,7 @@
     loginHint.textContent="已登录。以下内容仅本人可查看。";
     view.querySelector("#pc-public-name").value=currentUser.user_metadata?.username||"";
     // Only a real sign-in / account switch initializes data. Token refreshes must not reopen the last page.
-    if (userChanged && !drawSessionGatePending && (currentPage==="draw" || !view.classList.contains("hidden"))) await loadPage(currentPage);
+    if (userChanged && event!=="INITIAL_SESSION" && !drawSessionGatePending && (currentPage==="draw" || !view.classList.contains("hidden"))) await loadPage(currentPage);
     if (userChanged) await checkAdmin();
   }
 
