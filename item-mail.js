@@ -44,7 +44,7 @@
     try{const [c,p]=await Promise.all([fetch("./data/cards.json",{cache:"no-store"}),fetch("./data/packs.json",{cache:"no-store"})]);if(c.ok)cardsById=Object.fromEntries((await c.json()).map(x=>[x.id,x]));if(p.ok)packs=await p.json();}catch(_){}
   }
   async function loadItems(){const {data,error}=await client.from("item_catalog").select("item_id,name,icon,description,category,effect_type,effect_config,is_active,created_at").order("created_at",{ascending:false});if(error)throw error;items=data||[];return items;}
-  async function loadPlayers(){let timer;try{const result=await Promise.race([client.rpc("admin_list_mail_recipients"),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("读取玩家名单超时（15秒）。请检查数据库函数是否已执行，以及 Supabase 网络连接。")),15000);})]);if(result.error)throw result.error;players=result.data||[];return players;}finally{clearTimeout(timer);}}
+  let playersLoadPromise=null;async function loadPlayers(){if(!playersLoadPromise){playersLoadPromise=(async()=>{let timer;try{const result=await Promise.race([client.rpc("admin_list_player_accounts"),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("读取玩家名单超时（15秒），请检查 Supabase 连接。")),15000);})]);if(result.error)throw result.error;players=(result.data||[]).map(p=>({id:p.user_id,username:p.username,player_number:p.player_number}));return players;}finally{clearTimeout(timer);}})();}try{return await playersLoadPromise;}finally{playersLoadPromise=null;}}
 
   const playerTabs=$(".pc-sidebar .pc-tabs")||$(".pc-tabs");
   function activate(tab){view.querySelectorAll(".pc-sidebar .pc-tabs [data-page],.pc-tabs [data-page]").forEach(x=>x.classList.toggle("active",x===tab));}
@@ -239,7 +239,7 @@
     }
     function refreshAttachmentOptions(){[...attachments.children].forEach(row=>{const selects=row.querySelectorAll("select");const type=selects[0]?.value,reward=selects[1];if(!reward)return;reward.replaceChildren(new Option(type==="tokens"?"无需选择":"选择奖励",""));if(type==="card")Object.values(cardsById).forEach(x=>reward.add(new Option(x.name+" · "+x.id,x.id)));if(type==="item")items.filter(x=>x.is_active).forEach(x=>reward.add(new Option(x.name+" · "+x.item_id,x.item_id)));});}
     pane._loadHistory=loadHistory;
-    pane._refresh=async()=>{await loadStatic();try{await loadPlayers();}catch(error){recipient.replaceChildren(new Option("读取玩家失败："+error.message,""));throw error;}await loadItems();recipient.replaceChildren();if(!players.length)recipient.add(new Option("目前没有已注册玩家账号",""));players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));refreshAttachmentOptions();await loadHistory();};
+    pane._refresh=async()=>{await loadStatic();try{await loadPlayers();recipient.replaceChildren();if(!players.length)recipient.add(new Option("目前没有已注册玩家账号",""));players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));}catch(error){recipient.replaceChildren(new Option("读取玩家失败："+error.message,""));throw error;}await loadItems();refreshAttachmentOptions();await loadHistory();};
     loadHistory();
   }
   async function refreshAdmin(){
