@@ -6,7 +6,7 @@
   window.acgFishingInitialized = true;
 
   const root = document.getElementById("fishing-view");
-  if (!root) return;
+  if (!root) { window.addEventListener("DOMContentLoaded", () => { if (!window.acgFishingInitialized) boot(); }, { once: true }); return; }
   const $ = (id) => root.querySelector("#" + id);
   const state = { dashboard:null, baits:[], fish:[], berries:[], currentSession:null, raf:0, phase:"idle" };
   const el = (tag, cls, text) => {
@@ -15,7 +15,7 @@
     if(text!==undefined)n.textContent=text;
     return n;
   };
-  const status=(message,bad=false)=>{ $("fish-status").textContent=message; $("fish-status").className="status"+(bad?" bad":" good"); };
+  const status=(message,bad=false)=>{ const node=$("fish-status"); if(node){node.textContent=message;node.className="status"+(bad?" bad":" good");} };
   const uuid=()=>crypto.randomUUID();
   const rpc=async(name,args)=>{
     const {data,error}=await client.rpc(name,args);
@@ -230,7 +230,7 @@
   });
   root.querySelectorAll("[data-fishing-page]").forEach(b=>b.addEventListener("click",()=>setSubpage(b.dataset.fishingPage)));
   window.acgOpenFishing=async()=>{document.getElementById("tab-fishing")?.click();};
-  (async()=>{try{const {data}=await client.auth.getSession();if(data?.session){await loadDashboard();setSubpage("overview");}else status("请先登录账号，再进入钓场。",true);}catch(e){status("钓场初始化失败："+e.message,true);}})();
+  (async()=>{try{status("正在读取钓场资料……");const {data,error}=await client.auth.getSession();if(error)throw error;if(data?.session){await loadDashboard();setSubpage("overview");status("钓场已连接。");}else status("请先登录账号，再进入钓场。",true);}catch(e){console.error("[ACG Fishing] 初始化失败",e);status("钓场初始化失败："+(e?.message||String(e)),true);}})();
   };
   if (window.acgSupabaseClient) boot();
   else window.addEventListener("acg-supabase-ready", boot, { once: true });
