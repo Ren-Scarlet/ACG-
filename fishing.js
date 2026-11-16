@@ -8,7 +8,7 @@
   const root = document.getElementById("fishing-view");
   if (!root) { window.addEventListener("DOMContentLoaded", () => { if (!window.acgFishingInitialized) boot(); }, { once: true }); return; }
   const $ = (id) => root.querySelector("#" + id);
-  const state = { dashboard:null, baits:[], fish:[], berries:[], currentSession:null, raf:0, phase:"idle" };
+  const state = { dashboard:null, baits:[], fish:[], berries:[], shopCards:[], shopItems:[], currentSession:null, raf:0, phase:"idle" };
   const el = (tag, cls, text) => {
     const n=document.createElement(tag);
     if(cls)n.className=cls;
@@ -54,6 +54,15 @@
     const [cardsRes]=await Promise.all([fetch("./data/cards.json",{cache:"no-store"})]);
     const cards=cardsRes.ok?await cardsRes.json():[];
     const names=Object.fromEntries(cards.map(c=>[c.id,c.name]));
+    state.shopCards=[];state.shopItems=[];
+    if(d.is_admin){
+      const [drawRes,itemRes]=await Promise.all([
+        client.from("draw_card_catalog").select("card_id").eq("enabled",true),
+        client.from("item_catalog").select("item_id,name").eq("is_active",true).order("name")
+      ]);
+      if(!drawRes.error)state.shopCards=(drawRes.data||[]).map(x=>({card_id:x.card_id,card_name:names[x.card_id]||x.card_id}));
+      if(!itemRes.error)state.shopItems=itemRes.data||[];
+    }
     state.berries=(berryRes.data||[]).filter(r=>cards.some(c=>c.id===r.card_id&&c.pack_id==="pack_010"))
       .map(r=>({id:r.card_id,name:names[r.card_id]||r.card_id,quantity:r.quantity}));
     renderHeader();
