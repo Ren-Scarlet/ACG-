@@ -12,9 +12,6 @@ create table if not exists public.match_seasons (
   constraint match_seasons_range_check check (ends_at > starts_at)
 );
 
-create unique index if not exists match_seasons_one_active_idx
-  on public.match_seasons(status) where status='active';
-
 create table if not exists public.season_player_stats (
   season_key text not null references public.match_seasons(season_key) on delete restrict,
   user_id uuid not null references public.profiles(id) on delete cascade,
@@ -117,9 +114,10 @@ begin
   v_key := public.ensure_monthly_season(v_local_date);
   select status into v_status from public.match_seasons where season_key=v_key for update;
 
-  -- Settled months are immutable: late edits do not rewrite already-issued rewards.
+  -- Never allow a correction/deletion to silently diverge from an already-issued
+  -- settlement snapshot and reward mail. Admins must resolve it explicitly.
   if v_status='settled' then
-    if tg_op='DELETE' then return old; else return new; end if;
+    raise exception '该比赛所属赛季已结算，不能直接更正；请先联系管理员处理结算记录';
   end if;
 
   if tg_op='DELETE' then
@@ -186,6 +184,9 @@ begin
   return v_count;
 end;
 $$;
+
+-- Ensure the current Beijing calendar month exists immediately after migration.
+select public.ensure_monthly_season((now() at time zone 'Asia/Shanghai')::date);
 
 -- Admin config: thresholds are minimum monthly wins. Highest qualifying threshold wins.
 create or replace function public.admin_save_season_rank_reward(
