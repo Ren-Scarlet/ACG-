@@ -244,7 +244,7 @@
   }
   async function refreshAdmin(){
     if(!admin)return;
-    try{await Promise.all([loadStatic(),loadItems()]);const ip=admin.querySelector('[data-admin-category="items"]'),mp=admin.querySelector('[data-admin-category="mail"]');const results=await Promise.allSettled([ip?._refresh?.(),mp?._refresh?.()]);const mailResult=results[1];if(mailResult?.status==="rejected"){const recipient=mp?.querySelector('select[multiple]');if(recipient)recipient.replaceChildren(new Option("读取玩家失败："+(mailResult.reason?.message||String(mailResult.reason)),""));}}catch(error){const mp=admin.querySelector('[data-admin-category="mail"]');const recipient=mp?.querySelector('select[multiple]');if(recipient)recipient.replaceChildren(new Option("邮件管理初始化失败："+(error?.message||String(error)),""));}
+    try{await Promise.all([loadStatic(),loadItems()]);const ip=admin.querySelector('.pc-admin-category-pane[data-admin-category="items"]'),mp=admin.querySelector('.pc-admin-category-pane[data-admin-category="mail"]');const results=await Promise.allSettled([ip?._refresh?.(),mp?._refresh?.()]);const mailResult=results[1];if(mailResult?.status==="rejected"){const recipient=mp?.querySelector('select[multiple]');if(recipient)recipient.replaceChildren(new Option("读取玩家失败："+(mailResult.reason?.message||String(mailResult.reason)),""));}}catch(error){const mp=admin.querySelector('.pc-admin-category-pane[data-admin-category="mail"]');const recipient=mp?.querySelector('select[multiple]');if(recipient)recipient.replaceChildren(new Option("邮件管理初始化失败："+(error?.message||String(error)),""));}
   }
   client.auth.onAuthStateChange((_event,session)=>{if(session?.user)setTimeout(()=>{void refreshAdmin();},0);});
   void refreshAdmin();void loadStatic();void loadItems().catch(()=>{});
