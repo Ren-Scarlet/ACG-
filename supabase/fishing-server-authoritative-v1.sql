@@ -56,8 +56,8 @@ begin
     'status','reeling',
     'reel_duration_ms',3000,
     'reel_elapsed_ms',v_elapsed,
-    'zone_start_pct',25,
-    'zone_width_pct',50,
+    'zone_start_pct',15,
+    'zone_width_pct',70,
     'duplicate_request',v_session.reel_started_at is not null
   );
 end;
@@ -100,7 +100,7 @@ begin
   v_phase:=mod(v_elapsed_ms,3000)::numeric/3000;
   v_needle:=case when v_phase<0.5 then v_phase*200 else (1-v_phase)*200 end;
   v_score:=greatest(0,least(100,round(100-abs(v_needle-50)*2)::integer));
-  v_caught:=v_needle between 25 and 75;
+  v_caught:=v_needle between 15 and 85;
 
   if not v_caught then
     update public.fishing_sessions set status='escaped',resolved_at=clock_timestamp()
