@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+  const boot = () => {
   const client = window.acgSupabaseClient;
   if (!client || window.acgFishingInitialized) return;
   window.acgFishingInitialized = true;
@@ -230,4 +231,7 @@
   root.querySelectorAll("[data-fishing-page]").forEach(b=>b.addEventListener("click",()=>setSubpage(b.dataset.fishingPage)));
   window.acgOpenFishing=async()=>{document.getElementById("tab-fishing")?.click();};
   (async()=>{try{const {data}=await client.auth.getSession();if(data?.session){await loadDashboard();setSubpage("overview");}else status("请先登录账号，再进入钓场。",true);}catch(e){status("钓场初始化失败："+e.message,true);}})();
+  };
+  if (window.acgSupabaseClient) boot();
+  else window.addEventListener("acg-supabase-ready", boot, { once: true });
 })();
