@@ -70,8 +70,21 @@
     return /^[a-zA-Z0-9_]{3,20}$/.test(username);
   }
 
+  // Publish one shared auth state for every feature on this page. The player
+  // center must not start a second getSession() while this client restores auth.
+  window.acgAuthSessionReady = false;
+  window.acgAuthSession = null;
+  function publishAuthSession(session) {
+    window.acgAuthSession = session || null;
+    window.acgAuthSessionReady = true;
+    window.dispatchEvent(new CustomEvent("acg-auth-session", {
+      detail: { session: window.acgAuthSession }
+    }));
+  }
+
   let sessionRenderVersion = 0;
   async function renderSession(session) {
+    publishAuthSession(session);
     const renderVersion = ++sessionRenderVersion;
     if (!session) {
       formsEl.classList.remove("hidden");
@@ -199,16 +212,22 @@
   // Supabase Auth callbacks must stay synchronous. Defer database reads until
   // after the callback returns, and let the latest session render win.
   client.auth.onAuthStateChange((_event, session) => {
+    // Keep the auth callback synchronous; only publish state here.
+    publishAuthSession(session);
     setTimeout(() => { void renderSession(session); }, 0);
   });
 
   client.auth.getSession().then(({ data, error }) => {
-    if (error) showStatus("读取登录状态失败：" + error.message, "bad");
+    if (error) {
+      showStatus("读取登录状态失败：" + error.message, "bad");
+      return;
+    }
+    publishAuthSession(data?.session || null);
     setTimeout(() => { void renderSession(data?.session || null); }, 0);
   });
 
   const playerCenterScript = document.createElement("script");
-  playerCenterScript.src = "./player-center.js?v=88";
+  playerCenterScript.src = "./player-center.js?v=89";
   playerCenterScript.defer = true;
   playerCenterScript.onload = () => {
     const itemMailScript = document.createElement("script");
