@@ -261,6 +261,7 @@ declare
   v_row record;
   v_rank public.season_rank_rewards%rowtype;
   v_mail_id bigint;
+  v_attachment record;
   v_sent integer:=0;
   v_snap integer:=0;
 begin
@@ -292,10 +293,15 @@ begin
         null)
       returning id into v_mail_id;
       insert into public.mail_recipients(mail_id,user_id) values(v_mail_id,v_row.user_id);
-      insert into public.mail_attachments(mail_id,reward_type,reward_id,amount,sort_order)
-      select v_mail_id,x.reward_type,x.reward_id,(x.amount)::bigint,(x.ordinality)::integer
-      from jsonb_to_recordset(v_rank.reward_attachments) with ordinality
-        as x(reward_type text,reward_id text,amount text,ordinality bigint);
+      for v_attachment in
+        select value, ordinality
+        from jsonb_array_elements(v_rank.reward_attachments) with ordinality as a(value,ordinality)
+      loop
+        insert into public.mail_attachments(mail_id,reward_type,reward_id,amount,sort_order)
+        values(v_mail_id,v_attachment.value->>'reward_type',
+          nullif(v_attachment.value->>'reward_id',''),
+          (v_attachment.value->>'amount')::bigint,v_attachment.ordinality::integer);
+      end loop;
       v_sent:=v_sent+1;
     end if;
 
@@ -326,7 +332,8 @@ begin
 end;
 $$;
 
--- Runs at 00:05 Beijing time on day 1 (16:05 UTC on the last day of prior month).
+-- Runs daily at 16:05 UTC (00:05 Beijing next day). The function only settles
+-- when the Beijing calendar date is day 1, avoiding UTC/month-length assumptions.
 -- If pg_cron is enabled for this database, the schedule is installed automatically.
 create or replace function public.run_monthly_season_rollover()
 returns jsonb
@@ -340,13 +347,17 @@ declare
   v_previous text;
   v_result jsonb;
 begin
-  v_current:=public.ensure_monthly_season(v_today);
+  if extract(day from v_today)<>1 then
+    v_current:=public.ensure_monthly_season(v_today);
+    return jsonb_build_object('current_season',v_current,'settlement_due',false);
+  end if;
   v_previous:=to_char((date_trunc('month',v_today::timestamp)-interval '1 month')::date,'YYYY-MM');
   if exists(select 1 from public.match_seasons where season_key=v_previous and status='active') then
     v_result:=public.settle_monthly_season(v_previous);
   else
     v_result:=jsonb_build_object('season_key',v_previous,'already_settled',true,'mail_count',0);
   end if;
+  v_current:=public.ensure_monthly_season(v_today);
   return jsonb_build_object('current_season',v_current,'previous_result',v_result);
 end;
 $$;
@@ -371,7 +382,7 @@ do $$
 begin
   if exists(select 1 from pg_namespace where nspname='cron') then
     perform cron.unschedule(jobid) from cron.job where jobname='acg-monthly-season-rollover';
-    perform cron.schedule('acg-monthly-season-rollover','5 16 1 * *',
+    perform cron.schedule('acg-monthly-season-rollover','5 16 * * *',
       'select public.run_monthly_season_rollover();');
   end if;
 end;
