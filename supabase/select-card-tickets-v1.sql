@@ -244,8 +244,8 @@ begin
   where user_id=v_user_id and request_id=p_request_id;
   if found then
     if v_existing_item<>p_item_id then raise exception '使用请求编号已用于其他道具'; end if;
-    if v_existing_data->>'kind'<>'select_card' or v_existing_data->>'reward_id'<>p_card_id then
-      raise exception '该请求编号已用于其他选择，请刷新后重新操作';
+    if v_existing_data->>'kind'<>'select_card' then
+      raise exception '该请求编号已用于其他类型的道具操作';
     end if;
     return jsonb_build_object('item_id',p_item_id,'result',v_existing_data,'duplicate_request',true);
   end if;
