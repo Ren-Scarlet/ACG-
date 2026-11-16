@@ -502,6 +502,68 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 #fishing-view .fish-table th{background:#0756a6;color:white}
 @media(max-width:650px){#fishing-view .fish-stat-grid{grid-template-columns:1fr 1fr}}
 </style>
+<style>
+/* Lakeside fishing grounds visual refresh */
+#fishing-view{margin:0!important;padding:0!important;background:transparent!important;color:#173e45!important}
+#fishing-view>.fish-world-shell{overflow:hidden;border:1px solid #b5d6c5;background:#e8f3e9;box-shadow:0 18px 48px #173b3424}
+#fishing-view .fish-world-scene{height:clamp(300px,38vw,470px);min-height:300px;position:relative;overflow:hidden;background:#83d8ef}
+#fishing-view .fish-landscape{position:absolute;inset:0;width:100%;height:100%;display:block}
+#fishing-view .fish-scene-shade{position:absolute;inset:0;background:linear-gradient(90deg,#102f32b8 0%,#173b345c 42%,transparent 76%),linear-gradient(0deg,#143e3b66,transparent 42%)}
+#fishing-view .fish-scene-copy{position:absolute;left:clamp(22px,5vw,68px);top:50%;transform:translateY(-50%);color:#fff;text-shadow:0 2px 12px #123a39a6}
+#fishing-view .fish-eyebrow{font-size:10px;letter-spacing:.22em;font-weight:900;color:#e1f5d7}
+#fishing-view .fish-scene-copy h2{margin:12px 0 8px;font-size:clamp(38px,6vw,72px);line-height:1.05;letter-spacing:.12em;color:#fff;font-weight:1000}
+#fishing-view .fish-scene-copy p{margin:0 0 20px;color:#f0fff5;font-size:clamp(13px,1.5vw,17px);letter-spacing:.08em}
+#fishing-view .fish-scene-tag{display:inline-block;padding:8px 13px;border:1px solid #e7f8db99;background:#174c45a8;color:#f4ffe9;font-size:11px;letter-spacing:.12em;backdrop-filter:blur(5px)}
+#fishing-view .fish-scene-sign{position:absolute;right:clamp(16px,4vw,54px);bottom:22px;padding:12px 17px;border-left:3px solid #f2d58b;background:#163f3a9c;color:#f1f8df;font-size:10px;letter-spacing:.22em;text-align:left;line-height:1.4}
+#fishing-view .fish-scene-sign strong{font-family:Georgia,serif;font-size:21px;letter-spacing:.12em}
+#fishing-view .fish-scene-sign small{display:block;margin-top:5px;font-size:8px;letter-spacing:.16em;color:#c6dfc8}
+#fishing-view .fish-hud{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:#c5d9c8;border-bottom:1px solid #c5d9c8}
+#fishing-view .fish-hud-stat{padding:15px 20px;background:#f6fbf2;display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:10px}
+#fishing-view .fish-hud-stat span{font-size:12px;font-weight:800;color:#56756a}
+#fishing-view .fish-hud-stat strong{grid-column:2;grid-row:1/3;font-size:clamp(21px,3vw,30px);font-family:Georgia,serif;color:#285b4b}
+#fishing-view .fish-hud-stat small{font-size:8px;letter-spacing:.16em;color:#8aa397}
+#fishing-view .fish-tabs{display:flex;gap:0;flex-wrap:wrap;margin:0;padding:10px 12px;background:#315f4d;border-bottom:4px solid #d2b47a}
+#fishing-view .fish-tabs button{flex:1 1 auto;min-height:42px;padding:9px 14px;border:0!important;border-radius:0!important;clip-path:none!important;background:transparent!important;color:#e5f2df!important;font-size:13px;font-weight:800;transition:background .18s,color .18s}
+#fishing-view .fish-tabs button:hover{background:#ffffff18!important;color:#fff!important}
+#fishing-view .fish-tabs button.active{background:#e5edcf!important;color:#234c3e!important;box-shadow:inset 0 -3px #d4a95d!important}
+#fishing-view .fish-status-line{display:flex;align-items:center;gap:9px;padding:9px 18px;background:#eaf3e4}
+#fishing-view .fish-status-line .status{margin:0;color:#537667!important;font-size:11px}
+#fishing-view .fish-status-dot{width:7px;height:7px;border-radius:50%;background:#5caa79;box-shadow:0 0 0 4px #5caa7922}
+#fishing-view>.fish-page{padding:clamp(14px,2.5vw,28px)!important;margin:0!important;min-height:260px;background:linear-gradient(180deg,#edf5e9,#e3eee4)!important;border:0!important;box-shadow:none!important;color:#24483d!important}
+#fishing-view .panel{padding:20px!important;background:#f8fbf3!important;border:1px solid #c8dcca!important;border-radius:3px!important;box-shadow:0 6px 20px #264b3510!important;color:#24483d!important}
+#fishing-view .panel h3{color:#2d604c!important;font-size:19px!important;letter-spacing:.04em}
+#fishing-view .panel .hint,#fishing-view .fish-page .hint{color:#6b8879!important;line-height:1.7}
+#fishing-view .fish-stat-grid{display:none!important}
+#fishing-view .fish-bait-grid{gap:14px!important}
+#fishing-view .fish-bait-card{position:relative;padding:18px!important;background:linear-gradient(145deg,#fbfff7,#e7f1e4)!important;border:1px solid #c2d8c5!important;border-radius:3px!important;box-shadow:0 5px 14px #315d3c10!important;color:#274d3e!important}
+#fishing-view .fish-bait-card strong,#fishing-view .fish-bait-card h4{color:#315f4b!important;font-size:16px}
+#fishing-view .fish-bait-card .hint{color:#718b7b!important}
+#fishing-view button{border-radius:3px!important;clip-path:none!important;background:#426f56!important;border:1px solid #315b46!important;color:#fff!important;font-weight:800}
+#fishing-view button.primary,#fishing-view .fish-bait-card button{background:#b17b3e!important;border-color:#95642f!important;color:#fff!important}
+#fishing-view button:disabled{opacity:.45}
+#fishing-view input,#fishing-view select{background:#fff!important;color:#274b3d!important;border:1px solid #b5cdb9!important;border-radius:3px!important}
+#fishing-view .fish-reel-rail{height:36px;border:2px solid #2c685b;background:#183f48;border-radius:2px}
+#fishing-view .fish-reel-zone{background:#62d2a0;opacity:.9}
+#fishing-view .fish-reel-needle{width:5px;background:#fff1a6;box-shadow:0 0 10px #fff1a6}
+#fishing-view .fish-table{background:#f8fbf3;color:#315746}
+#fishing-view .fish-table th{background:#315f4d!important;color:#f5ffe9!important}
+#fishing-view .fish-table td{border-color:#c5d9c8!important}
+#fishing-view .fish-table tr:nth-child(even) td{background:#e9f2e6}
+@media(max-width:700px){
+ #fishing-view .fish-world-scene{height:330px}
+ #fishing-view .fish-scene-copy{left:20px;top:48%}
+ #fishing-view .fish-scene-copy h2{font-size:40px}
+ #fishing-view .fish-scene-copy p{max-width:230px;line-height:1.6}
+ #fishing-view .fish-scene-sign{right:10px;bottom:10px;padding:8px 10px;font-size:8px}
+ #fishing-view .fish-scene-sign strong{font-size:15px}
+ #fishing-view .fish-hud-stat{padding:11px 9px;grid-template-columns:1fr}
+ #fishing-view .fish-hud-stat strong{grid-column:1;grid-row:auto;font-size:22px}
+ #fishing-view .fish-hud-stat small{font-size:7px}
+ #fishing-view .fish-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:7px}
+ #fishing-view .fish-tabs button{padding:9px 4px;font-size:11px;min-width:0}
+ #fishing-view>.fish-page{padding:12px!important}
+}
+</style>
 </head>
 <body>
 
@@ -582,23 +644,63 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     </nav>
 
     <section id="fishing-view" class="hidden">
-      <div class="panel">
-        <h3>钓场 FISHING GROUNDS</h3>
-        <p class="hint">抛竿、提竿、收线。钓鱼积分独立于代币，只用于钓场商店。</p>
-        <div class="fish-stat-grid">
-          <div class="fish-stat"><small>钓鱼积分</small><strong id="fish-points">0</strong></div>
-          <div class="fish-stat"><small>累计钓获</small><strong id="fish-catches">0</strong></div>
-          <div class="fish-stat"><small>鱼类图鉴</small><strong id="fish-species">0/10</strong></div>
+      <div class="fish-world-shell">
+        <div class="fish-world-scene" role="img" aria-label="青岚湖畔，远山、湖水与木质钓鱼栈道">
+          <svg class="fish-landscape" viewBox="0 0 1440 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+              <linearGradient id="fish-sky" x2="0" y2="1"><stop stop-color="#83d8ef"/><stop offset="1" stop-color="#e2f4d8"/></linearGradient>
+              <linearGradient id="fish-water" x2="0" y2="1"><stop stop-color="#4ab8c0"/><stop offset="1" stop-color="#176b83"/></linearGradient>
+              <linearGradient id="fish-wood" x2="0" y2="1"><stop stop-color="#b98550"/><stop offset="1" stop-color="#70452f"/></linearGradient>
+              <linearGradient id="fish-hill" x2="0" y2="1"><stop stop-color="#4f9a83"/><stop offset="1" stop-color="#285f59"/></linearGradient>
+              <filter id="fish-soft"><feGaussianBlur stdDeviation="18"/></filter>
+            </defs>
+            <rect width="1440" height="560" fill="url(#fish-sky)"/>
+            <circle cx="1120" cy="92" r="48" fill="#fff4c5" opacity=".85"/>
+            <g fill="#fff" opacity=".56" filter="url(#fish-soft)"><ellipse cx="310" cy="108" rx="160" ry="30"/><ellipse cx="850" cy="145" rx="190" ry="26"/></g>
+            <path d="M0 280L150 155 255 238 390 120 560 270 710 150 850 260 1030 130 1190 255 1320 170 1440 250V390H0Z" fill="#8bbba0"/>
+            <path d="M0 305L190 205 315 285 480 185 640 300 825 200 990 300 1160 185 1320 290 1440 225V390H0Z" fill="#6d9e82"/>
+            <path d="M0 330Q180 275 360 330T720 320T1080 315T1440 305V560H0Z" fill="url(#fish-hill)"/>
+            <path d="M0 332Q180 310 360 340T720 328T1080 338T1440 320V560H0Z" fill="url(#fish-water)"/>
+            <g fill="#d6fff0" opacity=".28"><path d="M0 372Q150 354 300 372T600 370T900 374T1200 366T1440 372V384Q1200 378 900 386T300 384T0 386Z"/><path d="M120 425Q250 412 390 426T660 423T930 428V434Q660 430 390 436T120 434Z"/></g>
+            <g stroke="#d8fff2" stroke-width="3" opacity=".42" fill="none"><path d="M650 380q80 -13 160 0"/><path d="M900 420q70 -12 145 0"/><path d="M420 405q45 -8 95 0"/></g>
+            <path d="M0 350Q180 330 300 365Q430 400 570 560H0Z" fill="#477d55"/>
+            <path d="M1440 330Q1290 320 1190 360Q1080 405 1010 560H1440Z" fill="#3d704e"/>
+            <g fill="#275d48"><circle cx="75" cy="285" r="90"/><circle cx="170" cy="275" r="74"/><circle cx="1270" cy="270" r="100"/><circle cx="1380" cy="290" r="80"/></g>
+            <g fill="#4b8a5e"><circle cx="80" cy="250" r="58"/><circle cx="190" cy="245" r="50"/><circle cx="1260" cy="230" r="66"/><circle cx="1370" cy="250" r="55"/></g>
+            <path d="M690 560L820 420 1110 420 1260 560Z" fill="url(#fish-wood)"/>
+            <path d="M730 560L850 440H1090L1210 560Z" fill="#c18b54"/>
+            <g stroke="#75482f" stroke-width="7"><path d="M785 490H1150"/><path d="M755 530H1190"/><path d="M840 440V560"/><path d="M930 440V560"/><path d="M1030 440V560"/><path d="M1120 440V560"/></g>
+            <g stroke="#285d4e" stroke-width="5" stroke-linecap="round"><path d="M80 510q-15 -95 8 -145"/><path d="M105 525q5 -90 35 -130"/><path d="M1320 520q-8 -100 25 -155"/><path d="M1360 520q12 -75 45 -115"/></g>
+            <g fill="#d2b76e"><ellipse cx="87" cy="376" rx="9" ry="22" transform="rotate(-18 87 376)"/><ellipse cx="140" cy="400" rx="8" ry="20" transform="rotate(16 140 400)"/><ellipse cx="1340" cy="385" rx="9" ry="22"/></g>
+            <path d="M1085 68q-12 86 -5 170" stroke="#4a3729" stroke-width="5" fill="none"/>
+            <path d="M1080 236q-24 18 -20 40" stroke="#f8f3dc" stroke-width="3" fill="none"/>
+            <path d="M1060 276q20 -12 40 0q-20 24 -40 0Z" fill="#f05d5b" stroke="#fff2cf" stroke-width="3"/>
+            <circle cx="1080" cy="300" r="5" fill="#fff7df"/>
+            <path d="M1060 315q20 5 40 0" stroke="#fff" stroke-width="2" opacity=".7" fill="none"/>
+          </svg>
+          <div class="fish-scene-shade"></div>
+          <div class="fish-scene-copy">
+            <span class="fish-eyebrow">ACG OUTDOOR CLUB · LAKESIDE AREA</span>
+            <h2>青岚湖</h2>
+            <p>风从山间吹来，湖面正适合抛竿。</p>
+            <span class="fish-scene-tag">今日垂钓 · 湖畔开放中</span>
+          </div>
+          <div class="fish-scene-sign">FISHING<br><strong>GROUNDS</strong><small>EST. ACG CLUB</small></div>
         </div>
-        <div class="fish-tabs">
-          <button type="button" data-fishing-page="overview" class="active">钓场</button>
-          <button type="button" data-fishing-page="craft">鱼饵工坊</button>
-          <button type="button" data-fishing-page="book">鱼类图鉴</button>
-          <button type="button" data-fishing-page="achievements">钓鱼成就</button>
-          <button type="button" data-fishing-page="shop">钓场商店</button>
-          <button type="button" data-fishing-page="leaderboard">排行榜</button>
+        <div class="fish-hud">
+          <div class="fish-hud-stat"><span>钓鱼积分</span><strong id="fish-points">0</strong><small>FISHING POINTS</small></div>
+          <div class="fish-hud-stat"><span>累计钓获</span><strong id="fish-catches">0</strong><small>TOTAL CATCHES</small></div>
+          <div class="fish-hud-stat"><span>鱼类图鉴</span><strong id="fish-species">0/10</strong><small>DISCOVERED</small></div>
         </div>
-        <p id="fish-status" class="status">正在连接钓场……</p>
+        <nav class="fish-tabs" aria-label="钓场功能">
+          <button type="button" data-fishing-page="overview" class="active">⌂　钓场</button>
+          <button type="button" data-fishing-page="craft">✦　鱼饵工坊</button>
+          <button type="button" data-fishing-page="book">▤　鱼类图鉴</button>
+          <button type="button" data-fishing-page="achievements">♛　钓鱼成就</button>
+          <button type="button" data-fishing-page="shop">◇　钓场商店</button>
+          <button type="button" data-fishing-page="leaderboard">♙　排行榜</button>
+        </nav>
+        <div class="fish-status-line"><span class="fish-status-dot"></span><p id="fish-status" class="status">正在连接钓场……</p></div>
       </div>
       <section id="fish-page-overview" class="fish-page"><div id="fish-overview"></div><div id="fish-action" class="panel hidden"></div></section>
       <section id="fish-page-craft" class="fish-page hidden"><div id="fish-craft"></div></section>
