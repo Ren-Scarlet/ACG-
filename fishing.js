@@ -235,13 +235,57 @@
   function renderFishbook(){
     const host=$("fish-book");host.replaceChildren();
     const owned=new Map((state.dashboard.fishbook||[]).map(x=>[x.fish_id,x]));
-    const grid=el("div","fish-bait-grid");
-    state.fish.forEach(f=>{
-      const item=owned.get(f.fish_id),c=el("article","fish-bait-card");
-      c.append(el("strong","",item?f.fish_name:"？？？"),el("p","hint",item?"已发现 · 钓获 "+item.catch_count+" 次":"尚未发现"));
-      c.append(el("p","",item?"最高积分："+item.best_points:"鱼类资料尚未解锁"));
-      grid.append(c);
-    });host.append(grid);
+    const discovered=state.fish.filter(f=>owned.has(f.fish_id)).length;
+    let filter="all";
+    const shell=el("section","fishbook-shell");
+    const head=el("div","fishbook-heading");
+    const eyebrow=el("p","fishbook-eyebrow","QINGLAN LAKE · FIELD GUIDE");
+    const title=el("h2","fishbook-title","湖畔鱼类图鉴");
+    const subtitle=el("p","fishbook-subtitle","每一次相遇，都是湖泊收藏的一页。继续垂钓，发现这里的全部鱼类。");
+    head.append(eyebrow,title,subtitle);
+    const progress=el("div","fishbook-progress");
+    const progressText=el("div","fishbook-progress-copy");
+    progressText.append(el("span","","探索进度"),el("strong","",discovered+" / "+state.fish.length+" 种"));
+    const track=el("div","fishbook-progress-track");
+    const fill=el("span","");fill.style.width=(state.fish.length?discovered/state.fish.length*100:0)+"%";track.append(fill);
+    progress.append(progressText,track);
+    const filters=el("div","fishbook-filters");
+    const grid=el("div","fishbook-grid");
+    const renderCards=()=>{
+      filters.replaceChildren();
+      const choices=[["all","全部鱼类"],["found","已发现"],["unknown","未发现"]];
+      choices.forEach(([key,label])=>{
+        const b=el("button",filter===key?"active":"",label);
+        b.type="button";b.setAttribute("aria-pressed",filter===key?"true":"false");
+        b.addEventListener("click",()=>{filter=key;renderCards();});
+        filters.append(b);
+      });
+      grid.replaceChildren();
+      const visible=state.fish.filter(f=>filter==="all"||(filter==="found"?owned.has(f.fish_id):!owned.has(f.fish_id)));
+      if(!visible.length){grid.append(el("p","fishbook-empty","这里暂时没有符合条件的鱼类。"));return;}
+      visible.forEach((f,index)=>{
+        const item=owned.get(f.fish_id);
+        const card=el("article","fishbook-card"+(item?" is-discovered":" is-unknown"));
+        const art=el("div","fishbook-art");
+        const seal=el("span","fishbook-seal",item?"已收录":"未发现");
+        const fishMark=el("span","fishbook-fish-mark",item?"🐟":"?");
+        const number=el("span","fishbook-number","NO. "+String(state.fish.indexOf(f)+1).padStart(2,"0"));
+        art.append(number,fishMark,seal);
+        const info=el("div","fishbook-card-info");
+        info.append(el("p","fishbook-category",item?"湖泊记录":"待探索"),el("h3","fishbook-fish-name",item?f.fish_name:"神秘鱼类"));
+        if(item){
+          info.append(el("p","fishbook-catch-count","钓获 "+Number(item.catch_count||0).toLocaleString("zh-CN")+" 次"));
+          const facts=el("div","fishbook-facts");
+          const size=item.best_size_cm==null?"暂未记录":Number(item.best_size_cm).toLocaleString("zh-CN")+" cm";
+          facts.append(el("span","","最佳尺寸"),el("strong","",size),el("span","","最高积分"),el("strong","",Number(item.best_points||0).toLocaleString("zh-CN")));
+          info.append(facts);
+        }else{
+          info.append(el("p","fishbook-locked-copy","尚未与它相遇。前往湖边继续抛竿吧。"));
+        }
+        card.append(art,info);grid.append(card);
+      });
+    };
+    shell.append(head,progress,filters,grid);host.append(shell);renderCards();
   }
   function renderAchievements(){
     const host=$("fish-achievements");host.replaceChildren();
