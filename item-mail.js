@@ -44,7 +44,7 @@
     try{const [c,p]=await Promise.all([fetch("./data/cards.json",{cache:"no-store"}),fetch("./data/packs.json",{cache:"no-store"})]);if(c.ok)cardsById=Object.fromEntries((await c.json()).map(x=>[x.id,x]));if(p.ok)packs=await p.json();}catch(_){}
   }
   async function loadItems(){const {data,error}=await client.from("item_catalog").select("item_id,name,icon,description,category,effect_type,effect_config,is_active,created_at").order("created_at",{ascending:false});if(error)throw error;items=data||[];return items;}
-  async function loadPlayers(){const {data,error}=await client.from("profiles").select("id,username,player_number").order("username");if(error)throw error;players=data||[];}
+  async function loadPlayers(){const {data,error}=await client.rpc("admin_list_mail_recipients");if(error)throw error;players=data||[];}
 
   const playerTabs=$(".pc-sidebar .pc-tabs")||$(".pc-tabs");
   function activate(tab){view.querySelectorAll(".pc-sidebar .pc-tabs [data-page],.pc-tabs [data-page]").forEach(x=>x.classList.toggle("active",x===tab));}
@@ -208,7 +208,7 @@
     pane.append(el("h3","","邮件管理"),el("p","pc-muted","奖励只有在玩家点击领取后才会入账。发送时固定收件人名单；全体邮件只发送给当前已注册账号。"));
     const form=el("form",""),title=input("text","例如：活动奖励");title.maxLength=100;title.required=true;
     const body=el("textarea");body.rows=4;body.maxLength=3000;body.placeholder="邮件正文（可选）";
-    const target=select([["全体玩家","all"],["指定玩家","selected"]]),recipient=select([]);recipient.multiple=true;recipient.size=6;players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));
+    const target=select([["全体玩家","all"],["指定玩家","selected"]]),recipient=select([["正在读取玩家名单…",""]]);recipient.multiple=true;recipient.size=6;players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));
     const recipientWrap=field("指定收件人（按住 Ctrl / Command 多选）",recipient);recipientWrap.hidden=true;target.addEventListener("change",()=>recipientWrap.hidden=target.value!=="selected");
     const expires=input("datetime-local"),attachments=el("div","acg-attachment-list"),add=button("＋ 添加奖励附件");
     function addRow(){
@@ -239,7 +239,7 @@
     }
     function refreshAttachmentOptions(){[...attachments.children].forEach(row=>{const selects=row.querySelectorAll("select");const type=selects[0]?.value,reward=selects[1];if(!reward)return;reward.replaceChildren(new Option(type==="tokens"?"无需选择":"选择奖励",""));if(type==="card")Object.values(cardsById).forEach(x=>reward.add(new Option(x.name+" · "+x.id,x.id)));if(type==="item")items.filter(x=>x.is_active).forEach(x=>reward.add(new Option(x.name+" · "+x.item_id,x.item_id)));});}
     pane._loadHistory=loadHistory;
-    pane._refresh=async()=>{await loadStatic();await loadPlayers();await loadItems();recipient.replaceChildren();players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));refreshAttachmentOptions();await loadHistory();};
+    pane._refresh=async()=>{await loadStatic();try{await loadPlayers();}catch(error){recipient.replaceChildren(new Option("读取玩家失败："+error.message,""));throw error;}await loadItems();recipient.replaceChildren();if(!players.length)recipient.add(new Option("目前没有已注册玩家账号",""));players.forEach(p=>recipient.add(new Option(playerLabel(p),p.id)));refreshAttachmentOptions();await loadHistory();};
     loadHistory();
   }
   async function refreshAdmin(){
