@@ -1095,7 +1095,7 @@
     const bodyWrap=node("div","field"),bodyLabel=node("label","","邮件正文（可用 {player}、{rank}）"),body=node("textarea");
     body.id="pc-season-mail-body";body.rows=2;body.value="恭喜获得本月 {rank} 段位奖励！";bodyLabel.htmlFor=body.id;bodyWrap.append(bodyLabel,body);form.append(bodyWrap);
     const rewardWrap=node("div","field"),rewardLabel=node("label","","奖励附件 JSON"),reward=node("textarea");
-    reward.id="pc-season-rewards";reward.rows=4;reward.value='[{"reward_type":"tokens","reward_id":null,"amount":100}]';
+    reward.id="pc-season-rewards";reward.rows=4;reward.value='[]';
     rewardLabel.htmlFor=reward.id;rewardWrap.append(rewardLabel,reward,node("p","pc-muted",'代币示例：{"reward_type":"tokens","reward_id":null,"amount":100}；卡牌/道具需填写对应 reward_id。'));form.append(rewardWrap);
     const enabledWrap=node("label","pc-row"),enabled=node("input");enabled.type="checkbox";enabled.checked=true;enabled.id="pc-season-enabled";enabledWrap.append(enabled,node("span","","启用该段位"));
     const save=node("button","primary","保存段位奖励");save.type="submit";form.append(enabledWrap,save);
