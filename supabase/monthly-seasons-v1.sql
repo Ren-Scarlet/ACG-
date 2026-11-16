@@ -502,3 +502,9 @@ grant execute on function public.player_list_my_seasons() to authenticated;
 grant execute on function public.player_get_current_season() to authenticated;
 grant execute on function public.admin_list_season_settlements(text) to authenticated;
 grant execute on function public.admin_resend_season_reward(text,uuid) to authenticated;
+
+
+-- Backfill the current Beijing month once when the migration is installed.
+select public.rebuild_season_stats(
+  public.ensure_monthly_season((now() at time zone 'Asia/Shanghai')::date)
+);
