@@ -318,7 +318,7 @@
   });
 
   async function loadOverview() {
-    const [{data:profile,error:pe},{data:publicProfile,error:ppe},{data:stats,error:se}]=await Promise.all([
+    const [{data:profile,error:pe},{data:stats,error:se}]=await Promise.all([
       client.from("profiles").select("username,created_at,selected_title,selected_badges,player_number").eq("id",currentUser.id).maybeSingle(),
       client.from("player_stats").select("tokens,games_played,wins,losses").eq("user_id",currentUser.id).maybeSingle()
     ]);
