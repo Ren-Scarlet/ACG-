@@ -97,7 +97,7 @@
         state.berries.forEach(berry=>{const opt=new Option(berry.name+"（持有 ×"+berry.quantity+"）",berry.id);sel.append(opt);});
         wrap.append(sel);card.append(wrap);selects.push(sel);
       }
-      const qty=el("input");qty.type="number";qty.min="1";qty.max="20";qty.value="1";
+      const qty=el("input");qty.type="number";qty.min="1";qty.max="1";qty.value="1";
       const qtyWrap=el("label","fish-field","合成数量");qtyWrap.append(qty);card.append(qtyWrap);
       const button=el("button","primary","制作鱼饵");button.type="button";
       button.disabled=state.berries.length<b.ingredient_count;
@@ -105,7 +105,7 @@
         const ids=selects.map(x=>x.value);
         if(ids.some(x=>!x)){status("请先选择完整的树果配方。",true);return;}
         if(new Set(ids).size!==b.distinct_ingredients){status("所选树果种类不符合配方要求。",true);return;}
-        const count=Math.max(1,Math.min(20,Number(qty.value)||1));
+        const count=1;
         button.disabled=true;
         try{
           let last;
@@ -159,7 +159,7 @@
     if(state.phase!=="reeling")return;
     cancelAnimationFrame(state.raf);
     const score=Math.max(0,Math.round(100-Math.abs((state.needleX||0)-50)*2));
-    const caught=score>=25;
+    const caught=(state.needleX||0)>=40&&(state.needleX||0)<=60;
     state.phase="resolving";
     $("fish-action").replaceChildren(el("p","hint",caught?"收线成功，正在确认鱼获……":"鱼挣脱了！"));
     try{
