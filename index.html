@@ -501,6 +501,55 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 #fishing-view .fish-table th,#fishing-view .fish-table td{padding:9px;text-align:left;border:1px solid #7dcce4}
 #fishing-view .fish-table th{background:#0756a6;color:white}
 
+#fishing-view .fish-game-panel{padding:clamp(15px,3vw,28px);border:1px solid #b9c9b0;border-radius:18px;background:linear-gradient(145deg,#fbf8ec,#eaf0df 60%,#f5f0df);color:#304b38;box-shadow:0 12px 32px #172c2012}
+#fishing-view .fish-page-heading{text-align:center;padding:8px 8px 20px}
+#fishing-view .fish-kicker{margin:0 0 8px;color:#83936f;font-size:10px;font-weight:900;letter-spacing:.22em}
+#fishing-view .fish-page-heading h2{margin:0;color:#294b37;font-family:Georgia,"Microsoft YaHei",serif;font-size:clamp(24px,4vw,34px);letter-spacing:.07em}
+#fishing-view .fish-page-heading>p:last-child{max-width:620px;margin:10px auto 0;color:#71816d;font-size:13px;line-height:1.8}
+#fishing-view .fish-game-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 25px}
+#fishing-view .fish-game-stat{padding:14px;border:1px solid #c8d3bd;border-radius:12px;background:#fffdf5;text-align:center}
+#fishing-view .fish-game-stat span{display:block;color:#819076;font-size:11px}.fish-game-stat strong{display:block;margin:5px 0;color:#365b40;font-size:24px}
+#fishing-view .fish-subtitle-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0 12px}
+#fishing-view .fish-subtitle-row h3{margin:0;color:#36563c;font-size:17px}.fish-subtitle-row small{color:#91a084;font-size:9px;letter-spacing:.16em}
+#fishing-view .fish-game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:14px}
+#fishing-view .fish-bait-tile,#fishing-view .fish-recipe-card{overflow:hidden;border:1px solid #c7d2bd;border-radius:14px;background:#fffdf5;box-shadow:0 5px 15px #344d3210}
+#fishing-view .fish-bait-tile-art,#fishing-view .fish-recipe-art{position:relative;display:grid;place-items:center;min-height:112px;background:radial-gradient(ellipse at center,#e4edda,#d3e2ce 65%,#c5d8c4)}
+#fishing-view .fish-bait-tile-art span,#fishing-view .fish-recipe-art small{position:absolute;left:12px;top:10px;color:#71886e;font-size:9px;font-weight:900;letter-spacing:.14em}
+#fishing-view .fish-bait-tile-art b,#fishing-view .fish-recipe-art b{font-size:48px;filter:drop-shadow(0 5px 4px #314d3825)}
+#fishing-view .fish-bait-tile-body,#fishing-view .fish-recipe-body{padding:14px}
+#fishing-view .fish-bait-tile-body h4,#fishing-view .fish-recipe-body h3{margin:0 0 7px;color:#34543d;font-size:17px}
+#fishing-view .fish-bait-tile-body p,#fishing-view .fish-recipe-body p{min-height:38px;margin:0 0 10px;color:#77836f;font-size:12px;line-height:1.6}
+#fishing-view .fish-bait-tile-body strong,#fishing-view .fish-recipe-body>strong{display:block;color:#58754f;font-size:12px}
+#fishing-view .fish-ui-button{display:block;width:calc(100% - 28px);margin:0 14px 14px;padding:11px 14px;border:1px solid #456b4d;border-radius:9px;background:linear-gradient(#668c60,#456d4e);color:white;font-weight:900;box-shadow:0 3px 0 #2f5037}
+#fishing-view .fish-ui-button:disabled{background:#dfe5d9;color:#87917e;box-shadow:none;cursor:not-allowed}
+#fishing-view .fish-recipe-body .fish-ui-button{width:100%;margin:12px 0 0}
+#fishing-view .fish-berry-stock{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:18px;padding:13px;border:1px solid #c6d3bd;border-radius:12px;background:#fffdf4}
+#fishing-view .fish-berry-stock strong{margin-right:5px;color:#466344;font-size:12px}#fishing-view .fish-berry-stock span{margin-right:auto;color:#8a967e;font-size:11px}
+#fishing-view .fish-berry-stock small{padding:6px 9px;border:1px solid #d3ddc9;border-radius:99px;background:#f1f4e9;color:#63775b;font-size:11px}
+#fishing-view .fish-field{color:#64745c}#fishing-view .fish-field select{width:100%;padding:9px;border:1px solid #c8d2bf;border-radius:8px;background:#fffef8;color:#405a43}
+#fishing-view .fish-locked-note{padding:9px;border:1px dashed #c7cbb8;border-radius:8px;background:#f3f1e6;color:#8b8c78;font-size:12px;text-align:center}
+#fishing-view .fish-achievement-total{display:flex;justify-content:center;align-items:baseline;gap:8px;margin:0 auto 20px;padding:14px;border:1px solid #c7d2bd;border-radius:12px;background:#fffdf5;color:#75846d}
+#fishing-view .fish-achievement-total strong{color:#426447;font-size:26px}
+#fishing-view .fish-achievement-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px}
+#fishing-view .fish-achievement-tile{display:flex;align-items:center;gap:13px;padding:14px;border:1px solid #cbd4c2;border-radius:12px;background:#fffdf5}
+#fishing-view .fish-achievement-tile.unlocked{border-color:#a6c29a;background:#fafff2}
+#fishing-view .fish-achievement-icon{display:grid;place-items:center;flex:0 0 54px;height:54px;border:1px solid #c6d2ba;border-radius:50%;background:#edf1e4;color:#65815b;font-size:23px}
+#fishing-view .fish-achievement-tile.unlocked .fish-achievement-icon{background:#f5edcf;color:#9a7936}
+#fishing-view .fish-achievement-tile h3{margin:3px 0;color:#3e5a41;font-size:15px}#fishing-view .fish-achievement-tile p{margin:0;color:#7d8875;font-size:11px;line-height:1.5}
+#fishing-view .fish-shop-balance{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding:15px 18px;border:1px solid #c6d2bc;border-radius:12px;background:#fffdf4;color:#71816a}
+#fishing-view .fish-shop-balance strong{color:#496e47;font-size:23px}
+#fishing-view .fish-empty-state{padding:34px 18px;border:1px dashed #c2cdb7;border-radius:12px;background:#fffdf5;color:#819078;font-size:13px;line-height:1.8;text-align:center}
+#fishing-view .fish-ranking-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}
+#fishing-view .fish-podium-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:18px 8px;border:1px solid #c6d1bc;border-radius:12px;background:#fffdf5;text-align:center}
+#fishing-view .fish-podium-card.rank-1{transform:translateY(-6px);border-color:#d2bd7d;background:linear-gradient(#fff9df,#fffdf5)}
+#fishing-view .fish-podium-medal{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#e8eddf;color:#597651;font-weight:900}
+#fishing-view .fish-podium-card strong{color:#3c5940;font-size:14px}.fish-podium-card b{color:#648050;font-size:15px}.fish-podium-card small{color:#89937f;font-size:10px}
+#fishing-view .fish-ranking-table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid #cbd4c1;border-radius:12px;background:#fffdf6}
+#fishing-view .fish-ranking-table th{padding:11px 9px;background:#4f7653;color:white;font-size:11px;text-align:left}
+#fishing-view .fish-ranking-table td{padding:10px 9px;border-top:1px solid #e5e9de;color:#52684e;font-size:12px}
+@media(max-width:560px){#fishing-view .fish-game-stats{gap:6px}#fishing-view .fish-game-stat{padding:10px 4px}#fishing-view .fish-game-stat strong{font-size:18px}#fishing-view .fish-ranking-podium{gap:5px}#fishing-view .fish-podium-card{padding:12px 3px}#fishing-view .fish-ranking-table th,#fishing-view .fish-ranking-table td{padding:7px 4px;font-size:10px}}
+
+
 /* Fish encyclopedia: collectible field-guide presentation */
 #fishing-view .fishbook-shell{padding:clamp(16px,3vw,30px);border:1px solid #b5c7a5;border-radius:18px;background:linear-gradient(145deg,#f7f4e8,#e9f0dc 58%,#f7f0dc);color:#294435;box-shadow:0 12px 34px #122b2518}
 #fishing-view .fishbook-heading{text-align:center;padding:8px 8px 18px}
