@@ -150,7 +150,7 @@
     const icon=input("text","例如：🎟️");icon.maxLength=12;
     const desc=el("textarea");desc.rows=2;desc.maxLength=500;desc.placeholder="玩家可见说明";
     const category=select([["消耗品","consumable"],["重要道具","important"]]);
-    const effect=select([["无效果（仅收藏）","none"],["抽取指定卡包","draw_pack"],["增加代币","grant_tokens"],["发放指定卡牌","grant_card"],["发放指定道具","grant_item"],["随机奖励（高级配置）","random_reward"],["选择奖励","choose_reward"]]);
+    const effect=select([["无效果（仅收藏）","none"],["抽取指定卡包","draw_pack"],["增加代币","grant_tokens"],["发放指定卡牌","grant_card"],["发放指定道具","grant_item"],["随机奖励（高级配置）","random_reward"],["选择奖励","choose_reward"],["SR / SSR 自选卡牌","select_card"]]);
     const config=el("div","acg-form-grid"),cf={};
     function buildConfig(){
       config.replaceChildren();
@@ -159,7 +159,7 @@
       else if(effect.value==="grant_tokens"){const n=input("number");n.min="1";n.step="1";n.value="100";add("amount","代币数量",n);}
       else if(effect.value==="grant_card"){add("card_id","指定卡牌",select(Object.values(cardsById).map(x=>[x.name+" · "+x.id,x.id])));const n=input("number");n.min="1";n.step="1";n.value="1";add("amount","发放数量",n);}
       else if(effect.value==="grant_item"){add("item_id","指定道具",select(items.map(x=>[x.name+" · "+x.item_id,x.item_id])));const n=input("number");n.min="1";n.step="1";n.value="1";add("amount","发放数量",n);}
-      else if(effect.value==="random_reward"||effect.value==="choose_reward"){const j=el("textarea");j.rows=7;j.value=JSON.stringify({options:[{reward_type:"tokens",amount:100,weight:1},{reward_type:"card",reward_id:"card_001",amount:1,weight:1}]},null,2);add("json","奖励选项 JSON",j);config.appendChild(el("p","pc-muted","请填写 options 数组。随机奖励的每个选项需要 weight；选择奖励不需要 weight。")) ;}
+      else if(effect.value==="select_card"){add("rarity","可选卡牌星级",select([["SR（4 星）","4"],["SSR（5 星）","5"]]));config.appendChild(el("p","pc-muted","玩家使用时会从已同步且开放的卡牌目录中选择一张对应星级卡牌。"));}else if(effect.value==="random_reward"||effect.value==="choose_reward"){const j=el("textarea");j.rows=7;j.value=JSON.stringify({options:[{reward_type:"tokens",amount:100,weight:1},{reward_type:"card",reward_id:"card_001",amount:1,weight:1}]},null,2);add("json","奖励选项 JSON",j);config.appendChild(el("p","pc-muted","请填写 options 数组。随机奖励的每个选项需要 weight；选择奖励不需要 weight。")) ;}
       else config.appendChild(el("p","pc-muted","该道具不会执行自动效果。"));
     }
     effect.addEventListener("change",buildConfig);category.addEventListener("change",()=>{const important=category.value==="important";effect.disabled=important;if(important)effect.value="none";buildConfig();});buildConfig();
@@ -174,6 +174,7 @@
         else if(effect.value==="grant_tokens")cfg={amount:Number(cf.amount.value)};
         else if(effect.value==="grant_card")cfg={card_id:cf.card_id.value,amount:Number(cf.amount.value)};
         else if(effect.value==="grant_item")cfg={item_id:cf.item_id.value,amount:Number(cf.amount.value)};
+        else if(effect.value==="select_card")cfg={rarity:Number(cf.rarity.value)};
         else if(effect.value==="random_reward"||effect.value==="choose_reward")cfg=JSON.parse(cf.json.value);
       }catch(error){status(msg,"效果配置格式错误："+error.message,true);return;}
       save.disabled=true;status(msg,"正在保存道具……");
