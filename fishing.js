@@ -261,13 +261,145 @@
     shell.append(head,summary,grid);host.append(shell);
   }
   function renderShop(){
-    const host=$("fish-shop");host.replaceChildren();const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
-    head.append(el("p","fish-kicker","LAKESIDE TRADING POST · EXCHANGE"),el("h2","","钓场商店"),el("p","","用钓鱼积分兑换鱼饵补给。兑换成功后，鱼饵会直接存入你的钓场仓库。"));
+    const host=$("fish-shop");host.replaceChildren();
+    const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
+    head.append(el("p","fish-kicker","LAKESIDE TRADING POST · EXCHANGE"),el("h2","","钓场商店"),el("p","","使用钓鱼积分兑换鱼饵、网站代币、卡牌与收藏道具。兑换奖励会直接进入对应仓库。"));
     const balance=el("div","fish-shop-balance");balance.append(el("span","","当前钓鱼积分"),el("strong","",Number(state.dashboard.stats?.points||0).toLocaleString("zh-CN")+" P"));
     const grid=el("div","fish-game-grid"),products=state.dashboard.shop||[];
-    products.forEach((p,i)=>{const c=el("article","fish-recipe-card"),art=el("div","fish-recipe-art");art.append(el("small","","SPECIAL ITEM 0"+(i+1)),el("b","",p.icon||"🎁"));const body=el("div","fish-recipe-body");body.append(el("h3","",p.product_name),el("p","",p.description),el("strong","","价格 "+Number(p.price_points).toLocaleString("zh-CN")+" P"));const cfg=p.reward_config||{},bait=state.baits.find(x=>x.bait_id===cfg.bait_id);if(bait)body.append(el("small","fish-shop-stock","兑换内容："+bait.bait_name+" ×"+cfg.quantity));body.append(el("small","fish-shop-stock",p.stock_limit==null?"库存充足":"剩余库存 "+Math.max(0,p.stock_limit-p.stock_sold)));const btn=el("button","fish-ui-button","兑换商品");btn.type="button";btn.disabled=Number(state.dashboard.stats?.points||0)<Number(p.price_points)||(p.stock_limit!==null&&p.stock_limit!==undefined&&p.stock_sold>=p.stock_limit);btn.addEventListener("click",async()=>{if(!confirm("确定花费 "+Number(p.price_points).toLocaleString("zh-CN")+" 钓鱼积分兑换「"+p.product_name+"」吗？"))return;btn.disabled=true;btn.textContent="兑换中…";try{const result=await rpc("fishing_redeem_shop",{p_product_id:p.product_id,p_request_id:uuid()});status("兑换成功！已获得鱼饵，剩余积分 "+Number(result.remaining_points??state.dashboard.stats.points-Number(p.price_points)).toLocaleString("zh-CN")+"。");await loadDashboard();renderShop();renderOverview();}catch(e){status("兑换失败："+e.message,true);btn.disabled=false;btn.textContent="兑换商品";}});body.append(btn);c.append(art,body);grid.append(c);});
+    const rewardLabel=(p)=>{
+      const cfg=p.reward_config||{};
+      if(p.reward_type==="bait"){const bait=state.baits.find(x=>x.bait_id===cfg.bait_id);return "鱼饵："+(bait?.bait_name||cfg.bait_id||"未知")+" ×"+(cfg.quantity||0);}
+      if(p.reward_type==="tokens")return "网站代币 ×"+(cfg.amount||0);
+      if(p.reward_type==="card")return "卡牌："+(cardsByIdForShop[cfg.card_id]||cfg.card_id||"未知")+" ×"+(cfg.amount||0);
+      if(p.reward_type==="item")return "道具："+(cfg.item_id||"未知")+" ×"+(cfg.amount||0);
+      return "奖励配置待确认";
+    };
+    const cardsByIdForShop=Object.fromEntries((state.shopCards||[]).map(c=>[c.card_id,c.card_name||c.card_id]));
+    products.forEach((p,i)=>{
+      const c=el("article","fish-recipe-card"),art=el("div","fish-recipe-art");
+      art.append(el("small","","SPECIAL ITEM 0"+(i+1)),el("b","",p.icon||"🎁"));
+      const body=el("div","fish-recipe-body");
+      body.append(el("h3","",p.product_name),el("p","",p.description),el("strong","","价格 "+Number(p.price_points).toLocaleString("zh-CN")+" P"));
+      body.append(el("small","fish-shop-stock","兑换内容："+rewardLabel(p)));
+      body.append(el("small","fish-shop-stock",p.stock_limit==null?"库存充足":"剩余库存 "+Math.max(0,p.stock_limit-p.stock_sold)));
+      if(p.per_player_limit!=null)body.append(el("small","fish-shop-stock","每人限购 "+p.per_player_limit+" 次"));
+      const btn=el("button","fish-ui-button","兑换商品");btn.type="button";
+      btn.disabled=Number(state.dashboard.stats?.points||0)<Number(p.price_points)||(p.stock_limit!==null&&p.stock_limit!==undefined&&p.stock_sold>=p.stock_limit);
+      btn.addEventListener("click",async()=>{
+        if(!confirm("确定花费 "+Number(p.price_points).toLocaleString("zh-CN")+" 钓鱼积分兑换「"+p.product_name+"」吗？"))return;
+        btn.disabled=true;btn.textContent="兑换中…";
+        try{
+          const result=await rpc("fishing_redeem_shop",{p_product_id:p.product_id,p_request_id:uuid()});
+          const r=result.reward||{};
+          const detail=r.granted_tokens?"获得网站代币 ×"+r.granted_tokens:
+            r.granted_card_id?"获得卡牌 "+(cardsByIdForShop[r.granted_card_id]||r.granted_card_id)+" ×"+r.granted_amount:
+            r.granted_item_id?"获得道具 "+r.granted_item_id+" ×"+r.granted_amount:
+            r.granted_bait_id?"获得鱼饵 "+r.granted_bait_id+" ×"+r.granted_amount:"奖励已发放";
+          status("兑换成功！"+detail+"。剩余钓鱼积分 "+Number(result.remaining_points??0).toLocaleString("zh-CN")+"。");
+          await loadDashboard();renderShop();renderOverview();
+        }catch(e){status("兑换失败："+e.message,true);btn.disabled=false;btn.textContent="兑换商品";}
+      });
+      body.append(btn);c.append(art,body);grid.append(c);
+    });
     if(!products.length)grid.append(el("div","fish-empty-state","商店货架暂时空着。"));
     shell.append(head,balance,grid);host.append(shell);
+
+    if(state.dashboard.is_admin){
+      const admin=panel("商店管理","管理员可在这里新增、编辑、上下架商品。奖励类型会在保存时由服务器验证。");
+      const form=el("form","admin-form-grid");
+      const field=(label,node,wide=false)=>{const wrap=el("div","field"+(wide?" wide":""));wrap.append(el("label","",label),node);form.append(wrap);return node;};
+      const productId=field("商品编号（新增时填写；编辑时不可修改）",el("input"));
+      productId.placeholder="例如 fishing_exclusive_card";productId.maxLength=80;productId.required=true;
+      const name=field("商品名称",el("input"));name.maxLength=80;name.required=true;
+      const icon=field("图标",el("input"));icon.value="🎁";icon.maxLength=12;
+      const price=field("兑换价格（钓鱼积分）",el("input"));price.type="number";price.min="1";price.step="1";price.required=true;
+      const type=field("奖励类型",el("select"));
+      [["鱼饵","bait"],["网站代币","tokens"],["指定卡牌","card"],["现有道具","item"]].forEach(([t,v])=>type.add(new Option(t,v)));
+      const desc=field("商品说明",el("textarea"),true);desc.rows=2;desc.maxLength=500;
+      const configBox=el("div","admin-form-grid");configBox.className="admin-form-grid wide";form.append(configBox);
+      const stock=field("总库存（留空为不限量）",el("input"));stock.type="number";stock.min="0";stock.placeholder="不限量";
+      const limit=field("每人限购（留空为不限购）",el("input"));limit.type="number";limit.min="1";limit.placeholder="不限购";
+      const order=field("排序",el("input"));order.type="number";order.step="1";order.value="0";
+      const activeWrap=el("label","");activeWrap.style.display="flex";activeWrap.style.alignItems="center";activeWrap.style.gap="8px";
+      const active=el("input");active.type="checkbox";active.checked=true;activeWrap.append(active,el("span","","上架 / 启用"));form.append(activeWrap);
+      const save=el("button","primary","保存商品");save.type="submit";form.append(save);
+      const configFields={};
+      function buildRewardConfig(existing={}){
+        configBox.replaceChildren();Object.keys(configFields).forEach(k=>delete configFields[k]);
+        const add=(key,label,kind="text",options=null)=>{
+          const wrap=el("div","field");wrap.append(el("label","",label));
+          let input=kind==="select"?el("select"):el("input");
+          if(kind!=="select")input.type=kind;
+          if(options)options.forEach(([t,v])=>input.add(new Option(t,v)));
+          if(kind==="number"){input.min="1";input.step="1";}
+          input.value=existing[key]==null?"":String(existing[key]);
+          wrap.append(input);configBox.append(wrap);configFields[key]=input;
+        };
+        const t=type.value;
+        if(t==="bait")add("bait_id","选择鱼饵","select",state.baits.map(b=>[b.bait_name,b.bait_id]));
+        if(t==="tokens")add("amount","网站代币数量","number");
+        if(t==="card")add("card_id","选择卡牌","select",(state.shopCards||[]).map(c=>[(c.card_name||c.card_id)+" · "+c.card_id,c.card_id]));
+        if(t==="item")add("item_id","选择道具","select",(state.shopItems||[]).map(x=>[x.name+" · "+x.item_id,x.item_id]));
+        if(t==="bait")add("quantity","鱼饵数量","number");
+        if(t==="card"||t==="item")add("amount","发放数量","number");
+      }
+      type.addEventListener("change",()=>buildRewardConfig());
+      buildRewardConfig();
+      let editing=false;
+      form.addEventListener("submit",async event=>{
+        event.preventDefault();
+        let cfg={};
+        if(type.value==="bait")cfg={bait_id:configFields.bait_id.value,quantity:Number(configFields.quantity.value)};
+        if(type.value==="tokens")cfg={amount:Number(configFields.amount.value)};
+        if(type.value==="card")cfg={card_id:configFields.card_id.value,amount:Number(configFields.amount.value)};
+        if(type.value==="item")cfg={item_id:configFields.item_id.value,amount:Number(configFields.amount.value)};
+        if(!productId.value.trim()||!name.value.trim()||!Number(price.value)){status("请填写商品编号、名称和有效价格。",true);return;}
+        save.disabled=true;
+        try{
+          await rpc("fishing_admin_save_shop_product",{
+            p_product_id:productId.value.trim(),p_product_name:name.value.trim(),
+            p_description:desc.value,p_icon:icon.value||"🎁",p_price_points:Number(price.value),
+            p_reward_type:type.value,p_reward_config:cfg,
+            p_stock_limit:stock.value===""?null:Number(stock.value),
+            p_per_player_limit:limit.value===""?null:Number(limit.value),
+            p_is_active:active.checked,p_sort_order:Number(order.value)||0
+          });
+          status("商品已保存。");await loadDashboard();renderShop();
+        }catch(e){status("保存商品失败："+e.message,true);save.disabled=false;}
+      });
+      const list=el("div","");
+      const reload=async()=>{
+        try{
+          const rows=await rpc("fishing_admin_list_shop",{});
+          list.replaceChildren();
+          rows.forEach(p=>{
+            const row=el("div","admin-record"),main=el("div","admin-record-main");
+            main.append(el("strong","",(p.icon||"🎁")+" "+p.product_name),
+              el("div","hint",p.product_id+" · "+p.reward_type+" · "+p.price_points+" P · "+(p.is_active?"上架":"已下架")));
+            const actions=el("div","admin-record-actions"),edit=el("button","","编辑");
+            edit.type="button";edit.addEventListener("click",()=>{
+              editing=true;productId.value=p.product_id;productId.readOnly=true;
+              name.value=p.product_name;desc.value=p.description||"";icon.value=p.icon||"🎁";
+              price.value=p.price_points;type.value=p.reward_type;active.checked=p.is_active;
+              stock.value=p.stock_limit==null?"":p.stock_limit;limit.value=p.per_player_limit==null?"":p.per_player_limit;
+              order.value=p.sort_order||0;buildRewardConfig(p.reward_config||{});
+              save.textContent="保存修改";form.scrollIntoView({behavior:"smooth",block:"center"});
+            });
+            const toggle=el("button","","下架/上架");toggle.type="button";
+            toggle.addEventListener("click",async()=>{
+              try{await rpc("fishing_admin_save_shop_product",{
+                p_product_id:p.product_id,p_product_name:p.product_name,p_description:p.description||"",
+                p_icon:p.icon||"🎁",p_price_points:p.price_points,p_reward_type:p.reward_type,
+                p_reward_config:p.reward_config||{},p_stock_limit:p.stock_limit,
+                p_per_player_limit:p.per_player_limit,p_is_active:!p.is_active,p_sort_order:p.sort_order||0
+              });await loadDashboard();renderShop();}catch(e){status("更新商品状态失败："+e.message,true);}
+            });
+            actions.append(edit,toggle);row.append(main,actions);list.append(row);
+          });
+        }catch(e){list.append(el("p","hint","商品目录读取失败："+e.message));}
+      };
+      admin.append(form,el("h4","","已登记商品"),list);shell.append(admin);void reload();
+    }
   }
   async function renderLeaderboard(){
     const host=$("fish-leaderboard");host.replaceChildren();const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
