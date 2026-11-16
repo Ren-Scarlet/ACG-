@@ -651,7 +651,7 @@
     titleSelect.value=profile?.selected_title||"";
     badgeWrap.replaceChildren();
     const selected=new Set(profile?.selected_badges||[]);
-    available.forEach(item=>{
+    available.forEach((item,index)=>{
       const label=node("label","pc-badge-choice");
       const checkbox=node("input");checkbox.type="checkbox";checkbox.value=item.id;checkbox.checked=selected.has(item.id);
       checkbox.addEventListener("change",()=>{
