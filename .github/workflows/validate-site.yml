@@ -101,5 +101,10 @@ jobs:
               assert f"'{name}'" in preflight, f"Preflight missing table: {name}"
           for name in ["admin_save_item", "use_inventory_item", "admin_send_mail", "player_claim_mail"]:
               assert f"'{name}'" in preflight, f"Preflight missing function: {name}"
-          print("Key draw, item workshop, mailbox and reward functions are represented in preflight.")
+          seasons = Path("supabase/monthly-seasons-v1.sql").read_text(encoding="utf-8")
+          for name in ["match_seasons", "season_player_stats", "season_rank_rewards", "season_player_settlements"]:
+              assert f"public.{name}" in seasons, f"Missing season table: {name}"
+          for name in ["sync_season_match_result", "admin_save_season_rank_reward", "admin_settle_monthly_season", "run_monthly_season_rollover", "player_list_my_seasons", "admin_resend_season_reward"]:
+              assert f"function public.{name}" in seasons, f"Missing season function: {name}"
+          print("Key draw, item workshop, mailbox, reward and monthly season functions are represented in source.")
           PY
