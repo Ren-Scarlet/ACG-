@@ -31,7 +31,8 @@ create table if not exists public.season_rank_rewards (
   mail_body text not null default '感谢参与本月赛季，以下是你的段位奖励。',
   is_enabled boolean not null default true,
   updated_at timestamptz not null default now(),
-  constraint season_rank_rewards_attachments_array check(jsonb_typeof(reward_attachments)='array')
+  constraint season_rank_rewards_attachments_array check(jsonb_typeof(reward_attachments)='array'),
+  constraint season_rank_rewards_min_wins_unique unique(min_wins)
 );
 
 create table if not exists public.season_player_settlements (
@@ -438,7 +439,7 @@ begin
   if auth.uid() is null then raise exception '请先登录'; end if;
   return query
   select ps.season_key,ps.games_played,ps.wins,ps.losses,
-    coalesce(sp.rank_name,rr.rank_name),
+    case when sp.season_key is not null then sp.rank_name else rr.rank_name end,
     s.status,s.settled_at
   from public.season_player_stats ps
   join public.match_seasons s on s.season_key=ps.season_key
