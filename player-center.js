@@ -316,28 +316,12 @@
       return;
     }
     view.classList.remove("hidden");
-    // Re-check Supabase directly when opening the center. The account panel and
-    // player center can initialize at slightly different times during session restore.
-    contentEl.replaceChildren(node("div","pc-empty","正在确认登录状态……"));
-    pcLayout.classList.remove("hidden");
-    personalEl.classList.remove("hidden");
-    (async()=>{
-      try{
-        await withTimeout(initialSessionReady,12000,"登录状态读取超时，请刷新页面后重试。");
-        // onSession is the single source of truth. Calling getSession again here
-        // can contend with Supabase's auth lock while INITIAL_SESSION is restoring.
-        if(currentPage!==page)return;
-        if(currentUser)await loadPage(page);
-        else{
-          contentEl.replaceChildren(node("div","pc-empty","请先登录账号，再使用抽卡和个人资料功能。"));
-          setStatus("尚未检测到有效登录状态，请先在账号页面确认登录。",false);
-        }
-      }catch(error){
-        if(currentPage!==page)return;
-        contentEl.replaceChildren(node("div","pc-empty","登录状态确认失败："+error.message));
-        setStatus("无法确认登录状态，请稍后重试。",true);
-      }
-    })();
+    if (currentUser) loadPage(page);
+    else {
+      contentEl.replaceChildren(node("div","pc-empty","请先登录账号，再使用抽卡和个人资料功能。"));
+      pcLayout.classList.remove("hidden");
+      personalEl.classList.remove("hidden");
+    }
   }
   tab.addEventListener("click",()=>showCenter("overview"));
   // Direct entry from the homepage avoids showing the overview before the requested page.
@@ -1344,7 +1328,7 @@
     loginHint.textContent="已登录。以下内容仅本人可查看。";
     view.querySelector("#pc-public-name").value=currentUser.user_metadata?.username||"";
     // Only a real sign-in / account switch initializes data. Token refreshes must not reopen the last page.
-    if (userChanged && event!=="INITIAL_SESSION" && !drawSessionGatePending && (currentPage==="draw" || !view.classList.contains("hidden"))) await loadPage(currentPage);
+    if (userChanged && !drawSessionGatePending && (currentPage==="draw" || !view.classList.contains("hidden"))) await loadPage(currentPage);
     if (userChanged) await checkAdmin();
   }
 
@@ -2368,12 +2352,13 @@
   });
 
     loadCardNames();
-  // Subscribe to the single auth state published by auth.js. Do not call
-  // getSession() or register a second Supabase auth listener in this module.
-  window.addEventListener("acg-auth-session",event=>{
-    void onSession(event.detail?.session||null,"AUTH_SESSION_EVENT");
+  // Restore the player-center auth initialization that was in use before
+  // the experimental shared-session bridge. Keep this path independent.
+  client.auth.onAuthStateChange((event,session)=>{
+    setTimeout(()=>{ void onSession(session,event); },0);
   });
-  if(window.acgAuthSessionReady){
-    void onSession(window.acgAuthSession||null,"INITIAL_SESSION");
-  }
+  client.auth.getSession().then(({data,error})=>{
+    if(error){setStatus("无法读取登录状态："+error.message,true);markInitialSessionReady();return;}
+    void onSession(data?.session||null,"INITIAL_SESSION");
+  });
 })();
