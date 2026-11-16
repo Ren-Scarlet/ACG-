@@ -500,6 +500,42 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
 #fishing-view .fish-table{width:100%;border-collapse:collapse}
 #fishing-view .fish-table th,#fishing-view .fish-table td{padding:9px;text-align:left;border:1px solid #7dcce4}
 #fishing-view .fish-table th{background:#0756a6;color:white}
+
+/* Fish encyclopedia: collectible field-guide presentation */
+#fishing-view .fishbook-shell{padding:clamp(16px,3vw,30px);border:1px solid #b5c7a5;border-radius:18px;background:linear-gradient(145deg,#f7f4e8,#e9f0dc 58%,#f7f0dc);color:#294435;box-shadow:0 12px 34px #122b2518}
+#fishing-view .fishbook-heading{text-align:center;padding:8px 8px 18px}
+#fishing-view .fishbook-eyebrow{margin:0 0 8px;color:#71896c;font-size:10px;font-weight:900;letter-spacing:.24em}
+#fishing-view .fishbook-title{margin:0;color:#294c3a;font-family:Georgia,"Microsoft YaHei",serif;font-size:clamp(25px,4vw,36px);letter-spacing:.08em}
+#fishing-view .fishbook-subtitle{margin:9px auto 0;max-width:560px;color:#6e806e;font-size:13px;line-height:1.7}
+#fishing-view .fishbook-progress{max-width:620px;margin:0 auto 20px;padding:14px 17px;border:1px solid #c4d0b8;border-radius:12px;background:#fffdf4}
+#fishing-view .fishbook-progress-copy{display:flex;justify-content:space-between;gap:12px;color:#667b62;font-size:13px}
+#fishing-view .fishbook-progress-copy strong{color:#345b42;font-size:14px}
+#fishing-view .fishbook-progress-track{height:8px;margin-top:10px;overflow:hidden;border-radius:20px;background:#e1e8d8}
+#fishing-view .fishbook-progress-track span{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#80a879,#d1b86c);transition:width .3s ease}
+#fishing-view .fishbook-filters{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+#fishing-view .fishbook-filters button{padding:8px 17px;border:1px solid #b6c8ae;border-radius:999px;background:#fdfcf4;color:#557052;font-size:12px;font-weight:800}
+#fishing-view .fishbook-filters button.active{border-color:#456d50;background:#456d50;color:#fff;box-shadow:0 3px 0 #294b37}
+#fishing-view .fishbook-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:14px}
+#fishing-view .fishbook-card{overflow:hidden;border:1px solid #c5d0b9;border-radius:14px;background:#fffdf6;box-shadow:0 5px 14px #344d3210;transition:transform .18s ease,box-shadow .18s ease}
+#fishing-view .fishbook-card:hover{transform:translateY(-3px);box-shadow:0 10px 20px #344d3220}
+#fishing-view .fishbook-art{position:relative;display:grid;place-items:center;min-height:145px;overflow:hidden;background:radial-gradient(ellipse at 50% 65%,#d4e6d0 0,#edf1df 48%,#d9e5d1 100%)}
+#fishing-view .fishbook-art:before,#fishing-view .fishbook-art:after{content:"";position:absolute;width:180px;height:55px;border:1px solid #9ebd9a66;border-radius:50%;transform:rotate(-15deg)}
+#fishing-view .fishbook-art:after{width:230px;height:75px;transform:rotate(12deg)}
+#fishing-view .fishbook-fish-mark{position:relative;z-index:1;display:grid;place-items:center;width:88px;height:88px;border:1px solid #a8bea0;border-radius:50%;background:#f8f8e9;color:#587c59;font-size:48px;filter:drop-shadow(0 5px 4px #49664b22)}
+#fishing-view .fishbook-card.is-unknown .fishbook-fish-mark{border-style:dashed;background:#e7eadc;color:#87937e;font-size:34px}
+#fishing-view .fishbook-number{position:absolute;top:12px;left:13px;color:#71876b;font-size:10px;font-weight:900;letter-spacing:.12em}
+#fishing-view .fishbook-seal{position:absolute;right:10px;bottom:10px;padding:5px 9px;border:1px solid #b7c8ae;border-radius:99px;background:#fffdf0;color:#587653;font-size:10px;font-weight:900}
+#fishing-view .fishbook-card.is-unknown .fishbook-seal{color:#8b8f7d;background:#f1f0e7}
+#fishing-view .fishbook-card-info{padding:13px 15px 15px}
+#fishing-view .fishbook-category{margin:0 0 5px;color:#8b9a7d;font-size:10px;font-weight:900;letter-spacing:.12em}
+#fishing-view .fishbook-fish-name{margin:0;color:#304d39;font-size:17px}
+#fishing-view .fishbook-catch-count{margin:7px 0 0;color:#71806a;font-size:12px}
+#fishing-view .fishbook-facts{display:grid;grid-template-columns:1fr auto;gap:6px 10px;margin-top:12px;padding-top:10px;border-top:1px solid #e3e8dc;color:#75836f;font-size:11px}
+#fishing-view .fishbook-facts strong{color:#456849;font-size:12px;text-align:right}
+#fishing-view .fishbook-locked-copy{margin:10px 0 0;color:#8a907f;font-size:12px;line-height:1.6}
+#fishing-view .fishbook-empty{grid-column:1/-1;padding:28px;text-align:center;color:#71806a}
+@media(max-width:560px){#fishing-view .fishbook-shell{padding:13px}#fishing-view .fishbook-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}#fishing-view .fishbook-art{min-height:118px}#fishing-view .fishbook-fish-mark{width:68px;height:68px;font-size:38px}#fishing-view .fishbook-card-info{padding:10px}#fishing-view .fishbook-fish-name{font-size:14px}#fishing-view .fishbook-progress{padding:11px}}
+
 @media(max-width:650px){#fishing-view .fish-stat-grid{grid-template-columns:1fr 1fr}}
 </style>
 <style>
