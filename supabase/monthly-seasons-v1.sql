@@ -14,7 +14,7 @@ create table if not exists public.match_seasons (
 
 create table if not exists public.season_player_stats (
   season_key text not null references public.match_seasons(season_key) on delete restrict,
-  user_id uuid not null references public.profiles(id) on delete cascade,
+  user_id uuid not null,
   games_played integer not null default 0 check (games_played >= 0),
   wins integer not null default 0 check (wins >= 0),
   losses integer not null default 0 check (losses >= 0),
