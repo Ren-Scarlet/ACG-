@@ -532,7 +532,9 @@
           if(useError)throw useError;
           try{localStorage.removeItem(key);}catch(_){}
           overlay.remove();overlay=null;
-          setStatus("自选成功！「"+(selected.name||selected.id)+"」已加入你的卡牌收藏。",false);
+          const grantedId=result?.result?.reward_id||selected.id;
+          const grantedCard=cardsById[grantedId]||{id:grantedId,name:grantedId};
+          setStatus("自选成功！「"+(grantedCard.name||grantedId)+"」已加入你的卡牌收藏。",false);
           try{await loadPage("inventory");}catch(refreshError){setStatus("卡牌已成功加入收藏，但仓库刷新失败；重新打开仓库即可看到。",true);}
         }catch(error){confirm.disabled=false;close.disabled=false;confirm.textContent="确认选择并使用";setStatus("使用自选卷失败："+error.message,true);}
       });
