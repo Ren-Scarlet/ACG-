@@ -286,14 +286,16 @@
   async function showPublicProfile(username) {
     const result = view.querySelector("#pc-public-result");
     result.replaceChildren(node("p","pc-muted","正在查询……"));
-    let {data,error} = await client.from("public_profiles")
+    const publicResponse = await client.from("public_profiles")
       .select("username,player_number,player_id,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate")
       .eq("player_id",username).maybeSingle();
+    let data=publicResponse?.data??null;
+    let error=publicResponse?.error??null;
     if(!error&&!data){
       const fallback=await client.from("public_profiles")
         .select("username,player_number,player_id,created_at,selected_title,selected_badges,games_played,wins,losses,win_rate")
         .eq("username",username.toLowerCase()).maybeSingle();
-      data=fallback.data;error=fallback.error;
+      data=fallback?.data??null;error=fallback?.error??null;
     }
     result.replaceChildren();
     if (error) { result.appendChild(node("p","pc-empty","查询失败："+error.message)); return; }
@@ -326,8 +328,9 @@
     const s=stats||{tokens:0,games_played:0,wins:0,losses:0};
     let titleName="尚未设置称号";
     if(profile?.selected_title){const titleResult=await client.from("achievements").select("name").eq("id",profile.selected_title).maybeSingle();if(titleResult.error)throw titleResult.error;titleName=titleResult.data?.name||"已设置称号";}
-    const {data:publicIdData,error:publicIdError}=await client.from("public_profiles").select("player_id").eq("username",profile?.username||"").maybeSingle();
-    if(publicIdError)throw publicIdError;
+    const publicIdResponse=await client.from("public_profiles").select("player_id").eq("username",profile?.username||"").maybeSingle();
+    if(publicIdResponse?.error)throw publicIdResponse.error;
+    const publicIdData=publicIdResponse?.data??null;
     contentEl.replaceChildren(node("h3","",(publicIdData?.player_id||profile?.username||"玩家")+(profile?.player_number?" · "+profile.player_number:"")));
     contentEl.appendChild(node("p","pc-muted",titleName+" · 加入于 "+(profile?.created_at?new Date(profile.created_at).toLocaleDateString("zh-CN"):"未知")));
     const rate=s.games_played?(s.wins*100/s.games_played).toFixed(1)+"%":"0.0%";
