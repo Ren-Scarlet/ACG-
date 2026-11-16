@@ -219,7 +219,15 @@
       if(!rows.length)host.append(el("p","hint","还没有钓鱼记录。"));
     }catch(e){host.replaceChildren(el("p","hint","排行榜读取失败："+e.message));}
   }
+  client.auth.onAuthStateChange((_event,session)=>{
+    if(session?.user){
+      setTimeout(()=>{void loadDashboard().then(()=>{if(!root.classList.contains("hidden"))setSubpage("overview");}).catch(e=>status("钓场初始化失败："+e.message,true));},0);
+    }else{
+      state.dashboard=null;
+      status("请先登录账号，再进入钓场。",true);
+    }
+  });
   root.querySelectorAll("[data-fishing-page]").forEach(b=>b.addEventListener("click",()=>setSubpage(b.dataset.fishingPage)));
   window.acgOpenFishing=async()=>{document.getElementById("tab-fishing")?.click();};
-  (async()=>{try{await loadDashboard();setSubpage("overview");}catch(e){status("钓场初始化失败："+e.message,true);}})();
+  (async()=>{try{const {data}=await client.auth.getSession();if(data?.session){await loadDashboard();setSubpage("overview");}else status("请先登录账号，再进入钓场。",true);}catch(e){status("钓场初始化失败："+e.message,true);}})();
 })();
