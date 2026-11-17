@@ -222,6 +222,64 @@
     #builder-view .rule-warning{color:#a32132!important;font-weight:800!important}
     #builder-view .status.good{color:#17613b!important;font-weight:800!important}
     #builder-view .status.bad{color:#a32132!important;font-weight:800!important}
+
+    /* Keep card details and the effect-preview control readable in narrow builder columns */
+    #builder-view .builder-card{
+      display:grid!important;
+      grid-template-columns:46px minmax(0,1fr)!important;
+      align-items:start!important;
+      column-gap:9px!important;
+      row-gap:8px!important;
+      min-width:0!important;
+    }
+    #builder-view .builder-card>img{
+      grid-column:1!important;
+      grid-row:1 / span 2!important;
+      width:46px!important;
+      align-self:start!important;
+    }
+    #builder-view .builder-card-main{
+      grid-column:2!important;
+      grid-row:1!important;
+      width:100%!important;
+      min-width:0!important;
+      overflow-wrap:anywhere!important;
+    }
+    #builder-view .builder-card-main strong,
+    #builder-view .builder-card-main small{
+      display:block!important;
+      white-space:normal!important;
+      line-height:1.45!important;
+    }
+    #builder-view .builder-effect-preview{
+      display:inline-flex!important;
+      width:max-content!important;
+      max-width:100%!important;
+      min-width:0!important;
+      flex:0 0 auto!important;
+      align-self:flex-start!important;
+      white-space:nowrap!important;
+      word-break:keep-all!important;
+      overflow-wrap:normal!important;
+      writing-mode:horizontal-tb!important;
+      padding:6px 10px!important;
+      margin-top:8px!important;
+      line-height:1.35!important;
+      font-size:12px!important;
+    }
+    #builder-view .builder-count{
+      grid-column:2!important;
+      grid-row:2!important;
+      justify-self:end!important;
+      align-self:center!important;
+      min-width:0!important;
+    }
+    @media(max-width:520px){
+      #builder-view .builder-card{grid-template-columns:42px minmax(0,1fr)!important;column-gap:8px!important}
+      #builder-view .builder-card>img{width:42px!important}
+      #builder-view .builder-effect-preview{font-size:11px!important;padding:5px 8px!important}
+    }
+
     #builder-view .builder-filter-panel{border-radius:12px!important}
 
     /* ACG HUB Persona-style home */
