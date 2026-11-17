@@ -8,6 +8,11 @@ begin;
 revoke all on function public.fishing_start_cast(text,uuid)
   from public,anon,authenticated;
 
+-- Expose the complete V2 fish catalogue only as the V2 client becomes active.
+-- The legacy cast RPC is disabled in this same transaction, so old clients cannot
+-- bypass weather/hidden-fish conditions against the newly activated species.
+update public.fishing_fish_catalog set is_active=true where v2_available=true;
+
 -- Preserve purchase/redemption history and existing bait inventories.
 update public.fishing_shop_catalog
 set is_active=false
