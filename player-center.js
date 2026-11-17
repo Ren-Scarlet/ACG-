@@ -430,11 +430,17 @@
       summary.textContent=category.label+" · 持有 "+total+" 种";
       if(!total){host.appendChild(node("div","pc-empty",myWarehouseCategory==="consumables"?"你还没有获得消耗品。":"你还没有获得重要道具。"));return;}
       if(showTicket){
-        const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",TREE_FRUIT_TICKET.icon);
-        icon.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
-        const info=node("div","pc-card-info");info.append(node("strong","",TREE_FRUIT_TICKET.name),node("small","",TREE_FRUIT_TICKET.description),node("small","","持有数量：× "+ticketQty));
-        const controls=node("div","pc-ticket-use-controls"),countInput=node("input");countInput.type="number";countInput.min="1";countInput.max=String(Math.max(Math.min(20,ticketQty),pendingCount));countInput.step="1";countInput.value=hasPendingTicketUse&&pendingCount>0?String(pendingCount):"1";countInput.setAttribute("aria-label","使用树果卷数量");countInput.style.cssText="width:76px;min-width:76px;padding:8px;text-align:center";
-        const use=node("button","primary",hasPendingTicketUse?"重试上次使用":"批量使用");use.type="button";use.addEventListener("click",()=>useTreeFruitTicket(use,countInput.value));controls.append(countInput,use);row.append(icon,info,controls);host.appendChild(row);
+        const row=node("article","pc-inventory-card pc-tree-fruit-ticket"),icon=node("div","pc-consumable-icon",TREE_FRUIT_TICKET.icon);
+        row.style.cssText="grid-column:1/-1!important;display:grid!important;grid-template-columns:58px minmax(0,1fr) auto!important;align-items:center!important;gap:14px!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;padding:14px!important;min-height:112px!important";
+        icon.style.cssText="width:58px;height:58px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
+        const info=node("div","pc-card-info");info.style.cssText="min-width:0!important;width:100%!important;overflow-wrap:anywhere!important";
+        const ticketName=node("strong","",TREE_FRUIT_TICKET.name);ticketName.style.cssText="display:block!important;font-size:16px!important;line-height:1.4!important;white-space:nowrap!important";
+        const ticketDescription=node("small","",TREE_FRUIT_TICKET.description);ticketDescription.style.cssText="display:block!important;font-size:12px!important;line-height:1.6!important;overflow-wrap:anywhere!important;margin-top:5px!important";
+        const ticketQuantity=node("small","","持有数量：× "+ticketQty);ticketQuantity.style.cssText="display:block!important;font-size:12px!important;line-height:1.5!important;margin-top:5px!important;font-weight:700!important";
+        info.append(ticketName,ticketDescription,ticketQuantity);
+        const controls=node("div","pc-ticket-use-controls");controls.style.cssText="display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;flex:0 0 auto!important;white-space:nowrap!important";
+        const countInput=node("input");countInput.type="number";countInput.min="1";countInput.max=String(Math.max(Math.min(20,ticketQty),pendingCount));countInput.step="1";countInput.value=hasPendingTicketUse&&pendingCount>0?String(pendingCount):"1";countInput.setAttribute("aria-label","使用树果卷数量");countInput.style.cssText="width:76px!important;min-width:76px!important;max-width:76px!important;padding:9px 6px!important;text-align:center!important;box-sizing:border-box!important;margin:0!important";
+        const use=node("button","primary",hasPendingTicketUse?"重试上次使用":"批量使用");use.type="button";use.style.cssText="min-width:112px!important;white-space:nowrap!important;padding:10px 12px!important;margin:0!important;flex:0 0 auto!important";use.addEventListener("click",()=>useTreeFruitTicket(use,countInput.value));controls.append(countInput,use);row.append(icon,info,controls);host.appendChild(row);
       }
       owned.forEach(({item,quantity})=>{
         const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",item.icon||"🎁");
