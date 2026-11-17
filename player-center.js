@@ -274,14 +274,14 @@
   }
   let packCatalog = [];
   async function loadCardNames() {
-    try {
-      const [cardsResponse,packsResponse] = await Promise.all([
-        fetch("./data/cards.json",{cache:"no-store"}),
-        fetch("./data/packs.json",{cache:"no-store"})
-      ]);
-      if(cardsResponse.ok) cardsById = Object.fromEntries((await cardsResponse.json()).map(card=>[card.id,card]));
-      if(packsResponse.ok) packCatalog = await packsResponse.json();
-    } catch (_) {}
+    if(cardNamesLoadPromise)return cardNamesLoadPromise;
+    cardNamesLoadPromise=(async()=>{
+      const [cardsResponse,packsResponse]=await Promise.all([fetch("./data/cards.json"),fetch("./data/packs.json")]);
+      if(!cardsResponse.ok||!packsResponse.ok)throw new Error("无法读取卡牌或卡包资料");
+      const [cards,packs]=await Promise.all([cardsResponse.json(),packsResponse.json()]);
+      cardsById=Object.fromEntries(cards.map(card=>[card.id,card]));packCatalog=packs;
+    })().catch(error=>{cardNamesLoadPromise=null;throw error;});
+    return cardNamesLoadPromise;
   }
 
   async function showPublicProfile(username) {
@@ -702,6 +702,8 @@
 
   let drawPools=[];
   let drawBusy=false;
+  let cardNamesLoadPromise=null;
+  let lastSelectedDrawPoolId=null;
   const pendingDrawRequests = new Map();
   function drawRequestStorageKey(packId,packCount) { return "acg-pending-draw:"+currentUser.id+":"+packId+":"+packCount; }
   function getDrawRequestId(packId,packCount) {
@@ -753,7 +755,8 @@
     const packCategory=pool=>packCatalog.find(pack=>pack.id===pool.pack_id)?.category||"normal";
     const categoryOrder={normal:0,battle_item:1,berry:2};
     const orderedPools=pools.slice().sort((a,b)=>(categoryOrder[packCategory(a)]??0)-(categoryOrder[packCategory(b)]??0)||String(a.pack_name).localeCompare(String(b.pack_name),"zh-CN"));
-    let selectedPool=orderedPools[0]||null;
+    let selectedPool=orderedPools.find(pool=>pool.pack_id===lastSelectedDrawPoolId)||orderedPools[0]||null;
+    if(selectedPool)lastSelectedDrawPoolId=selectedPool.pack_id;
     const cards=Object.values(cardsById);
     const makePoolGrid=groupPools=>{
       const grid=node("div","adl-pools");
@@ -766,7 +769,7 @@
         // CSS background avoids image-translation extensions intercepting artwork clicks.
         if(coverCard){const art=node("div","adl-cover-art");art.style.backgroundImage="url("+JSON.stringify(coverCard.image)+")";cover.appendChild(art);}
         const info=node("div","adl-poolinfo");info.append(node("h3","",pool.pack_name),node("p","",pool.description||"ACG 卡牌卡池"),node("strong","","单包 "+pool.price_tokens+" 代币 · 5 张卡"));
-        tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;root.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
+        tile.append(cover,info);tile.addEventListener("click",()=>{selectedPool=pool;lastSelectedDrawPoolId=pool.pack_id;root.querySelectorAll(".adl-pool").forEach(el=>el.classList.toggle("active",el===tile));updateConfig();});grid.appendChild(tile);
       });
       return grid;
     };
@@ -851,7 +854,7 @@
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
     const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*10)+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
-    const close=node("button","acg-td-close","关闭 ×");close.type="button";close.addEventListener("click",()=>{overlay.remove();loadPage("draw");});overlay.append(top,close);
+    const close=node("button","acg-td-close","关闭 ×");close.type="button";close.addEventListener("click",()=>overlay.remove());overlay.append(top,close);
     const main=node("div","acg-td-main"),title=node("div","acg-td-title");
     title.innerHTML='<small>MASTER DUEL INSPIRED · TEN PACK OPENING</small><h2>十连抽卡</h2><p>十个卡包同时登场 · 共 50 张卡牌 · 结果已由服务器确定</p>';
     const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");
@@ -906,10 +909,10 @@
       rtitle.textContent="十连抽卡结果";progress.textContent="正在整理 50 张结果卡牌……";
       cardGrid.replaceChildren();const counts={alt:0,r5:0,r4:0,r3:0};cards.forEach(card=>counts[rarityOf(card)]++);
       summary.innerHTML="十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
-      revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回抽卡大厅");done.type="button";done.disabled=true;done.addEventListener("click",()=>{overlay.remove();loadPage("draw");});revealActions.appendChild(done);
+      revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回抽卡大厅");done.type="button";done.disabled=true;done.addEventListener("click",()=>overlay.remove());revealActions.appendChild(done);
       let index=0;
       function renderResultChunk(){
-        const fragment=document.createDocumentFragment(),end=Math.min(index+10,cards.length);
+        const fragment=document.createDocumentFragment(),end=cards.length;
         for(;index<end;index++){
           const card=cards[index],grade=rarityOf(card),info=cardsById[card.card_id]||{name:card.card_id};
           const el=node("div","acg-td-card flip"+(grade==="r3"?"":" "+grade));
@@ -918,7 +921,7 @@
           const name=node("strong","",info.name);front.append(img,name);inner.append(back,front);el.append(inner,node("div","acg-td-cardname",info.name));fragment.appendChild(el);
         }
         cardGrid.appendChild(fragment);progress.textContent=index+" / "+cards.length+" 张结果卡牌已载入";
-        if(index<cards.length)requestAnimationFrame(renderResultChunk);else{done.disabled=false;progress.textContent=cards.length+" / "+cards.length+" 张结果卡牌已载入";}
+        done.disabled=false;progress.textContent=cards.length+" / "+cards.length+" 张结果卡牌已载入";
       }
       reveal.scrollIntoView({behavior:"smooth",block:"start"});requestAnimationFrame(renderResultChunk);
     }
@@ -936,12 +939,11 @@
       const {data,error}=await withTimeout(client.rpc("draw_packages",{p_pack_id:pool.pack_id,p_request_id:requestId,p_pack_count:packCount}),30000,"抽卡服务器响应超时。请稍后重试；本次请求编号已保留，不会因重复点击重复扣费。");
       if(error)throw error;const result=Array.isArray(data)?data[0]:data;
       if(!result?.cards||result.cards.length!==packCount*5)throw new Error("服务器没有返回完整抽卡结果；请重试，系统会沿用同一请求编号避免重复扣费。");
-      await loadDraw();
-      // Keep the same idempotency key until the post-draw refresh succeeds.
-      // If that refresh fails, retrying returns the already-paid result instead of charging twice.
+      // The RPC confirms the transaction. Keep the lobby mounted under the reveal
+      // screen so returning is instant and the selected pack remains selected.
       clearDrawRequestId(pool.pack_id,packCount);
-      if(packCount===10){closeDrawLobby();showTenPackOpening(pool,result);}
-      else{closeDrawLobby();showSinglePackOpening(pool,result);}
+      if(packCount===10)showTenPackOpening(pool,result);
+      else showSinglePackOpening(pool,result);
     }catch(error){loading.textContent="抽卡失败："+error.message;loading.style.color="#ff9b9b";}
     finally{drawBusy=false;}
   }
@@ -949,7 +951,7 @@
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
     const balance=node("div","acg-td-balance",(Number(result.charged_tokens??pool.price_tokens)===0?"树果卷 ×1 · 免费抽卡":"本次消耗 "+(result.charged_tokens??pool.price_tokens)+" 代币")+" · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
-    const close=node("button","acg-td-close",returnPage==="inventory"?"返回仓库":"返回卡包大厅");close.type="button";close.addEventListener("click",()=>{overlay.remove();loadPage(returnPage);});overlay.append(top,close);
+    const close=node("button","acg-td-close",returnPage==="inventory"?"返回仓库":"返回卡包大厅");close.type="button";close.addEventListener("click",()=>overlay.remove());overlay.append(top,close);
     const main=node("div","acg-td-main"),title=node("div","acg-td-title");title.innerHTML='<small>MASTER DUEL INSPIRED · PACK OPENING</small><h2>'+pool.pack_name+'</h2><p>本次获得 · '+result.cards.length+' 张卡牌</p>';
     const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");head.append(node("b","","ONE PACK OPENING"),node("p","","点击卡牌逐张揭晓"));
     const grid=node("div","acg-td-cards");
@@ -964,7 +966,7 @@
     const summary=node("div","acg-td-summary","点击卡牌翻开"),actions=node("div","acg-td-actions");
     const all=node("button","acg-td-btn primary","全部揭晓"),backBtn=node("button","acg-td-btn","返回卡包大厅");
     all.type=backBtn.type="button";all.addEventListener("click",()=>[...grid.children].forEach((el,i)=>setTimeout(()=>{el.classList.add("flip");el.querySelector(".acg-td-cardname").textContent=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index)[i]&&cardsById[result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index)[i].card_id]?.name||"";},i*90)));
-    backBtn.textContent=returnPage==="inventory"?"返回仓库":"返回卡包大厅";backBtn.addEventListener("click",()=>{overlay.remove();loadPage(returnPage);});actions.append(all,backBtn);
+    backBtn.textContent=returnPage==="inventory"?"返回仓库":"返回卡包大厅";backBtn.addEventListener("click",()=>overlay.remove());actions.append(all,backBtn);
     stage.append(head,grid,summary,actions);main.append(title,stage);overlay.append(main);document.body.appendChild(overlay);
   }
   window.acgShowItemPackOpening = (pool,result) => showSinglePackOpening({ ...pool, pack_name: pool.pack_name || pool.name || "奖励卡包", draw_mode: pool.draw_mode || (pool.category==="berry"?"uniform":"rarity"), price_tokens: 0 },result);
