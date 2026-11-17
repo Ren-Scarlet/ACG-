@@ -8,7 +8,7 @@
   const root = document.getElementById("fishing-view");
   if (!root) { window.addEventListener("DOMContentLoaded", () => { if (!window.acgFishingInitialized) boot(); }, { once: true }); return; }
   const $ = (id) => root.querySelector("#" + id);
-  const state = { dashboard:null, world:null, globalRecords:[], currentLocation:"qinglan_lake", baits:[], fish:[], berries:[], specialMaterials:[], shopCards:[], shopItems:[], currentSession:null, raf:0, phase:"idle" };
+  const state = { dashboard:null, world:null, globalRecords:[], currentLocation:"qinglan_lake", baits:[], fish:[], berries:[], specialMaterials:[], shopCards:[], shopItems:[], currentSession:null, raf:0, biteTimer:0, weatherTimer:0, recoveryPromise:null, phase:"idle" };
   const el = (tag, cls, text) => {
     const n=document.createElement(tag);
     if(cls)n.className=cls;
@@ -145,32 +145,123 @@
     special.append(materialLine,specialBtn);
     shell.append(head,inv,grid,special);host.append(shell);
   }
+  function showHookPrompt(){
+    if(state.phase!=="waiting")return;
+    const box=$("fish-action");
+    const scene=box.querySelector(".fish-water-stage");
+    if(scene){
+      scene.classList.remove("waiting");scene.classList.add("bite");
+      const caption=scene.querySelector(".fish-stage-caption");
+      if(caption)caption.textContent="咬钩了！鱼漂沉下去了！";
+    }
+    box.replaceChildren(el("h3","","！鱼咬钩了！"),el("p","hint","鱼漂下沉，抓紧时机提竿！"),scene||createWaterScene("bite"));
+    const btn=el("button","primary","提竿！");btn.type="button";
+    btn.addEventListener("click",beginReel);box.append(btn);
+  }
+  function showWaitingSession(session){
+    clearTimeout(state.biteTimer);
+    state.currentSession=session.session_id;
+    state.phase="waiting";
+    const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
+    const scene=createWaterScene("waiting");
+    box.append(el("h3","","鱼线已经抛出"),el("p","hint","湖面很平静……留意水面上的鱼漂。"),scene);
+    if(session.fish_hint)box.append(el("p","hint",session.fish_hint));
+    const remaining=Math.max(0,Number(session.bite_remaining_ms??session.bite_after_ms)||0);
+    if(remaining===0)showHookPrompt();
+    else state.biteTimer=window.setTimeout(showHookPrompt,remaining);
+  }
+  function renderReelingSession(result,hookRoundTripMs=0){
+    clearTimeout(state.biteTimer);
+    state.phase="reeling";
+    const box=$("fish-action");box.classList.remove("hidden");
+    const scene=createWaterScene("reeling");
+    const rail=el("div","fish-reel-rail"),zone=el("div","fish-reel-zone"),needle=el("div","fish-reel-needle");
+    const zoneStart=Number(result.zone_start_pct??30),zoneWidth=Number(result.zone_width_pct??40);
+    zone.style.left=zoneStart+"%";zone.style.width=zoneWidth+"%";rail.append(zone,needle);
+    box.replaceChildren(el("h3","","鱼上钩了，开始收线！"),el("p","hint","盯住指针，在绿色区域内点击收线。"),scene,rail);
+    const hit=el("button","primary","收线");hit.type="button";box.append(hit);
+    const duration=Number(result.reel_duration_ms)||3000;
+    const elapsed=Number(result.reel_elapsed_ms)||0;
+    const start=performance.now()-(elapsed+Math.max(0,hookRoundTripMs)/2);
+    const animate=now=>{
+      if(state.phase!=="reeling")return;
+      const phase=((((now-start)/duration+(Number(result.phase_offset)||0))%1)+1)%1;
+      const x=(phase<.5?phase*2:(1-phase)*2)*100;
+      needle.style.left=x+"%";
+      state.raf=requestAnimationFrame(animate);
+    };
+    cancelAnimationFrame(state.raf);
+    state.raf=requestAnimationFrame(animate);
+    hit.addEventListener("click",finishReel);
+  }
+  async function recoverActiveSession(){
+    if(state.recoveryPromise)return state.recoveryPromise;
+    state.recoveryPromise=(async()=>{
+      const result=await rpc("fishing_get_active_session_v2",{});
+      if(!result?.active){
+        state.currentSession=null;state.phase="idle";
+        if(result?.expired){
+          const box=$("fish-action");box.classList.remove("hidden");
+          box.replaceChildren(el("h3","","上一轮钓鱼已超时"),el("p","hint","鱼已经逃走了，鱼饵已按规则消耗。现在可以重新开始。"));
+          const again=el("button","","返回钓场");again.type="button";
+          again.addEventListener("click",()=>{$("fish-action").classList.add("hidden");renderOverview();});
+          box.append(again);
+          status("检测到上一轮钓鱼已超时，已自动结束。",true);
+        }
+        return false;
+      }
+      if(result.reel_started){
+        state.currentSession=result.session_id;
+        renderReelingSession(result);
+        status("已恢复上一轮收线进度，可以继续操作。");
+      }else{
+        showWaitingSession(result);
+        status("已恢复上一轮钓鱼，请留意鱼漂。");
+      }
+      return true;
+    })();
+    try{return await state.recoveryPromise;}
+    finally{state.recoveryPromise=null;}
+  }
+  async function refreshWorldState(){
+    const world=await rpc("fishing_get_world_state_v2",{});
+    state.world=world;
+    if(!(world.locations||[]).some(x=>x.location_id===state.currentLocation))
+      state.currentLocation=world.locations?.[0]?.location_id||"qinglan_lake";
+    renderHeader();
+    const activePage=root.querySelector("[data-fishing-page].active")?.dataset.fishingPage;
+    if(activePage==="overview")renderOverview();
+    return world;
+  }
+  function startWeatherRefresh(){
+    if(state.weatherTimer)clearInterval(state.weatherTimer);
+    state.weatherTimer=window.setInterval(()=>{
+      if(!document.hidden)refreshWorldState().catch(e=>console.warn("[ACG Fishing] 天气刷新失败",e));
+    },5*60*1000);
+    document.addEventListener("visibilitychange",()=>{
+      if(!document.hidden)refreshWorldState().catch(e=>console.warn("[ACG Fishing] 天气刷新失败",e));
+    });
+  }
   async function startCast(baitId){
     if(state.phase!=="idle"){status("当前还有一轮钓鱼没有结束。",true);return;}
     state.phase="waiting";renderOverview();
     try{
       const result=await rpc("fishing_start_cast_v2",{p_bait_id:baitId,p_request_id:uuid(),p_location_id:state.currentLocation});
       state.world=result.weather||state.world;renderHeader();
-      state.currentSession=result.session_id;
-      const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
-      const scene=createWaterScene("waiting");
-      box.append(el("h3","","鱼线已经抛出"),el("p","hint","湖面很平静……留意水面上的鱼漂。"),scene);
-      if(result.fish_hint)box.append(el("p","hint",result.fish_hint));
-      const wait=Math.max(1000,Math.min(10000,Number(result.bite_after_ms)||3000));
-      window.setTimeout(()=>{
-        if(state.phase!=="waiting")return;
-        scene.classList.remove("waiting");scene.classList.add("bite");
-        const caption=scene.querySelector(".fish-stage-caption");
-        if(caption)caption.textContent="咬钩了！鱼漂沉下去了！";
-        const title=el("h3","","！鱼咬钩了！");
-        const hint=el("p","hint","鱼漂下沉，抓紧时机提竿！");
-        const btn=el("button","primary","提竿！");btn.type="button";
-        btn.addEventListener("click",beginReel);
-        box.replaceChildren(title,hint,scene,btn);
-      },wait);
+      showWaitingSession({...result,bite_remaining_ms:result.bite_after_ms});
       status("抛竿成功，已消耗 1 个鱼饵。");
       await loadDashboard();
-    }catch(e){state.phase="idle";state.currentSession=null;status("抛竿失败："+e.message,true);await loadDashboard();}
+    }catch(e){
+      status("抛竿请求未确认，正在检查服务器记录……",true);
+      try{
+        const recovered=await recoverActiveSession();
+        if(!recovered){state.phase="idle";state.currentSession=null;status("抛竿失败："+e.message,true);}
+        else status("已找到服务器上的钓鱼记录，已恢复进度。");
+      }catch(recoveryError){
+        state.phase="idle";status("抛竿结果暂时无法确认："+e.message+"；请刷新页面恢复，不要再次连续抛竿。",true);
+        console.error("[ACG Fishing] cast recovery failed",recoveryError);
+      }
+    }
   }
   async function beginReel(){
     if(state.phase!=="waiting")return;
@@ -182,35 +273,20 @@
       const result=await rpc("fishing_hook_cast_v2",{p_session_id:state.currentSession});
       const hookRoundTripMs=performance.now()-hookRequestStarted;
       if(result.status==="escaped"){
+        clearTimeout(state.biteTimer);
         state.phase="idle";state.currentSession=null;
         box.replaceChildren(el("h3","","鱼逃走了"),el("p","hint","提竿太晚，这次没有收获，鱼饵不会返还。"));
         status("提竿太晚，鱼逃走了。",true);
         const again=el("button","","返回钓场");again.type="button";again.addEventListener("click",()=>{$("fish-action").classList.add("hidden");renderOverview();});
         box.append(again);await loadDashboard();renderOverview();return;
       }
-      state.phase="reeling";
-      const scene=createWaterScene("reeling");
-      const rail=el("div","fish-reel-rail"),zone=el("div","fish-reel-zone"),needle=el("div","fish-reel-needle");
-      const zoneStart=Number(result.zone_start_pct??15),zoneWidth=Number(result.zone_width_pct??70);
-      zone.style.left=zoneStart+"%";zone.style.width=zoneWidth+"%";rail.append(zone,needle);
-      box.replaceChildren(el("h3","","鱼上钩了，开始收线！"),el("p","hint","盯住指针，在绿色区域内点击收线。"),scene,rail);
-      const hit=el("button","primary","收线");hit.type="button";box.append(hit);
-      const duration=Number(result.reel_duration_ms)||3000;
-      // 补偿提竿 RPC 的往返延迟，使画面指针尽量对齐服务器收到收线请求时的位置。
-      const start=performance.now()-((Number(result.reel_elapsed_ms)||0)+hookRoundTripMs/2);
-      const animate=now=>{
-        if(state.phase!=="reeling")return;
-        const phase=((((now-start)/duration+(Number(result.phase_offset)||0))%1)+1)%1;
-        const x=(phase<.5?phase*2:(1-phase)*2)*100;
-        needle.style.left=x+"%";
-        state.raf=requestAnimationFrame(animate);
-      };
-      state.raf=requestAnimationFrame(animate);
-      hit.addEventListener("click",finishReel);
+      if(result.status!=="reeling")throw new Error("服务器没有返回有效的收线状态");
+      renderReelingSession(result,hookRoundTripMs);
     }catch(e){
-      state.phase="idle";state.currentSession=null;
-      box.replaceChildren(el("p","hint","提竿判定失败："+e.message));
-      status("提竿判定失败："+e.message,true);
+      state.phase="waiting";
+      box.replaceChildren(el("p","hint","提竿请求暂时未确认："+e.message));
+      const retry=el("button","primary","重试提竿");retry.type="button";retry.addEventListener("click",beginReel);box.append(retry);
+      status("提竿结果未确认，当前鱼饵不会再次扣除。可重试或刷新页面恢复。",true);
     }
   }
   async function finishReel(){
@@ -223,8 +299,7 @@
       if(result.status==="caught"){
         const label=result.size_label||"尺寸待定";
         const caughtScene=createWaterScene("caught");
-        const catchMark=el("div","fish-catch-spark","🎣");
-        caughtScene.append(catchMark);
+        const catchMark=el("div","fish-catch-spark","🎣");caughtScene.append(catchMark);
         const catchTitle=el("h3","fish-catch-title","🎉 成功钓获："+result.fish_name);
         const rewardLabel=result.is_first_discovery?"首次发现奖励 ×3":result.is_size_record?"尺寸纪录奖励 ×2":"重复钓获奖励 ×0.2";
         $("fish-action").replaceChildren(caughtScene,catchTitle,el("p","",label+" · 获得 "+result.points_awarded+" 钓鱼积分"),el("p","hint",rewardLabel+" · 收线评分 "+result.action_score+" · 天气 "+({sunny:"晴天",cloudy:"阴天",rain:"雨天",fog:"浓雾",storm:"雷雨",windy:"大风"}[result.weather_id]||"未知")));
@@ -237,7 +312,12 @@
       const again=el("button","","返回钓场");again.type="button";again.addEventListener("click",()=>{$("fish-action").classList.add("hidden");renderOverview();});
       $("fish-action").append(again);
       await loadDashboard();renderOverview();
-    }catch(e){state.phase="idle";status("收线结算失败："+e.message,true);}
+    }catch(e){
+      state.phase="reeling";
+      const box=$("fish-action");box.replaceChildren(el("p","hint","收线结算暂时未确认："+e.message));
+      const retry=el("button","primary","重试结算");retry.type="button";retry.addEventListener("click",finishReel);box.append(retry);
+      status("结算请求未确认。请点击重试；服务器会防止重复发放积分。",true);
+    }
   }
   function renderFishbook(){
     const host=$("fish-book");host.replaceChildren();
@@ -464,15 +544,15 @@
   }
   client.auth.onAuthStateChange((_event,session)=>{
     if(session?.user){
-      setTimeout(()=>{void loadDashboard().then(()=>{if(!root.classList.contains("hidden"))setSubpage("overview");}).catch(e=>status("钓场初始化失败："+e.message,true));},0);
+      setTimeout(()=>{void loadDashboard().then(()=>recoverActiveSession()).then(()=>{if(!root.classList.contains("hidden"))setSubpage("overview");startWeatherRefresh();}).catch(e=>status("钓场初始化失败："+e.message,true));},0);
     }else{
-      state.dashboard=null;
+      state.dashboard=null;state.currentSession=null;state.phase="idle";clearTimeout(state.biteTimer);cancelAnimationFrame(state.raf);
       status("请先登录账号，再进入钓场。",true);
     }
   });
   root.querySelectorAll("[data-fishing-page]").forEach(b=>b.addEventListener("click",()=>setSubpage(b.dataset.fishingPage)));
   window.acgOpenFishing=async()=>{document.getElementById("tab-fishing")?.click();};
-  (async()=>{try{status("正在读取钓场资料……");const {data,error}=await client.auth.getSession();if(error)throw error;if(data?.session){await loadDashboard();setSubpage("overview");status("钓场已连接。");}else status("请先登录账号，再进入钓场。",true);}catch(e){console.error("[ACG Fishing] 初始化失败",e);status("钓场初始化失败："+(e?.message||String(e)),true);}})();
+  (async()=>{try{status("正在读取钓场资料……");const {data,error}=await client.auth.getSession();if(error)throw error;if(data?.session){await loadDashboard();await recoverActiveSession();setSubpage("overview");startWeatherRefresh();status("钓场已连接。");}else status("请先登录账号，再进入钓场。",true);}catch(e){console.error("[ACG Fishing] 初始化失败",e);status("钓场初始化失败："+(e?.message||String(e)),true);}})();
   };
   if (window.acgSupabaseClient) boot();
   else window.addEventListener("acg-supabase-ready", boot, { once: true });

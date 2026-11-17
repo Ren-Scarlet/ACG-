@@ -199,3 +199,14 @@
 - FFXIV 官方 Fisher 指南：https://na.finalfantasyxiv.com/crafting_gathering_guide/fisher/
 - FFXIV 钓鱼天气/时段窗口与活饵机制参考：https://ffxiv-fieldcraft.com/guide/fishing
 - FFXIV 鱼类条件字段（地点、时间、前序天气、当前天气、鱼饵、活饵链、直觉）：https://ffxiv.consolegameswiki.com/wiki/Template:Fish_acquisition
+
+
+## 2026-11-18 会话恢复补丁
+
+- 新增 `fishing_get_active_session_v2()`：仅返回当前登录玩家自己的未完成会话；返回咬钩剩余时间或收线已进行时间，不开放其他玩家会话。
+- 刷新页面或重新登录后，前端会恢复等待/收线界面。
+- 收线请求失败保留会话并显示安全重试按钮；服务端原有幂等结算保证重复 finish 请求不会重复发放奖励。
+- 抛竿请求结果不确定时，前端先查询服务器会话，不盲目再次扣除鱼饵。
+- 天气在页面恢复前台及每 5 分钟刷新，避免页面长时间停留显示旧预报。
+- 对已超时的等待/收线会话，恢复接口按原有超时规则结束会话；不返还已消耗鱼饵。
+- 已部署版本的数据库升级只需执行 `supabase/fishing-overhaul-v2-session-recovery.sql`，不要重新运行整套安装 SQL。
