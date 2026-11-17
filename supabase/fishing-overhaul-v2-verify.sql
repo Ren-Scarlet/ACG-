@@ -80,9 +80,9 @@ from pg_proc p
 join pg_namespace n on n.oid=p.pronamespace
 where n.nspname='public'
   and p.proname in (
-    'fishing_start_cast',
-    'fishing_hook_cast',
-    'fishing_finish_reel',
+    'fishing_start_cast_v2',
+    'fishing_hook_cast_v2',
+    'fishing_finish_reel_v2',
     'fishing_get_world_state_v2',
     'fishing_craft_special_bait',
     'fishing_admin_grant_special_bait'
