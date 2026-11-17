@@ -185,13 +185,20 @@ insert into public.fishing_achievements
  (achievement_id,name,description,condition_type,threshold,fish_id,reward_points,
   reward_bait_id,reward_bait_quantity,is_active,sort_order)
 values
- ('discover_rainbow_phantom','雨后虹影','首次发现虹影鱼，获得 1 个特殊鱼饵。','specific_fish',1,'rainbow_phantom',0,'unknown_mixed_bait',1,true,90),
- ('discover_old_lake_dragon','湖之传说','首次发现古湖龙鱼，获得 2 个特殊鱼饵。','specific_fish',1,'old_lake_dragon',0,'unknown_mixed_bait',2,true,91)
+ ('fish_20','鱼群学者','在鱼类图鉴中发现 20 种不同的鱼。','distinct_fish',20,null,250,null,0,true,80),
+ ('fish_30','水域博物家','在鱼类图鉴中发现 30 种不同的鱼。','distinct_fish',30,null,500,null,0,true,81),
+ ('fish_36','全域钓鱼名人','发现全部 36 种鱼类，包含隐藏鱼。','distinct_fish',36,null,1000,null,0,true,82),
+ ('hidden_discovery_1','神秘鱼讯','首次发现一条隐藏鱼种，获得 1 个特殊鱼饵。','specific_fish',1,'rainbow_phantom',0,'unknown_mixed_bait',1,true,90),
+ ('hidden_discovery_2','深水秘藏','发现深水中的传说鱼种，获得 2 个特殊鱼饵。','specific_fish',1,'old_lake_dragon',0,'unknown_mixed_bait',2,true,91)
 on conflict(achievement_id) do update set
  name=excluded.name,description=excluded.description,condition_type=excluded.condition_type,
  threshold=excluded.threshold,fish_id=excluded.fish_id,reward_points=excluded.reward_points,
  reward_bait_id=excluded.reward_bait_id,reward_bait_quantity=excluded.reward_bait_quantity,
  is_active=true,sort_order=excluded.sort_order;
+
+update public.fishing_achievements
+set description='在鱼类图鉴中发现 10 种不同的鱼。'
+where achievement_id='fish_10';
 
 create or replace function public.fishing_admin_grant_special_bait(
  p_user_id uuid,p_quantity integer,p_reason text
