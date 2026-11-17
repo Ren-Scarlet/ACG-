@@ -11,7 +11,7 @@
 - 鱼类条件：钓点、天气、前序天气、北京时间时段、前置鱼种发现。
 - 天气影响鱼种出现条件/权重，并可将 0–10 个百分点从小型鱼概率转移到大型鱼概率。
 - 收线评分由服务器时钟和每次会话随机相位决定；客户端不提交评分或成功标记。
-- V2 使用独立的 fishing_start_cast_v2 / fishing_hook_cast_v2 / fishing_finish_reel_v2 RPC；旧 V1 收线函数保留，用于处理迁移前已开始的会话；旧 V1 抛竿入口在迁移时停用，防止新钓鱼绕过 V2 规则。
+- V2 使用独立的 fishing_start_cast_v2 / fishing_hook_cast_v2 / fishing_finish_reel_v2 RPC；旧 V1 RPC 在数据库准备阶段暂时保留，确保旧前端仍能运行。待新版前端部署并通过实测后，再执行单独的激活迁移停用旧 V1 抛竿入口和旧鱼饵商店商品。
 - 具体尺寸由服务器生成；图鉴同时展示个人最佳尺寸与全服历史最大尺寸。纪录奖励基准独立保存，避免多次小幅进步重置奖励门槛。首次发现 ×3、纪录刷新 ×2、普通重复 ×0.2；收线附加积分 0/2/4/5%，最后向下取整。
 - 普通鱼饵继续消耗树果制作；特殊鱼饵可消耗三种稀有材料制作，也可由成就/活动发放。
 - 旧四种无限积分鱼饵商品下架，但不删除兑换历史、不扣除玩家已有积分/鱼饵。商店保留 V2 的卡牌/道具/网站代币奖励管理能力；新的兑换商品与价格暂不盲目预设，需先核对现有网站代币和卡牌经济，避免把旧刷分问题转移到新商品。
@@ -28,11 +28,14 @@
 4. supabase/item-workshop-mail-v1.sql（提供现有道具目录；若已执行则跳过）
 5. supabase/fishing-shop-v2.sql（若尚未执行；启用钓鱼商店的跨系统奖励类型）
 6. supabase/fishing-overhaul-v2-preflight.sql（只读预检，确认旧数据与依赖）
-7. supabase/fishing-overhaul-v2.sql
-8. supabase/fishing-overhaul-v2-engine.sql
+7. supabase/fishing-overhaul-v2.sql（新增目录、天气、钓点、条件和隐藏鱼）
+8. supabase/fishing-overhaul-v2-engine.sql（新增 V2 RPC；此时旧前端/旧鱼饵商店仍可运行）
 9. supabase/fishing-overhaul-v2-verify.sql（只读验收，不修改数据）
+10. 合并 PR 并等待 Pages 部署；先验证新版钓鱼页面和非钓鱼模块。
+11. supabase/fishing-overhaul-v2-activate.sql（仅在新版前端实测通过后执行：停用旧抛竿入口和旧积分鱼饵商品）
+12. supabase/fishing-overhaul-v2-activate-verify.sql（只读确认旧入口已关闭、V2 RPC 正常）
 
-**注意：** 这两份 V2 SQL 目前只保存在开发分支。未通过 PR 检查前不要在生产 Supabase 执行；代码合并后，我会提供只读预检与执行后验证 SQL，并明确一次只需要你做哪一步。GitHub 提交不会自动修改 Supabase 数据库。
+**注意：** 两份 V2 核心迁移先部署数据库兼容层，不会立即关闭旧入口；新版前端部署并实测通过后，再单独执行最终激活迁移。这样避免出现“旧前端先失效”或“新前端找不到数据库函数”的切换空窗。GitHub 提交不会自动修改 Supabase 数据库。
 
 ### 本阶段明确不修改
 
