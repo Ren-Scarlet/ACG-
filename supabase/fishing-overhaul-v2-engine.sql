@@ -74,7 +74,7 @@ drop policy if exists fishing_fish_catalog_read on public.fishing_fish_catalog;
 create policy fishing_fish_catalog_read on public.fishing_fish_catalog
  for select to authenticated
  using (
-   (is_active and not is_hidden)
+   ((is_active or v2_available) and not is_hidden)
    or public.is_admin()
    or exists (
      select 1 from public.player_fishbook b
@@ -334,7 +334,7 @@ begin
  select f,r.size_shift_to_large into v_fish,v_weather_shift
  from public.fishing_fish_catalog f
  join public.fishing_fish_rules_v2 r on r.fish_id=f.fish_id
- where f.is_active and f.bait_id=p_bait_id
+ where f.v2_available and f.bait_id=p_bait_id
    and r.location_id=v_location
    and (cardinality(r.weather_ids)=0 or v_weather=any(r.weather_ids))
    and (cardinality(r.previous_weather_ids)=0 or v_previous=any(r.previous_weather_ids))
