@@ -28,6 +28,34 @@ select
 from public.fishing_locations_v2
 where is_active;
 
+-- Every ordinary bait must have at least one all-weather fish at each location.
+-- This prevents a weather roll from making an entire bait unusable at a chosen spot.
+select
+  l.location_id,
+  l.location_name,
+  f.bait_id,
+  count(*) filter (
+    where cardinality(r.weather_ids)=0
+      and cardinality(r.previous_weather_ids)=0
+      and r.start_hour_local is null
+  ) as all_weather_baseline_fish,
+  count(*) filter (
+    where cardinality(r.weather_ids)=0
+      and cardinality(r.previous_weather_ids)=0
+      and r.start_hour_local is null
+  ) >= 1 as pool_ready
+from public.fishing_locations_v2 l
+cross join (values
+  ('small_mixed_bait'),('medium_mixed_bait'),('large_mixed_bait')
+) as b(bait_id)
+left join public.fishing_fish_catalog f
+  on f.bait_id=b.bait_id and f.is_active
+left join public.fishing_fish_rules_v2 r
+  on r.fish_id=f.fish_id and r.location_id=l.location_id
+where l.is_active
+group by l.location_id,l.location_name,f.bait_id,b.bait_id
+order by l.sort_order,b.bait_id;
+
 select
   count(*) as fish_with_encounter_rules,
   (select count(*) from public.fishing_fish_catalog where is_active) as active_fish,
