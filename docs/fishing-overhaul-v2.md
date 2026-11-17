@@ -28,7 +28,7 @@
 4. supabase/item-workshop-mail-v1.sql（提供现有道具目录；若已执行则跳过）
 5. supabase/fishing-shop-v2.sql（若尚未执行；启用钓鱼商店的跨系统奖励类型）
 6. supabase/fishing-overhaul-v2-preflight.sql（只读预检，确认旧数据与依赖）
-7. **只需执行一次** supabase/fishing-overhaul-v2-install.sql（将目录、天气、钓点、36 种鱼、隐藏鱼、特殊鱼饵和 V2 RPC 放在同一个数据库事务中；任何一步失败都会整体回滚，旧系统保持不变）
+7. **只需执行一次** supabase/fishing-overhaul-v2-install.sql（将目录、天气、钓点、36 种鱼、隐藏鱼、特殊鱼饵和 V2 RPC 放在同一个数据库事务中；任何一步失败都会整体回滚。V2 可见鱼目录立即完整，旧 V1 仍只使用原有 10 种鱼）
 8. supabase/fishing-overhaul-v2-verify.sql（只读验收，不修改数据）
 9. 合并 PR 并等待 Pages 部署；先验证新版钓鱼页面和非钓鱼模块。
 10. supabase/fishing-overhaul-v2-activate.sql（仅在新版前端实测通过后执行：停用旧抛竿入口和旧积分鱼饵商品）
