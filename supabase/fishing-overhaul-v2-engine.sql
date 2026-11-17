@@ -601,17 +601,10 @@ $function$;
 
 -- The existing dashboard signature and keys are preserved. Weather/forecast and
 -- location data are fetched through fishing_get_world_state_v2().
-update public.fishing_shop_catalog
-set is_active=false
-where product_id in (
- 'shop_small_bait_bundle','shop_medium_bait_bundle',
- 'shop_large_bait','shop_mystery_bait'
-);
+-- Legacy V1 cast and bait-shop entry points stay enabled during the staged rollout.
+-- They are disabled only by fishing-overhaul-v2-activate.sql after the V2 page is live.
 
 revoke all on function public.fishing_craft_special_bait(uuid) from public,anon,authenticated;
--- Disable only the old cast-entry RPC so new casts cannot bypass V2.
--- Legacy hook/finish functions remain available for already-open V1 sessions.
-revoke all on function public.fishing_start_cast(text,uuid) from public,anon,authenticated;
 revoke all on function public.fishing_start_cast_v2(text,uuid,text) from public,anon,authenticated;
 revoke all on function public.fishing_hook_cast_v2(uuid) from public,anon,authenticated;
 revoke all on function public.fishing_finish_reel_v2(uuid) from public,anon,authenticated;
