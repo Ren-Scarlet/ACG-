@@ -27,9 +27,10 @@
 3. supabase/fishing-achievements-shop-v1.sql
 4. supabase/item-workshop-mail-v1.sql（提供现有道具目录；若已执行则跳过）
 5. supabase/fishing-shop-v2.sql（若尚未执行；启用钓鱼商店的跨系统奖励类型）
-6. supabase/fishing-overhaul-v2.sql
-7. supabase/fishing-overhaul-v2-engine.sql
-8. supabase/fishing-overhaul-v2-verify.sql（只读验收，不修改数据）
+6. supabase/fishing-overhaul-v2-preflight.sql（只读预检，确认旧数据与依赖）
+7. supabase/fishing-overhaul-v2.sql
+8. supabase/fishing-overhaul-v2-engine.sql
+9. supabase/fishing-overhaul-v2-verify.sql（只读验收，不修改数据）
 
 **注意：** 这两份 V2 SQL 目前只保存在开发分支。未通过 PR 检查前不要在生产 Supabase 执行；代码合并后，我会提供只读预检与执行后验证 SQL，并明确一次只需要你做哪一步。GitHub 提交不会自动修改 Supabase 数据库。
 
