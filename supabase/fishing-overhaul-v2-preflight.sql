@@ -12,7 +12,14 @@ select
   to_regclass('public.fishing_sessions') as fishing_sessions,
   to_regclass('public.fishing_catches') as fishing_catches,
   to_regclass('public.player_fishbook') as player_fishbook,
-  to_regclass('public.fishing_shop_catalog') as fishing_shop_catalog;
+  to_regclass('public.fishing_shop_catalog') as fishing_shop_catalog,
+  to_regclass('public.fishing_craft_history') as fishing_craft_history,
+  to_regclass('public.fishing_achievements') as fishing_achievements,
+  to_regclass('public.player_fishing_achievements') as player_fishing_achievements,
+  to_regclass('public.player_fishing_stats') as player_fishing_stats,
+  to_regclass('public.fishing_points_ledger') as fishing_points_ledger,
+  to_regclass('public.draw_card_catalog') as draw_card_catalog,
+  to_regprocedure('public.is_admin()') as is_admin_function;
 
 select
   p.proname,
@@ -34,6 +41,11 @@ select
   bait_id,bait_name,ingredient_count,distinct_ingredients,
   craftable,is_active
 from public.fishing_bait_catalog
+order by sort_order;
+
+select
+  fish_id,bait_id,fish_name,is_active
+from public.fishing_fish_catalog
 order by sort_order;
 
 select
