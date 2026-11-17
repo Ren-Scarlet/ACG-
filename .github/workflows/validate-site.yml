@@ -112,6 +112,7 @@ jobs:
           fishing_v2 = Path("supabase/fishing-overhaul-v2.sql").read_text(encoding="utf-8")
           fishing_engine = Path("supabase/fishing-overhaul-v2-engine.sql").read_text(encoding="utf-8")
           fishing_install = Path("supabase/fishing-overhaul-v2-install.sql").read_text(encoding="utf-8")
+          fishing_js = Path("fishing.js").read_text(encoding="utf-8")
           rules_block = fishing_v2.split("insert into public.fishing_fish_rules_v2", 1)[1].split("on conflict (fish_id)", 1)[0]
           fish_pairs = re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", fishing_base + fishing_v2)
           fish_ids = {fish_id for fish_id, _bait_id in fish_pairs}
@@ -121,6 +122,9 @@ jobs:
           original_seed = fishing_v2.split("-- Ensure all ten original species exist", 1)[1].split("on conflict (fish_id)", 1)[0]
           original_seed_ids = set(re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(?:small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", original_seed))
           assert len(original_seed_ids) == 10, f"V2 must restore all ten original fish, found {len(original_seed_ids)}"
+          assert "v2_available boolean" in fishing_v2, "V2 fish visibility must be isolated from legacy is_active"
+          assert "v2_available=true" in fishing_v2 and "f.v2_available" in fishing_engine
+          assert '.eq("v2_available",true)' in fishing_js, "V2 frontend must read the isolated V2 catalogue"
           for fallback in ["jade_scale_carp", "reed_whisker", "deepwater_catfish", "sunset_gar", "cobalt_tuna", "bluegill", "whitewater_salmon"]:
               assert fallback in fishing_v2, f"Missing all-weather bait fallback: {fallback}"
           for prerequisite in ["fishing_craft_history", "player_fishing_achievements", "fishing_points_ledger", "item_catalog"]:
@@ -152,5 +156,6 @@ jobs:
           assert "record_reward_size_cm" in fishing_engine and "fishing_get_records_v2" in fishing_engine
           assert "pool_ready" in fishing_verify, "Verification must check ordinary bait availability at every location"
           assert "legacy_cast_still_executable" in fishing_activate_verify and "v2_cast_executable" in fishing_activate_verify
+          assert "set is_active=true where v2_available=true" in fishing_activate, "Activation must expose the full V2 catalogue only when disabling legacy casting"
           print("Key draw, item workshop, mailbox, reward, monthly season and fishing V2 functions are represented in source.")
           PY
