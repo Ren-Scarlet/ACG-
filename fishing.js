@@ -8,7 +8,7 @@
   const root = document.getElementById("fishing-view");
   if (!root) { window.addEventListener("DOMContentLoaded", () => { if (!window.acgFishingInitialized) boot(); }, { once: true }); return; }
   const $ = (id) => root.querySelector("#" + id);
-  const state = { dashboard:null, world:null, currentLocation:"qinglan_lake", baits:[], fish:[], berries:[], specialMaterials:[], shopCards:[], shopItems:[], currentSession:null, raf:0, phase:"idle" };
+  const state = { dashboard:null, world:null, globalRecords:[], currentLocation:"qinglan_lake", baits:[], fish:[], berries:[], specialMaterials:[], shopCards:[], shopItems:[], currentSession:null, raf:0, phase:"idle" };
   const el = (tag, cls, text) => {
     const n=document.createElement(tag);
     if(cls)n.className=cls;
@@ -42,6 +42,7 @@
     const d=await rpc("fishing_get_dashboard",{});
     state.dashboard=d;
     state.world=await rpc("fishing_get_world_state_v2",{});
+    state.globalRecords=await rpc("fishing_get_records_v2",{});
     const {data:userData,error:userError}=await client.auth.getUser();
     if(userError)throw userError;
     if(!userData?.user)throw new Error("无法确认当前登录账号");
@@ -284,7 +285,8 @@
           info.append(el("p","fishbook-catch-count","钓获 "+Number(item.catch_count||0).toLocaleString("zh-CN")+" 次"));
           const facts=el("div","fishbook-facts");
           const size=item.best_size_cm==null?"暂未记录":Number(item.best_size_cm).toLocaleString("zh-CN")+" cm";
-          facts.append(el("span","","最佳尺寸"),el("strong","",size),el("span","","最高积分"),el("strong","",Number(item.best_points||0).toLocaleString("zh-CN")));
+          const globalRecord=state.globalRecords.find(x=>x.fish_id===f.fish_id)?.global_best_size_cm;
+          facts.append(el("span","","个人最佳尺寸"),el("strong","",size),el("span","","全服纪录"),el("strong","",globalRecord==null?"暂无":Number(globalRecord).toLocaleString("zh-CN")+" cm"),el("span","","最高积分"),el("strong","",Number(item.best_points||0).toLocaleString("zh-CN")));
           info.append(facts);
         }else{
           info.append(el("p","fishbook-locked-copy","尚未与它相遇。前往湖边继续抛竿吧。"));
