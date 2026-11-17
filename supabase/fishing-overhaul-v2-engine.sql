@@ -26,6 +26,12 @@ alter table public.fishing_sessions
   add column if not exists action_score integer,
   add column if not exists base_points integer not null default 0;
 
+alter table public.player_fishbook
+  add column if not exists record_reward_size_cm numeric(7,2);
+update public.player_fishbook
+set record_reward_size_cm=best_size_cm
+where record_reward_size_cm is null and best_size_cm is not null;
+
 alter table public.fishing_catches
   add column if not exists action_score integer,
   add column if not exists weather_id text,
@@ -485,7 +491,7 @@ begin
  end if;
  v_size:=round((v_min+random()*(v_max-v_min))::numeric,2);
 
- select best_size_cm into v_best from public.player_fishbook
+ select record_reward_size_cm into v_best from public.player_fishbook
  where user_id=v_user and fish_id=v_fish.fish_id for update;
  v_first:=not found;
  v_record:=not v_first and
@@ -504,11 +510,13 @@ begin
  values(v_user,v_fish.fish_id,v_session.bait_id,v_tier,v_size,v_award,v_score,
    v_session.weather_id,v_session.location_id,v_first,v_record);
 
- insert into public.player_fishbook(user_id,fish_id,catch_count,best_size_cm,best_points)
- values(v_user,v_fish.fish_id,1,v_size,v_award)
+ insert into public.player_fishbook(user_id,fish_id,catch_count,best_size_cm,best_points,record_reward_size_cm)
+ values(v_user,v_fish.fish_id,1,v_size,v_award,v_size)
  on conflict(user_id,fish_id) do update set
    catch_count=public.player_fishbook.catch_count+1,
    best_size_cm=greatest(coalesce(public.player_fishbook.best_size_cm,0),excluded.best_size_cm),
+   record_reward_size_cm=case when v_record then excluded.best_size_cm
+     else coalesce(public.player_fishbook.record_reward_size_cm,excluded.best_size_cm) end,
    best_points=greatest(public.player_fishbook.best_points,excluded.best_points);
 
  insert into public.player_fishing_stats(user_id,points,total_catches,largest_fish_cm,updated_at)
@@ -551,6 +559,31 @@ begin
 end;
 $$;
 
+-- Global record values are aggregated server-side; no player IDs are exposed.
+create or replace function public.fishing_get_records_v2()
+returns jsonb
+language plpgsql
+security definer
+set search_path=''
+as $
+declare
+ v_user uuid:=auth.uid();
+ v_records jsonb;
+begin
+ if v_user is null then raise exception '请先登录'; end if;
+ select coalesce(jsonb_agg(jsonb_build_object(
+   'fish_id',fish_id,
+   'global_best_size_cm',max(size_cm),
+   'record_catches',count(*)
+ ) order by fish_id),'[]'::jsonb)
+ into v_records
+ from public.fishing_catches
+ where size_cm is not null
+ group by fish_id;
+ return v_records;
+end;
+$;
+
 -- The existing dashboard signature and keys are preserved. Weather/forecast and
 -- location data are fetched through fishing_get_world_state_v2().
 update public.fishing_shop_catalog
@@ -568,6 +601,7 @@ revoke all on function public.fishing_start_cast_v2(text,uuid,text) from public,
 revoke all on function public.fishing_hook_cast_v2(uuid) from public,anon,authenticated;
 revoke all on function public.fishing_finish_reel_v2(uuid) from public,anon,authenticated;
 revoke all on function public.fishing_get_world_state_v2() from public,anon,authenticated;
+revoke all on function public.fishing_get_records_v2() from public,anon,authenticated;
 revoke all on function public.fishing_craft_special_bait(uuid) from public,anon,authenticated;
 revoke all on function public.fishing_admin_grant_special_bait(uuid,integer,text) from public,anon,authenticated;
 grant execute on function public.fishing_craft_special_bait(uuid) to authenticated;
@@ -575,6 +609,7 @@ grant execute on function public.fishing_start_cast_v2(text,uuid,text) to authen
 grant execute on function public.fishing_hook_cast_v2(uuid) to authenticated;
 grant execute on function public.fishing_finish_reel_v2(uuid) to authenticated;
 grant execute on function public.fishing_get_world_state_v2() to authenticated;
+grant execute on function public.fishing_get_records_v2() to authenticated;
 grant execute on function public.fishing_admin_grant_special_bait(uuid,integer,text) to authenticated;
 
 commit;
