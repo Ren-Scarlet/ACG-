@@ -21,19 +21,18 @@
 
 ### Supabase SQL 执行顺序
 
-以下文件必须按顺序执行。已执行过的旧迁移无需重复手动执行；新增 V2 文件则必须执行：
+以下文件按顺序执行。已执行过的旧迁移无需重复手动执行；新增 V2 安装文件只需执行一次：
 1. supabase/fishing-system-v1.sql
 2. supabase/fishing-server-authoritative-v1.sql
 3. supabase/fishing-achievements-shop-v1.sql
 4. supabase/item-workshop-mail-v1.sql（提供现有道具目录；若已执行则跳过）
 5. supabase/fishing-shop-v2.sql（若尚未执行；启用钓鱼商店的跨系统奖励类型）
 6. supabase/fishing-overhaul-v2-preflight.sql（只读预检，确认旧数据与依赖）
-7. supabase/fishing-overhaul-v2.sql（新增目录、天气、钓点、条件和隐藏鱼）
-8. supabase/fishing-overhaul-v2-engine.sql（新增 V2 RPC；此时旧前端/旧鱼饵商店仍可运行）
-9. supabase/fishing-overhaul-v2-verify.sql（只读验收，不修改数据）
-10. 合并 PR 并等待 Pages 部署；先验证新版钓鱼页面和非钓鱼模块。
-11. supabase/fishing-overhaul-v2-activate.sql（仅在新版前端实测通过后执行：停用旧抛竿入口和旧积分鱼饵商品）
-12. supabase/fishing-overhaul-v2-activate-verify.sql（只读确认旧入口已关闭、V2 RPC 正常）
+7. **只需执行一次** supabase/fishing-overhaul-v2-install.sql（将目录、天气、钓点、36 种鱼、隐藏鱼、特殊鱼饵和 V2 RPC 放在同一个数据库事务中；任何一步失败都会整体回滚，旧系统保持不变）
+8. supabase/fishing-overhaul-v2-verify.sql（只读验收，不修改数据）
+9. 合并 PR 并等待 Pages 部署；先验证新版钓鱼页面和非钓鱼模块。
+10. supabase/fishing-overhaul-v2-activate.sql（仅在新版前端实测通过后执行：停用旧抛竿入口和旧积分鱼饵商品）
+11. supabase/fishing-overhaul-v2-activate-verify.sql（只读确认旧入口已关闭、V2 RPC 正常）
 
 **注意：** 两份 V2 核心迁移先部署数据库兼容层，不会立即关闭旧入口；新版前端部署并实测通过后，再单独执行最终激活迁移。这样避免出现“旧前端先失效”或“新前端找不到数据库函数”的切换空窗。GitHub 提交不会自动修改 Supabase 数据库。
 
