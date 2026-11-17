@@ -111,6 +111,7 @@ jobs:
           fishing_base = Path("supabase/fishing-system-v1.sql").read_text(encoding="utf-8")
           fishing_v2 = Path("supabase/fishing-overhaul-v2.sql").read_text(encoding="utf-8")
           fishing_engine = Path("supabase/fishing-overhaul-v2-engine.sql").read_text(encoding="utf-8")
+          fishing_install = Path("supabase/fishing-overhaul-v2-install.sql").read_text(encoding="utf-8")
           rules_block = fishing_v2.split("insert into public.fishing_fish_rules_v2", 1)[1].split("on conflict (fish_id)", 1)[0]
           fish_pairs = re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", fishing_base + fishing_v2)
           fish_ids = {fish_id for fish_id, _bait_id in fish_pairs}
@@ -124,6 +125,19 @@ jobs:
               assert fallback in fishing_v2, f"Missing all-weather bait fallback: {fallback}"
           for prerequisite in ["fishing_craft_history", "player_fishing_achievements", "fishing_points_ledger", "item_catalog"]:
               assert prerequisite in fishing_engine, f"Engine prerequisite guard missing: {prerequisite}"
+          def without_transaction(source):
+              start = source.index("begin;") + len("begin;")
+              end = source.rindex("commit;")
+              return source[start:end].strip()
+          expected_install = (
+              "-- ACG Fishing V2 combined installer.\n"
+              "-- Run once after the existing Fishing V1 and item-workshop migrations.\n"
+              "-- Both additive migrations execute in ONE transaction: any error rolls back the entire V2 install.\n\n"
+              "begin;\n\n" + without_transaction(fishing_v2) +
+              "\n\n-- V2 server engine and special-bait rewards.\n\n" +
+              without_transaction(fishing_engine) + "\n\ncommit;\n"
+          )
+          assert fishing_install == expected_install, "Combined installer is stale; regenerate it from the two canonical migrations."
           for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
               assert name in fishing_v2, f"Fishing V2 migration missing: {name}"
           for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_get_records_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
