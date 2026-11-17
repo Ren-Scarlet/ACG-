@@ -22,6 +22,7 @@ jobs:
           node --check auth.js
           node --check player-center.js
           node --check item-mail.js
+          node --check fishing.js
           python - <<'PY'
           from html.parser import HTMLParser
           from pathlib import Path
@@ -106,5 +107,12 @@ jobs:
               assert f"public.{name}" in seasons, f"Missing season table: {name}"
           for name in ["sync_season_match_result", "admin_save_season_rank_reward", "admin_settle_monthly_season", "run_monthly_season_rollover", "player_list_my_seasons", "admin_resend_season_reward"]:
               assert f"function public.{name}" in seasons, f"Missing season function: {name}"
-          print("Key draw, item workshop, mailbox, reward and monthly season functions are represented in source.")
+          fishing_v2 = Path("supabase/fishing-overhaul-v2.sql").read_text(encoding="utf-8")
+          fishing_engine = Path("supabase/fishing-overhaul-v2-engine.sql").read_text(encoding="utf-8")
+          for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
+              assert name in fishing_v2, f"Fishing V2 migration missing: {name}"
+          for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
+              assert f"function public.{name}" in fishing_engine, f"Fishing V2 engine missing: {name}"
+          assert "fishing_start_cast(text,uuid)" in fishing_engine, "Fishing V2 must disable the legacy cast entry point"
+          print("Key draw, item workshop, mailbox, reward, monthly season and fishing V2 functions are represented in source.")
           PY
