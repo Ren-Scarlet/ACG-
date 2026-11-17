@@ -5,6 +5,28 @@
 
 begin;
 
+do $preflight$
+begin
+  if to_regclass('public.fishing_fish_rules_v2') is null
+     or to_regclass('public.fishing_sessions') is null
+     or to_regclass('public.player_stats') is null
+     or to_regclass('public.player_fishing_bait') is null
+     or to_regclass('public.fishing_craft_history') is null
+     or to_regclass('public.item_catalog') is null
+     or to_regclass('public.card_inventory') is null
+     or to_regclass('public.fishing_achievements') is null
+     or to_regclass('public.player_fishing_achievements') is null
+     or to_regclass('public.player_fishing_stats') is null
+     or to_regclass('public.fishing_catches') is null
+     or to_regclass('public.player_fishbook') is null
+     or to_regclass('public.fishing_points_ledger') is null
+     or to_regclass('public.profiles') is null
+     or to_regprocedure('public.is_admin()') is null then
+    raise exception 'Fishing V2 engine prerequisite missing. Apply the documented fishing and item-workshop migrations first; no V2 engine changes were applied.';
+  end if;
+end
+$preflight$;
+
 alter table public.fishing_fish_rules_v2
   add column if not exists size_shift_to_large numeric(5,2) not null default 0
     check(size_shift_to_large between -20 and 20);
