@@ -78,6 +78,22 @@
 }
 `;
   style.textContent += "#player-center-view .pc-avatar-editor{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px;margin:12px 0;background:#f4fbff;border:1px solid #8bbdce}#player-center-view .pc-avatar-preview{width:78px;height:78px;flex:0 0 78px;object-fit:cover;border-radius:50%;border:1px solid #9bbdcb;background:#173f60}#player-center-view .pc-avatar-editor-copy{flex:1;min-width:180px}#player-center-view .pc-avatar-editor-copy strong{display:block;color:#123d5a}#player-center-view .pc-avatar-editor-copy small{display:block;color:#55768a;margin:4px 0 9px;line-height:1.5}#player-center-view .pc-avatar-crop-modal{position:fixed;inset:0;z-index:99999;background:#071b2bd9;display:flex;align-items:center;justify-content:center;padding:16px}#player-center-view .pc-avatar-crop-dialog{width:min(440px,100%);max-height:90vh;overflow:auto;background:#f2fbff;border:2px solid #69c5dd;box-shadow:8px 8px 0 #e83c63;padding:18px;color:#123d5a}#player-center-view .pc-avatar-crop-window{width:240px;height:240px;max-width:100%;margin:14px auto;border-radius:50%;overflow:hidden;position:relative;background:#173f60;border:3px solid #d6b45b}#player-center-view .pc-avatar-crop-window img{position:absolute;max-width:none;max-height:none;object-fit:fill;display:block}#player-center-view .pc-avatar-crop-dialog label{display:block;font-size:12px;margin:10px 0}#player-center-view .pc-avatar-crop-dialog input[type=range]{display:block;width:100%;margin-top:5px}#player-center-view .pc-avatar-crop-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}#player-center-view .pc-avatar-frame-settings{margin:14px 0;padding:12px;border:1px solid #8bbdce;background:#eaf7fb}#player-center-view .pc-avatar-frame-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(142px,1fr));gap:10px;margin:12px 0}#player-center-view .pc-avatar-frame-option{display:flex;align-items:center;gap:8px;min-width:0;padding:8px;background:#f3fbff;border:1px solid #9bc9d8;color:#173f60;cursor:pointer;text-align:left}#player-center-view .pc-avatar-frame-option[aria-pressed=true]{border:2px solid #167da4;background:#dff5fc}#player-center-view .pc-avatar-frame-option img{width:72px;height:64px;flex:0 0 72px;object-fit:contain}#player-center-view .pc-avatar-frame-option span{font-size:11px;font-weight:800;line-height:1.35}#player-center-view .pc-profile-hero{display:flex;align-items:center;gap:16px;padding:16px;margin:12px 0;background:linear-gradient(120deg,#f8fdff,#dceff7);border:1px solid #8bbdce}#player-center-view .pc-avatar-frame-slot{position:relative;display:grid;place-items:center;width:140px;height:125px;flex:0 0 140px}#player-center-view .pc-avatar-core{position:absolute;z-index:1;width:70px;height:70px;left:35px;top:27.5px;border-radius:50%;overflow:hidden;background:#173f60;color:white;display:grid;place-items:center;font-size:28px}#player-center-view .pc-avatar-core img{width:100%;height:100%;object-fit:cover;display:block}#player-center-view .pc-avatar-frame-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:2;pointer-events:none}#player-center-view .pc-profile-meta{min-width:0}#player-center-view .pc-profile-kicker{font-size:10px;letter-spacing:.14em;color:#28708e;font-weight:900}#player-center-view .pc-profile-name{margin:4px 0;color:#123d5a}#player-center-view .pc-profile-sub{font-size:12px;color:#55768a}#player-center-view .pc-profile-title{display:inline-block;margin-top:7px;padding:4px 9px;background:#f8edc8;border:1px solid #d8b85d;color:#77531d;font-size:12px;font-weight:800}#player-center-view .pc-badge-shelf{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}#player-center-view .pc-badge-card{display:flex;align-items:center;gap:10px;padding:10px;background:linear-gradient(135deg,#f8fdff,#d9f1f8);border:1px solid #83bfd2;color:#123d5a}#player-center-view .pc-badge-seal{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;background:linear-gradient(145deg,var(--badge-light),var(--badge-main) 55%,var(--badge-dark));clip-path:polygon(50% 0,63% 12%,82% 8%,88% 27%,100% 40%,88% 57%,92% 78%,68% 82%,50% 100%,32% 82%,8% 78%,12% 57%,0 40%,12% 27%,18% 8%,37% 12%)}#player-center-view .pc-badge-glyph{font-size:23px;color:white;text-shadow:0 1px 3px #173f60}#player-center-view .pc-badge-copy strong{display:block;font-size:13px}#player-center-view .pc-badge-copy small{display:block;color:#55768a;font-size:11px;margin-top:3px}#player-center-view .pc-badge-choice{display:flex;align-items:center;gap:10px;padding:10px;background:#f3fbff;border:1px solid #83bfd2;color:#123d5a}#player-center-view .pc-badge-choice .pc-badge-seal{flex:0 0 42px;width:42px;height:42px}@media(max-width:520px){#player-center-view .pc-profile-hero{align-items:flex-start}#player-center-view .pc-avatar-frame-slot{width:94px;height:94px;flex-basis:94px}}";
+  
+  style.textContent += `
+#player-center-view .pc-auto-dismantle-panel{display:flex;flex-direction:column;gap:12px;padding:18px!important;min-width:0}
+#player-center-view .pc-auto-dismantle-header{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+#player-center-view .pc-auto-dismantle-title{display:block;font-size:20px;line-height:1.3;color:#123b5a}
+#player-center-view .pc-auto-dismantle-toggle{display:inline-flex;align-items:center;gap:9px;margin:0!important;font-weight:800;color:#244e6a;white-space:nowrap;cursor:pointer}
+#player-center-view #pc-auto-dismantle-enabled{width:18px!important;min-width:18px;height:18px;margin:0;flex:0 0 18px;accent-color:#087f9e}
+#player-center-view .pc-auto-dismantle-hint{margin:0;max-width:850px;line-height:1.65}
+#player-center-view .pc-auto-dismantle-rarities{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#player-center-view .pc-auto-dismantle-rarity{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border:1px solid #9abccc;background:#f2f9fc;color:#244e6a;font-weight:800;cursor:pointer}
+#player-center-view .pc-auto-dismantle-rarity input{width:17px!important;min-width:17px;height:17px;margin:0;flex:0 0 17px;accent-color:#087f9e}
+#player-center-view .pc-auto-dismantle-panel button{align-self:flex-start;min-width:150px}
+#player-center-view .pc-ticket-use-controls{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;flex:0 0 auto}
+#player-center-view .pc-ticket-use-controls input{width:76px!important;min-width:76px}
+@media(max-width:600px){#player-center-view .pc-auto-dismantle-panel{padding:14px!important}#player-center-view .pc-auto-dismantle-header{align-items:flex-start;flex-direction:column;gap:10px}#player-center-view .pc-ticket-use-controls{width:100%;justify-content:flex-start}}
+`;
   document.head.appendChild(style);
 
   const tab = document.createElement("button");
@@ -385,7 +401,7 @@
   const warehouseCategories = [
     {id:"cards",label:"卡牌",description:"普通卡牌、特殊攻击卡及可用于构筑的卡牌"},
     {id:"key-items",label:"重要道具",description:"长期持有的重要物品"},
-    {id:"consumables",label:"消耗品",description:"使用后会消耗数量的物品"},
+    {id:"consumables",label:"消耗品",description:"树果卷等可消耗道具在此使用；树果卷支持一次使用多张（最多 20 张）。"},
     {id:"berries",label:"树果",description:"树果及相关收集品"}
   ];
   function renderWarehouseCategoryTabs(host) {
@@ -972,12 +988,12 @@
     contentEl.replaceChildren(node("div","pc-stat","当前代币："+(stats?.tokens??0)),
       node("p","pc-muted","选择不需要的卡牌并填写分解数量。分解后卡牌会从收藏中扣除，代币立即到账。"),
       node("p","pc-muted","三星 10 · 四星 15 · 五星 20 · 异画 30 代币 / 张"));
-    const autoPanel=node("section","pc-stat"),autoTitle=node("strong","","自动分解设置"),autoHint=node("p","pc-muted","开启后，只处理勾选星级中同名卡超过 3 张的部分；开启保存时也会立即检查现有库存。未勾选星级和前 3 张不会被分解。");
+    const autoPanel=node("section","pc-stat pc-auto-dismantle-panel"),autoTitle=node("strong","pc-auto-dismantle-title","自动分解设置"),autoHint=node("p","pc-muted pc-auto-dismantle-hint","开启后，只处理勾选星级中同名卡超过 3 张的部分；开启保存时也会立即检查现有库存。未勾选星级和前 3 张不会被分解。");
     const autoToggle=node("input");autoToggle.type="checkbox";autoToggle.checked=Boolean(autoSettings?.enabled);autoToggle.id="pc-auto-dismantle-enabled";
-    const toggleLabel=node("label","","启用自动分解");toggleLabel.htmlFor=autoToggle.id;toggleLabel.style.cssText="display:flex;align-items:center;gap:8px;margin:10px 0;font-weight:800";
+    const toggleLabel=node("label","pc-auto-dismantle-toggle","启用自动分解");toggleLabel.htmlFor=autoToggle.id;
     toggleLabel.prepend(autoToggle);
-    const rarityOptions=node("div","");rarityOptions.style.cssText="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0";
-    const rarityChecks=[3,4,5].map(star=>{const input=node("input");input.type="checkbox";input.value=String(star);input.checked=(autoSettings?.rarities||[3,4,5]).includes(star);input.id="pc-auto-dismantle-"+star;const label=node("label","",""+star+" 星");label.htmlFor=input.id;label.style.cssText="display:flex;align-items:center;gap:6px";label.prepend(input);rarityOptions.appendChild(label);return input;});
+    const rarityOptions=node("div","pc-auto-dismantle-rarities");
+    const rarityChecks=[3,4,5].map(star=>{const input=node("input");input.type="checkbox";input.value=String(star);input.checked=(autoSettings?.rarities||[3,4,5]).includes(star);input.id="pc-auto-dismantle-"+star;const label=node("label","",""+star+" 星");label.htmlFor=input.id;label.className="pc-auto-dismantle-rarity";label.prepend(input);rarityOptions.appendChild(label);return input;});
     const autoSave=node("button","primary","保存自动分解设置");autoSave.type="button";const autoStatus=node("p","pc-muted","");
     autoSave.addEventListener("click",async()=>{autoSave.disabled=true;autoStatus.textContent="正在保存设置并检查库存……";try{
       const selectedStars=rarityChecks.filter(input=>input.checked).map(input=>Number(input.value));
@@ -986,7 +1002,7 @@
       await loadDismantle();
       setStatus((autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。",false);
     }catch(error){autoStatus.textContent="保存失败："+error.message;autoSave.disabled=false;}});
-    autoPanel.append(autoTitle,autoHint,toggleLabel,rarityOptions,autoSave,autoStatus);
+    const autoHeader=node("div","pc-auto-dismantle-header");autoHeader.append(autoTitle,toggleLabel);autoPanel.append(autoHeader,autoHint,rarityOptions,autoSave,autoStatus);
     contentEl.appendChild(autoPanel);
     const selected=new Map(),rows=[];
     (inventory||[]).forEach(item=>{
