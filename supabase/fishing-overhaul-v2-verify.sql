@@ -21,7 +21,7 @@ select
     or size_large_min_cm is null
     or size_large_max_v2_cm is null) as fish_missing_size_ranges
 from public.fishing_fish_catalog
-where is_active;
+where v2_available;
 
 select
   count(*) as active_locations
@@ -49,7 +49,7 @@ cross join (values
   ('small_mixed_bait'),('medium_mixed_bait'),('large_mixed_bait')
 ) as b(bait_id)
 left join public.fishing_fish_catalog f
-  on f.bait_id=b.bait_id and f.is_active
+  on f.bait_id=b.bait_id and f.v2_available
 left join public.fishing_fish_rules_v2 r
   on r.fish_id=f.fish_id and r.location_id=l.location_id
 where l.is_active
@@ -62,7 +62,7 @@ select
   count(*) filter (where r.location_id is null) as rules_missing_location
 from public.fishing_fish_catalog f
 left join public.fishing_fish_rules_v2 r on r.fish_id=f.fish_id
-where f.is_active;
+where f.v2_available;
 
 select
   count(*) as scheduled_weather_slots,
