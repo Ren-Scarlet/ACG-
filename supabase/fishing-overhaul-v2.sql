@@ -240,6 +240,8 @@ on conflict (fish_id) do update set
  size_medium_min_cm=excluded.size_medium_min_cm,size_medium_max_cm=excluded.size_medium_max_cm,
  size_large_min_cm=excluded.size_large_min_cm,size_large_max_v2_cm=excluded.size_large_max_v2_cm,
  rarity=excluded.rarity,is_hidden=excluded.is_hidden,description=excluded.description,
+ is_active=case when fishing_fish_catalog.v2_available
+   then fishing_fish_catalog.is_active else false end,
  v2_available=true;
 
 -- Hide undiscovered fish immediately, even between the two ordered V2 migrations.
