@@ -118,5 +118,6 @@ jobs:
           fishing_preflight = Path("supabase/fishing-overhaul-v2-preflight.sql").read_text(encoding="utf-8")
           assert "player_fishing_stats" in fishing_preflight and "card_inventory" in fishing_preflight
           assert "player_fishing_stats" in fishing_verify and "player_fishbook" in fishing_verify
+          assert "record_reward_size_cm" in fishing_engine and "fishing_get_records_v2" in fishing_engine
           print("Key draw, item workshop, mailbox, reward, monthly season and fishing V2 functions are represented in source.")
           PY
