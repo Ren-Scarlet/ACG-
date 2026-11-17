@@ -6,6 +6,17 @@
 
 begin;
 
+do $preflight$
+begin
+  if to_regclass('public.fishing_fish_catalog') is null
+     or to_regclass('public.fishing_bait_catalog') is null
+     or to_regclass('public.player_fishbook') is null
+     or to_regprocedure('public.is_admin()') is null then
+    raise exception 'Fishing V2 prerequisite missing. Run the existing fishing V1 migrations first; no V2 changes were applied.';
+  end if;
+end
+$preflight$;
+
 alter table public.fishing_fish_catalog
   add column if not exists size_small_min_cm numeric(7,2),
   add column if not exists size_small_max_cm numeric(7,2),
