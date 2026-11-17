@@ -4,14 +4,6 @@
 
 begin;
 
--- ACG Fishing V2 - isolated world, habitats, weather windows and expanded fish catalogue.
--- Apply AFTER fishing-system-v1.sql, fishing-server-authoritative-v1.sql,
--- and fishing-achievements-shop-v1.sql.
--- This migration is additive: it does not replace login, player, inventory,
--- card, draw, battle, or existing fishing RPC functions.
-
-
-
 do $preflight$
 begin
   if to_regclass('public.fishing_fish_catalog') is null
@@ -406,13 +398,6 @@ revoke all on function public.fishing_get_world_state_v2() from public,anon,auth
 grant execute on function public.fishing_get_world_state_v2() to authenticated;
 
 -- V2 server engine and special-bait rewards.
-
--- ACG Fishing V2 engine
--- Apply AFTER fishing-overhaul-v2.sql.
--- Additive and isolated to fishing tables/RPCs plus three dedicated item_catalog rows.
--- Existing player balances, inventory, catches, fishbook and redemption history are retained.
-
-
 
 do $preflight$
 begin
