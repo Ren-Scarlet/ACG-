@@ -267,7 +267,7 @@
       });
       grid.replaceChildren();
       const visible=state.fish.filter(f=>filter==="all"||(filter==="found"?owned.has(f.fish_id):!owned.has(f.fish_id)));
-      if(!visible.length){grid.append(el("p","fishbook-empty","这里暂时没有符合条件的鱼类。"));return;}
+      if(!visible.length&&!(hiddenUnknown>0&&(filter==="all"||filter==="unknown"))){grid.append(el("p","fishbook-empty","这里暂时没有符合条件的鱼类。"));return;}
       visible.forEach((f,index)=>{
         const item=owned.get(f.fish_id);
         const card=el("article","fishbook-card"+(item?" is-discovered":" is-unknown"));
@@ -288,7 +288,7 @@
           info.append(el("p","fishbook-locked-copy","尚未与它相遇。前往湖边继续抛竿吧。"));
         }
         if(f.description)info.append(el("p","fishbook-locked-copy",f.description));
-        info.append(el("small","fishbook-category","稀有度："+({common:"普通",uncommon:"优秀",rare:"稀有",epic:"史诗",legendary:"传说",mythic:"神话"}[f.rarity]||"未知"));
+        info.append(el("small","fishbook-category","稀有度："+({common:"普通",uncommon:"优秀",rare:"稀有",epic:"史诗",legendary:"传说",mythic:"神话"}[f.rarity]||"未知")));
         card.append(art,info);grid.append(card);
       });
       if(hiddenUnknown>0&&(filter==="all"||filter==="unknown")){
