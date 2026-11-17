@@ -62,3 +62,56 @@
  #fishing-view .fish-scene-sign strong{font-size:16px}
 }
 @media(prefers-reduced-motion:reduce){#fishing-view .fish-world-scene:before,#fishing-view .fish-world-scene:after{transition:none}}
+
+
+/* Art 2.0 — composed fishing grounds overview */
+#fishing-view .fish-overview-layout{display:grid;gap:12px;background:transparent!important;border:0!important;padding:0!important;box-shadow:none!important}
+#fishing-view .fish-location-panel{padding:16px!important;background:linear-gradient(145deg,#14223c,#0d172b)!important}
+#fishing-view .fish-subtitle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}
+#fishing-view .fish-subtitle-row h3{margin:0;color:#efd7a6!important;font:500 17px Georgia,"Noto Serif SC","Microsoft YaHei",serif!important;letter-spacing:.1em}
+#fishing-view .fish-subtitle-row small{color:#d0b783!important;font:600 10px Georgia,serif;letter-spacing:.08em}
+#fishing-view .fish-location-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#fishing-view .fish-location-card{display:grid;grid-template-columns:1fr;justify-items:start;gap:6px;min-height:80px;padding:12px!important;text-align:left;background:#111e35!important;border:1px solid #655d4d!important;color:#eee4d1!important;transition:border-color .18s,background .18s,transform .18s}
+#fishing-view .fish-location-card:hover{transform:translateY(-2px);border-color:#d6b77b!important}
+#fishing-view .fish-location-card.active{background:linear-gradient(135deg,#514a4b,#26334a)!important;border-color:#e4c587!important;box-shadow:inset 0 0 0 1px #e4c58733}
+#fishing-view .fish-location-icon{font-size:22px;color:#e9c989}
+#fishing-view .fish-location-card strong{font-size:14px;font-weight:500;color:#f0e4ce}
+#fishing-view .fish-location-card small{font-size:10px;color:#b6c0ce}
+#fishing-view .fish-overview-main-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(220px,.8fr);gap:12px}
+#fishing-view .fish-cast-panel,#fishing-view .fish-weather-panel{padding:16px!important;background:linear-gradient(145deg,#172541,#101a30)!important}
+#fishing-view .fish-cast-intro{display:flex;align-items:center;gap:14px;padding:8px 0 16px}
+#fishing-view .fish-cast-emblem{display:grid;place-items:center;width:48px;height:48px;flex:0 0 48px;border:1px solid #d6b77b;border-radius:50%;color:#f0d7a1;font:24px Georgia,serif}
+#fishing-view .fish-cast-copy strong{color:#f2e6d2;font:500 17px "Noto Serif SC","Microsoft YaHei",serif}
+#fishing-view .fish-cast-copy p{margin:4px 0 0;color:#b9c3d1;font-size:12px}
+#fishing-view .fish-bait-heading{margin-top:4px;padding-top:12px;border-top:1px solid #ffffff18}
+#fishing-view .fish-bait-list{display:grid;gap:7px}
+#fishing-view .fish-bait-row{display:flex;align-items:center;gap:10px;width:100%;padding:9px 11px!important;text-align:left;background:#101c32!important;border:1px solid #5c5b50!important;color:#e9e1d2!important}
+#fishing-view .fish-bait-row.preferred{border-color:#d9bd88!important;background:linear-gradient(90deg,#51483d,#1b2940)!important}
+#fishing-view .fish-bait-row:disabled{opacity:.42}
+#fishing-view .fish-bait-row-icon{color:#e8c98d;font-size:16px}
+#fishing-view .fish-bait-row-name{flex:1;font-size:13px}
+#fishing-view .fish-bait-row-qty{color:#c5d2e3;font-size:12px}
+#fishing-view .fish-cast-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:10px;border-top:1px solid #ffffff18}
+#fishing-view .fish-cast-hint{margin:0;color:#aeb9c8;font-size:11px}
+#fishing-view .fish-cast-button{min-width:90px;padding:12px 20px!important;font-weight:700}
+#fishing-view .fish-weather-card{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #ffffff18}
+#fishing-view .fish-weather-symbol{display:grid;place-items:center;width:44px;height:44px;border:1px solid #b99b68;border-radius:50%;color:#efd49b;font-size:20px}
+#fishing-view .fish-weather-copy{display:grid;gap:5px}
+#fishing-view .fish-weather-copy strong{color:#f0dfc2;font-size:15px}
+#fishing-view .fish-weather-copy small{color:#aeb9c8;font-size:11px}
+#fishing-view .fish-forecast,#fishing-view .fish-weather-note{color:#aeb9c8;font-size:11px;line-height:1.8}
+#fishing-view .fish-overview-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#fishing-view .fish-overview-stat{display:grid;gap:8px;padding:14px!important}
+#fishing-view .fish-overview-stat span{color:#e6cc98;font:500 14px Georgia,"Noto Serif SC",serif;letter-spacing:.08em}
+#fishing-view .fish-overview-stat strong{color:#f3e5ce;font:600 22px Georgia,"Noto Serif SC",serif}
+#fishing-view .fish-overview-stat small{color:#aeb9c8;font-size:10px}
+#fishing-view .fish-today-record{padding:14px!important;background:#101a30!important}
+#fishing-view .fish-today-record .fish-subtitle-row{margin-bottom:6px}
+#fishing-view .fish-today-record p{margin:0;color:#b8c2d0;font-size:12px}
+@media(max-width:650px){
+ #fishing-view .fish-location-grid{grid-template-columns:1fr}
+ #fishing-view .fish-overview-main-grid{grid-template-columns:1fr}
+ #fishing-view .fish-overview-stats{grid-template-columns:1fr 1fr}
+ #fishing-view .fish-cast-foot{align-items:stretch;flex-direction:column}
+ #fishing-view .fish-cast-button{width:100%}
+}
