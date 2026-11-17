@@ -575,13 +575,18 @@ begin
  into v_records
  from (
    select jsonb_build_object(
-     'fish_id',fish_id,
-     'global_best_size_cm',max(size_cm),
+     'fish_id',c.fish_id,
+     'global_best_size_cm',max(c.size_cm),
      'record_catches',count(*)
    ) as record_row
-   from public.fishing_catches
-   where size_cm is not null
-   group by fish_id
+   from public.fishing_catches c
+   join public.fishing_fish_catalog f on f.fish_id=c.fish_id
+   where c.size_cm is not null
+     and (not f.is_hidden or exists(
+       select 1 from public.player_fishbook b
+       where b.user_id=v_user and b.fish_id=f.fish_id
+     ))
+   group by c.fish_id
  ) records;
  return v_records;
 end;
