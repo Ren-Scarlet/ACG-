@@ -12,7 +12,7 @@ select
   to_regclass('public.fishing_catches') as catches;
 
 select
-  count(*) as total_active_fish,
+  count(*) as total_v2_fish,
   count(*) filter (where is_hidden) as hidden_fish,
   count(*) filter (where size_small_min_cm is null
     or size_small_max_cm is null
