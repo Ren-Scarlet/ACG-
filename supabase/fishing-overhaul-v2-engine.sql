@@ -9,14 +9,18 @@ alter table public.fishing_fish_rules_v2
   add column if not exists size_shift_to_large numeric(5,2) not null default 0
     check(size_shift_to_large between -20 and 20);
 
+-- Weather-favored species shift a small part of the size roll toward large fish.
+-- Every identifier below exists in the V2 catalogue; the old draft contained
+-- several placeholder IDs that silently matched no fish.
 update public.fishing_fish_rules_v2 set size_shift_to_large=5
-where fish_id in ('rain_loach','rain_catfish','amber_loach','rainbell_fish','ironback_sturgeon','whitewater_salmon');
+where fish_id in ('amber_loach','reed_whisker','rainbell_fish','ironback_sturgeon','whitewater_salmon');
 update public.fishing_fish_rules_v2 set size_shift_to_large=10
 where fish_id in ('stormscale_pike','thunder_crown_eel','ichigaya_fish_king_king','old_lake_dragon');
 update public.fishing_fish_rules_v2 set size_shift_to_large=5
-where fish_id in ('fog_glassfish','mistfin_trout','fog_veil_koi','abyssal_manta','aurora_ray');
+where fish_id in ('rare_treasure_trout','mistfin_trout','peerless_crucian',
+                  'ichigaya_fish_king','fog_veil_koi','abyssal_manta','aurora_ray');
 update public.fishing_fish_rules_v2 set size_shift_to_large=5
-where fish_id in ('windstone_carp','cobalt_tuna','gale_sailfish');
+where fish_id in ('cobalt_tuna','whitewater_salmon');
 
 alter table public.fishing_sessions
   add column if not exists weather_size_shift numeric(5,2) not null default 0,
@@ -385,7 +389,7 @@ begin
  v_elapsed:=greatest(0,floor(extract(epoch from (v_now-v_started))*1000)::integer);
  return jsonb_build_object('status','reeling','reel_duration_ms',3000,
    'reel_elapsed_ms',v_elapsed,'phase_offset',v_offset,
-   'zone_start_pct',20,'zone_width_pct',60,
+   'zone_start_pct',30,'zone_width_pct',40,
    'duplicate_request',v_session.reel_started_at is not null);
 end;
 $$;
