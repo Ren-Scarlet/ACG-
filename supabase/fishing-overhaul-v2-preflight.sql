@@ -2,24 +2,24 @@
 -- Run BEFORE the two V2 migrations. This file does not modify anything.
 
 select
-  to_regclass('public.profiles') as profiles,
-  to_regclass('public.player_stats') as player_stats,
-  to_regclass('public.card_inventory') as card_inventory,
-  to_regclass('public.item_catalog') as item_catalog,
-  to_regclass('public.fishing_bait_catalog') as fishing_bait_catalog,
-  to_regclass('public.fishing_fish_catalog') as fishing_fish_catalog,
-  to_regclass('public.player_fishing_bait') as player_fishing_bait,
-  to_regclass('public.fishing_sessions') as fishing_sessions,
-  to_regclass('public.fishing_catches') as fishing_catches,
-  to_regclass('public.player_fishbook') as player_fishbook,
-  to_regclass('public.fishing_shop_catalog') as fishing_shop_catalog,
-  to_regclass('public.fishing_craft_history') as fishing_craft_history,
-  to_regclass('public.fishing_achievements') as fishing_achievements,
-  to_regclass('public.player_fishing_achievements') as player_fishing_achievements,
-  to_regclass('public.player_fishing_stats') as player_fishing_stats,
-  to_regclass('public.fishing_points_ledger') as fishing_points_ledger,
-  to_regclass('public.draw_card_catalog') as draw_card_catalog,
-  to_regprocedure('public.is_admin()') as is_admin_function;
+  (to_regclass('public.profiles') is not null) as profiles_exists,
+  (to_regclass('public.player_stats') is not null) as player_stats_exists,
+  (to_regclass('public.card_inventory') is not null) as card_inventory_exists,
+  (to_regclass('public.item_catalog') is not null) as item_catalog_exists,
+  (to_regclass('public.fishing_bait_catalog') is not null) as fishing_bait_catalog_exists,
+  (to_regclass('public.fishing_fish_catalog') is not null) as fishing_fish_catalog_exists,
+  (to_regclass('public.player_fishing_bait') is not null) as player_fishing_bait_exists,
+  (to_regclass('public.fishing_sessions') is not null) as fishing_sessions_exists,
+  (to_regclass('public.fishing_catches') is not null) as fishing_catches_exists,
+  (to_regclass('public.player_fishbook') is not null) as player_fishbook_exists,
+  (to_regclass('public.fishing_shop_catalog') is not null) as fishing_shop_catalog_exists,
+  (to_regclass('public.fishing_craft_history') is not null) as fishing_craft_history_exists,
+  (to_regclass('public.fishing_achievements') is not null) as fishing_achievements_exists,
+  (to_regclass('public.player_fishing_achievements') is not null) as player_fishing_achievements_exists,
+  (to_regclass('public.player_fishing_stats') is not null) as player_fishing_stats_exists,
+  (to_regclass('public.fishing_points_ledger') is not null) as fishing_points_ledger_exists,
+  (to_regclass('public.draw_card_catalog') is not null) as draw_card_catalog_exists,
+  (to_regprocedure('public.is_admin()') is not null) as is_admin_function_exists;
 
 select
   p.proname,
