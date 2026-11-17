@@ -215,9 +215,8 @@ $$;
 
 -- Server-side cast. Every eligible fish must satisfy its location, weather,
 -- previous-weather, local-time and prerequisite-fish conditions.
-create or replace function public.fishing_start_cast(
- p_bait_id text,p_request_id uuid,p_location_id text
-)
+create or replace function public.fishing_start_cast_v2(
+ p_bait_id text,p_request_id uuid,p_location_id text)
 returns jsonb
 language plpgsql
 security definer
@@ -327,19 +326,9 @@ begin
 end;
 $$;
 
--- Backward-compatible signature for clients that have not yet selected a location.
-create or replace function public.fishing_start_cast(p_bait_id text,p_request_id uuid)
-returns jsonb
-language sql
-security definer
-set search_path=''
-as $$
- select public.fishing_start_cast(p_bait_id,p_request_id,'qinglan_lake');
-$$;
-
 -- A random server-signed phase offset is stored on the session. The browser may
 -- animate it for feedback, but cannot submit a score or a catch result.
-create or replace function public.fishing_hook_cast(p_session_id uuid)
+create or replace function public.fishing_hook_cast_v2(p_session_id uuid)
 returns jsonb
 language plpgsql
 security definer
@@ -389,7 +378,7 @@ end;
 $$;
 
 -- The server calculates score and size; no client-supplied score or success flag.
-create or replace function public.fishing_finish_reel(p_session_id uuid)
+create or replace function public.fishing_finish_reel_v2(p_session_id uuid)
 returns jsonb
 language plpgsql
 security definer
@@ -572,17 +561,19 @@ where product_id in (
 );
 
 revoke all on function public.fishing_craft_special_bait(uuid) from public,anon,authenticated;
-revoke all on function public.fishing_start_cast(text,uuid,text) from public,anon,authenticated;
+-- Disable only the old cast-entry RPC so new casts cannot bypass V2.
+-- Legacy hook/finish functions remain available for already-open V1 sessions.
 revoke all on function public.fishing_start_cast(text,uuid) from public,anon,authenticated;
-revoke all on function public.fishing_hook_cast(uuid) from public,anon,authenticated;
-revoke all on function public.fishing_finish_reel(uuid) from public,anon,authenticated;
+revoke all on function public.fishing_start_cast_v2(text,uuid,text) from public,anon,authenticated;
+revoke all on function public.fishing_hook_cast_v2(uuid) from public,anon,authenticated;
+revoke all on function public.fishing_finish_reel_v2(uuid) from public,anon,authenticated;
 revoke all on function public.fishing_get_world_state_v2() from public,anon,authenticated;
+revoke all on function public.fishing_craft_special_bait(uuid) from public,anon,authenticated;
 revoke all on function public.fishing_admin_grant_special_bait(uuid,integer,text) from public,anon,authenticated;
 grant execute on function public.fishing_craft_special_bait(uuid) to authenticated;
-grant execute on function public.fishing_start_cast(text,uuid,text) to authenticated;
-grant execute on function public.fishing_start_cast(text,uuid) to authenticated;
-grant execute on function public.fishing_hook_cast(uuid) to authenticated;
-grant execute on function public.fishing_finish_reel(uuid) to authenticated;
+grant execute on function public.fishing_start_cast_v2(text,uuid,text) to authenticated;
+grant execute on function public.fishing_hook_cast_v2(uuid) to authenticated;
+grant execute on function public.fishing_finish_reel_v2(uuid) to authenticated;
 grant execute on function public.fishing_get_world_state_v2() to authenticated;
 grant execute on function public.fishing_admin_grant_special_bait(uuid,integer,text) to authenticated;
 
