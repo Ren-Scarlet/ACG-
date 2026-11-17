@@ -706,7 +706,12 @@ begin
  update public.fishing_sessions
  set status='escaped',resolved_at=clock_timestamp()
  where user_id=v_user and status='waiting'
-   and created_at<clock_timestamp()-interval '10 minutes';
+   and (
+     (reel_started_at is null and
+       created_at+(bite_after_ms::text||' milliseconds')::interval+interval '12 seconds'<clock_timestamp())
+     or (reel_started_at is not null and
+       reel_started_at<clock_timestamp()-interval '60 seconds')
+   );
 
  select * into v_existing from public.fishing_sessions
  where user_id=v_user and request_id=p_request_id;
@@ -716,6 +721,15 @@ begin
    end if;
    return jsonb_build_object('session_id',v_existing.id,'status',v_existing.status,
      'bite_after_ms',v_existing.bite_after_ms,'duplicate_request',true);
+ end if;
+
+ -- Enforce one unfinished fishing round per player on the server as well as
+ -- in the browser. The player_stats row lock above serializes concurrent casts.
+ if exists(
+   select 1 from public.fishing_sessions
+   where user_id=v_user and status='waiting'
+ ) then
+   raise exception '你还有一轮未完成的钓鱼，请先完成当前钓鱼';
  end if;
 
  select * into v_bait from public.fishing_bait_catalog
