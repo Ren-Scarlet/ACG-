@@ -70,12 +70,22 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $
 begin
+  if new.quantity<=3 or not exists(
+    select 1
+    from public.draw_card_catalog dc
+    join public.player_card_auto_dismantle_settings setting
+      on setting.user_id=new.user_id and setting.enabled=true
+    where dc.card_id=new.card_id and dc.enabled=true
+      and dc.rarity=any(setting.rarities)
+  ) then
+    return new;
+  end if;
   perform public.apply_player_auto_dismantle(new.user_id);
   return new;
 end;
-$$;
+$;
 
 drop trigger if exists card_inventory_auto_dismantle on public.card_inventory;
 create trigger card_inventory_auto_dismantle
