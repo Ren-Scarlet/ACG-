@@ -8,7 +8,7 @@
   const root = document.getElementById("fishing-view");
   if (!root) { window.addEventListener("DOMContentLoaded", () => { if (!window.acgFishingInitialized) boot(); }, { once: true }); return; }
   const $ = (id) => root.querySelector("#" + id);
-  const state = { dashboard:null, baits:[], fish:[], berries:[], shopCards:[], shopItems:[], currentSession:null, raf:0, phase:"idle" };
+  const state = { dashboard:null, world:null, currentLocation:"qinglan_lake", baits:[], fish:[], berries:[], specialMaterials:[], shopCards:[], shopItems:[], currentSession:null, raf:0, phase:"idle" };
   const el = (tag, cls, text) => {
     const n=document.createElement(tag);
     if(cls)n.className=cls;
@@ -41,6 +41,7 @@
   async function loadDashboard(){
     const d=await rpc("fishing_get_dashboard",{});
     state.dashboard=d;
+    state.world=await rpc("fishing_get_world_state_v2",{});
     const {data:userData,error:userError}=await client.auth.getUser();
     if(userError)throw userError;
     if(!userData?.user)throw new Error("无法确认当前登录账号");
@@ -68,13 +69,15 @@
     }
     state.berries=(berryRes.data||[]).filter(r=>cards.some(c=>c.id===r.card_id&&c.pack_id==="pack_010"))
       .map(r=>({id:r.card_id,name:names[r.card_id]||r.card_id,quantity:r.quantity}));
+    const rareMaterials=[["fishing_ancient_scale","古代鱼鳞"],["fishing_moon_pearl","月光珍珠"],["fishing_storm_core","风暴核心"]];
+    state.specialMaterials=rareMaterials.map(([id,name])=>({id,name,quantity:Number((berryRes.data||[]).find(r=>r.card_id===id)?.quantity||0)}));
     renderHeader();
   }
   function renderHeader(){
     const s=state.dashboard.stats||{};
     $("fish-points").textContent=Number(s.points||0).toLocaleString("zh-CN");
     $("fish-catches").textContent=Number(s.total_catches||0).toLocaleString("zh-CN");
-    $("fish-species").textContent=Number(s.distinct_fish||0)+"/10";
+    $("fish-species").textContent=Number(s.distinct_fish||0)+"/"+Number(state.world?.species_total||state.fish.length||36);
   }
   function createWaterScene(mode="waiting"){
     const scene=el("div","fish-water-stage "+mode);
@@ -101,12 +104,28 @@
   function renderOverview(){
     const host=$("fish-overview");host.replaceChildren();
     const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
-    head.append(el("p","fish-kicker","WELCOME TO QINGLAN LAKE"),el("h2","","今日的湖面，正等待新的相遇"),el("p","","挑选鱼饵，在湖畔享受片刻宁静。鱼种与尺寸由服务器决定，操作只影响是否成功收获。"));
+    head.append(el("p","fish-kicker","ANGLER'S FIELD GUIDE"),el("h2","","今日的湖面，正等待新的相遇"),el("p","","观察天气、选择钓点与鱼饵。鱼种、尺寸和收藏奖励均由服务器结算。"));
+    const weatherNames={sunny:"晴天",cloudy:"阴天",rain:"雨天",fog:"浓雾",storm:"雷雨",windy:"大风"};
+    const weather=state.world||{};
+    const weatherPanel=el("section","fish-game-stat");weatherPanel.style.cssText="grid-column:1/-1;padding:16px;text-align:left";
+    const weatherTop=el("div","");weatherTop.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap";
+    weatherTop.append(el("strong","","当前天气　"+({sunny:"☀️",cloudy:"☁️",rain:"🌧️",fog:"🌫️",storm:"⛈️",windy:"🌬️"}[weather.weather_id]||"🌤️")+" "+(weatherNames[weather.weather_id]||"未知")));
+    const next=weather.forecast?.find(x=>!x.is_current);
+    weatherTop.append(el("span","hint",next?"下一时段："+(weatherNames[next.weather_id]||next.weather_id):"天气预报更新中"));
+    const forecast=el("div","hint");forecast.style.marginTop="8px";
+    forecast.textContent="未来天气："+(weather.forecast||[]).map(x=>(x.is_current?"现在 ":"")+ (weatherNames[x.weather_id]||x.weather_id)).join("　→　");
+    const locationLabel=el("label","field");locationLabel.style.cssText="display:block;margin-top:12px";locationLabel.append(el("span","","选择钓点"));
+    const locationSelect=el("select","");locationSelect.style.marginTop="6px";
+    (weather.locations||[]).forEach(x=>locationSelect.add(new Option((x.icon||"🎣")+" "+x.location_name+" — "+x.description,x.location_id)));
+    locationSelect.value=state.currentLocation;
+    locationSelect.addEventListener("change",()=>{state.currentLocation=locationSelect.value;});
+    locationLabel.append(locationSelect);weatherPanel.append(weatherTop,forecast,locationLabel);
     const stats=el("div","fish-game-stats");
     [["钓鱼积分",$("fish-points").textContent],["累计钓获",$("fish-catches").textContent],["已发现鱼种",$("fish-species").textContent]].forEach(([k,v])=>{const c=el("article","fish-game-stat");c.append(el("span","",k),el("strong","",v));stats.append(c);});
     const title=el("div","fish-subtitle-row");title.append(el("h3","","选择你的鱼饵"),el("small","","SELECT BAIT"));
     const grid=el("div","fish-game-grid");
     state.baits.forEach((b,i)=>{const qty=(state.dashboard.baits||[]).find(x=>x.bait_id===b.bait_id)?.quantity||0,c=el("article","fish-bait-tile"),art=el("div","fish-bait-tile-art");art.append(el("span","","✦  BAIT 0"+(i+1)),el("b","",b.icon||"🪱"));const body=el("div","fish-bait-tile-body");body.append(el("h4","",b.bait_name),el("p","",b.description),el("strong","","持有 ×"+qty));const btn=el("button","fish-ui-button",qty?"抛竿垂钓":"前往工坊");btn.type="button";btn.disabled=!b.is_active||(qty<1&&!b.craftable);btn.addEventListener("click",()=>qty?startCast(b.bait_id):setSubpage("craft"));c.append(art,body,btn);grid.append(c);});
+    stats.append(weatherPanel);
     shell.append(head,stats,title,grid);host.append(shell);
   }
   function renderCraft(){
@@ -116,13 +135,19 @@
     const inv=el("div","fish-berry-stock");inv.append(el("strong","","树果库存"),el("span","",state.berries.length+" 种可用"));state.berries.forEach(b=>inv.append(el("small","","🌳 "+b.name+" ×"+b.quantity)));
     const grid=el("div","fish-game-grid");
     state.baits.forEach((b,i)=>{const c=el("article","fish-recipe-card"),art=el("div","fish-recipe-art");art.append(el("small","","RECIPE 0"+(i+1)),el("b","",b.icon||"🪱"));const body=el("div","fish-recipe-body");body.append(el("h3","",b.bait_name),el("p","",b.description));if(!b.craftable)body.append(el("div","fish-locked-note","配方尚未开放"));else{const selects=[];for(let n=0;n<b.ingredient_count;n++){const label=el("label","fish-field","树果 "+(n+1)),sel=el("select");sel.append(new Option("选择树果",""));state.berries.forEach(x=>sel.append(new Option(x.name+"（×"+x.quantity+"）",x.id)));label.append(sel);body.append(label);selects.push(sel);}const btn=el("button","fish-ui-button","制作鱼饵");btn.type="button";btn.disabled=state.berries.length<b.ingredient_count;btn.addEventListener("click",async()=>{const ids=selects.map(x=>x.value);if(ids.some(x=>!x)){status("请先选择完整的树果配方。",true);return;}if(new Set(ids).size!==b.distinct_ingredients){status("所选树果种类不符合配方要求。",true);return;}btn.disabled=true;try{await rpc("fishing_craft_bait",{p_bait_id:b.bait_id,p_berry_ids:ids,p_request_id:uuid()});status("制作完成，获得 1 个"+b.bait_name+"。");await loadDashboard();renderCraft();renderOverview();}catch(e){status("制作失败："+e.message,true);btn.disabled=false;}});body.append(btn);}c.append(art,body);grid.append(c);});
-    shell.append(head,inv,grid);host.append(shell);
+    const special=panel("特殊鱼饵配方","使用三种稀有材料制作成分不明的混合饵；也可通过隐藏鱼成就或活动获得。");
+    const materialLine=el("div","fish-berry-stock");state.specialMaterials.forEach(m=>materialLine.append(el("small","",m.name+" ×"+m.quantity)));
+    const specialBtn=el("button","fish-ui-button","制作 1 个特殊鱼饵");specialBtn.type="button";
+    specialBtn.disabled=state.specialMaterials.some(m=>m.quantity<1);
+    specialBtn.addEventListener("click",async()=>{specialBtn.disabled=true;try{await rpc("fishing_craft_special_bait",{p_request_id:uuid()});status("特殊鱼饵制作完成。");await loadDashboard();renderCraft();renderOverview();}catch(e){status("特殊鱼饵制作失败："+e.message,true);specialBtn.disabled=false;}});
+    special.append(materialLine,specialBtn);
+    shell.append(head,inv,grid,special);host.append(shell);
   }
   async function startCast(baitId){
     if(state.phase!=="idle"){status("当前还有一轮钓鱼没有结束。",true);return;}
     state.phase="waiting";renderOverview();
     try{
-      const result=await rpc("fishing_start_cast",{p_bait_id:baitId,p_request_id:uuid()});
+      const result=await rpc("fishing_start_cast",{p_bait_id:baitId,p_request_id:uuid(),p_location_id:state.currentLocation});
       state.currentSession=result.session_id;
       const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
       const scene=createWaterScene("waiting");
@@ -171,7 +196,7 @@
       const start=performance.now()-((Number(result.reel_elapsed_ms)||0)+hookRoundTripMs/2);
       const animate=now=>{
         if(state.phase!=="reeling")return;
-        const phase=(((now-start)%duration)+duration)%duration/duration;
+        const phase=((((now-start)/duration+(Number(result.phase_offset)||0))%1)+1)%1;
         const x=(phase<.5?phase*2:(1-phase)*2)*100;
         needle.style.left=x+"%";
         state.raf=requestAnimationFrame(animate);
@@ -197,7 +222,8 @@
         const catchMark=el("div","fish-catch-spark","🎣");
         caughtScene.append(catchMark);
         const catchTitle=el("h3","fish-catch-title","🎉 成功钓获："+result.fish_name);
-        $("fish-action").replaceChildren(caughtScene,catchTitle,el("p","",label+" · 获得 "+result.points_awarded+" 钓鱼积分"),el("p","hint","鱼获已登记到图鉴，积分已入账。"));
+        const rewardLabel=result.is_first_discovery?"首次发现奖励 ×3":result.is_size_record?"尺寸纪录奖励 ×2":"重复钓获奖励 ×0.2";
+        $("fish-action").replaceChildren(caughtScene,catchTitle,el("p","",label+" · 获得 "+result.points_awarded+" 钓鱼积分"),el("p","hint",rewardLabel+" · 收线评分 "+result.action_score+" · 天气 "+({sunny:"晴天",cloudy:"阴天",rain:"雨天",fog:"浓雾",storm:"雷雨",windy:"大风"}[result.weather_id]||"未知")));
         status("成功钓获 "+result.fish_name+"！");
       }else{
         $("fish-action").replaceChildren(el("h3","","鱼逃走了"),el("p","hint","收线时机不合适，这次没有收获，鱼饵不会返还。"));
@@ -212,7 +238,9 @@
   function renderFishbook(){
     const host=$("fish-book");host.replaceChildren();
     const owned=new Map((state.dashboard.fishbook||[]).map(x=>[x.fish_id,x]));
-    const discovered=state.fish.filter(f=>owned.has(f.fish_id)).length;
+    const discovered=Number(state.dashboard.stats?.distinct_fish||state.dashboard.fishbook?.length||0);
+    const hiddenKnown=state.fish.filter(f=>f.is_hidden).length;
+    const hiddenUnknown=Math.max(0,Number(state.world?.hidden_total||4)-hiddenKnown);
     let filter="all";
     const shell=el("section","fishbook-shell");
     const head=el("div","fishbook-heading");
@@ -222,9 +250,9 @@
     head.append(eyebrow,title,subtitle);
     const progress=el("div","fishbook-progress");
     const progressText=el("div","fishbook-progress-copy");
-    progressText.append(el("span","","探索进度"),el("strong","",discovered+" / "+state.fish.length+" 种"));
+    progressText.append(el("span","","探索进度"),el("strong","",discovered+" / "+Number(state.world?.species_total||36)+" 种"));
     const track=el("div","fishbook-progress-track");
-    const fill=el("span","");fill.style.width=(state.fish.length?discovered/state.fish.length*100:0)+"%";track.append(fill);
+    const fill=el("span","");fill.style.width=(Number(state.world?.species_total||36)?discovered/Number(state.world?.species_total||36)*100:0)+"%";track.append(fill);
     progress.append(progressText,track);
     const filters=el("div","fishbook-filters");
     const grid=el("div","fishbook-grid");
@@ -259,8 +287,16 @@
         }else{
           info.append(el("p","fishbook-locked-copy","尚未与它相遇。前往湖边继续抛竿吧。"));
         }
+        if(f.description)info.append(el("p","fishbook-locked-copy",f.description));
+        info.append(el("small","fishbook-category","稀有度："+({common:"普通",uncommon:"优秀",rare:"稀有",epic:"史诗",legendary:"传说",mythic:"神话"}[f.rarity]||"未知"));
         card.append(art,info);grid.append(card);
       });
+      if(hiddenUnknown>0&&(filter==="all"||filter==="unknown")){
+        const mystery=el("article","fishbook-card is-unknown"),art=el("div","fishbook-art");
+        art.append(el("span","fishbook-number","HIDDEN"),el("span","fishbook-fish-mark","?"),el("span","fishbook-seal","隐藏鱼种"));
+        const info=el("div","fishbook-card-info");info.append(el("p","fishbook-category","尚未发现"),el("h3","fishbook-fish-name","未知的水域传说"),el("p","fishbook-locked-copy","还有 "+hiddenUnknown+" 种隐藏鱼尚未收入图鉴。天气、时段与钓点可能藏着线索。"));
+        mystery.append(art,info);grid.append(mystery);
+      }
     };
     shell.append(head,progress,filters,grid);host.append(shell);renderCards();
   }
