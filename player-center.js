@@ -742,7 +742,8 @@
     const forceStyle=(el,styles)=>Object.entries(styles).forEach(([k,v])=>el.style.setProperty(k,v,"important"));
     forceStyle(root,{position:"fixed",inset:"0",zIndex:"999990",display:"block",overflowY:"auto",overflowX:"hidden",background:"radial-gradient(ellipse at 50% -15%,#263958 0,#101827 34%,#080b12 72%)",color:"#edf2fa",boxSizing:"border-box"});
     const top=node("header","adl-top"),brand=node("div","adl-brand");brand.innerHTML='ACG <b>PACK LAB</b>';
-    const right=node("div","adl-topright"),token=node("div","adl-token","代币："+(stats?.tokens??0)),close=node("button","adl-close","返回玩家中心");
+    let currentDrawBalance=Number(stats?.tokens??0);
+    const right=node("div","adl-topright"),token=node("div","adl-token","代币："+currentDrawBalance),close=node("button","adl-close","返回玩家中心");
     close.type="button";close.addEventListener("click",()=>{closeDrawLobby();showCenter("overview");});right.append(token,close);top.append(brand,right);
     const main=node("main","adl-main"),eyebrow=node("div","adl-eyebrow","CARD PACK COLLECTION"),hero=node("div","adl-hero");
     const groupStyle=node("style");
@@ -750,7 +751,7 @@
     root.appendChild(groupStyle);
     forceStyle(main,{display:"block",position:"relative",width:"min(1180px,100%)",maxWidth:"1180px",margin:"0 auto",padding:"34px 22px 70px",background:"transparent",border:"0",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
     const hgroup=node("div");hgroup.append(node("h1","","卡包抽卡"),node("p","","选择你的卡包，开启下一张传说。每包 5 张卡，十连共 50 张。"));
-    const tokenbox=node("div","adl-tokenbox");tokenbox.append(document.createTextNode("当前代币"),node("b","",String(stats?.tokens??0)));hero.append(hgroup,tokenbox);
+    const tokenbox=node("div","adl-tokenbox"),tokenValue=node("b","",String(currentDrawBalance));tokenbox.append(document.createTextNode("当前代币"),tokenValue);hero.append(hgroup,tokenbox);
     const section=node("div","adl-section");section.append(document.createTextNode("选择卡包"),node("small","","SELECT YOUR PACK"));
     const packCategory=pool=>packCatalog.find(pack=>pack.id===pool.pack_id)?.category||"normal";
     const categoryOrder={normal:0,battle_item:1,berry:2};
@@ -811,7 +812,25 @@
       if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;line.appendChild(img);}
       const detail=node("div");detail.append(node("strong","",info.name),node("div","adl-muted",(info.star||"")+" 星 · "+(packNames[item.pack_id]||item.pack_id)+" · "+new Date(item.created_at).toLocaleString("zh-CN")));line.appendChild(detail);historySection.appendChild(line);
     });
-    const launch=count=>{if(!selectedPool)return;status.textContent="正在连接抽卡系统……";single.disabled=ten.disabled=true;performDraw(selectedPool,count).finally(()=>{single.disabled=ten.disabled=false;});};
+    const launch=async count=>{
+      if(!selectedPool||drawBusy)return;
+      const estimatedCost=Number(selectedPool.price_tokens||0)*count;
+      if(currentDrawBalance<estimatedCost){
+        status.textContent="代币不足：本次需要 "+estimatedCost+"，当前只有 "+currentDrawBalance+"。";
+        status.style.color="#ff9b9b";return;
+      }
+      status.textContent="正在连接抽卡系统……";status.style.color="";
+      single.disabled=ten.disabled=true;
+      try{
+        const result=await performDraw(selectedPool,count);
+        if(result){
+          currentDrawBalance=Number(result.remaining_tokens);
+          token.textContent="代币："+currentDrawBalance;
+          tokenValue.textContent=String(currentDrawBalance);
+          status.textContent="抽卡完成，本次消耗 "+Number(result.charged_tokens||0)+" 代币。";
+        }
+      }finally{single.disabled=ten.disabled=false;}
+    };
     single.addEventListener("click",()=>launch(1));ten.addEventListener("click",()=>launch(10));
     main.append(eyebrow,hero,section);
     if(normalPools.length){main.append(normalHeading,normalGrid);}
@@ -945,7 +964,8 @@
       clearDrawRequestId(pool.pack_id,packCount);
       if(packCount===10)showTenPackOpening(pool,result);
       else showSinglePackOpening(pool,result);
-    }catch(error){loading.textContent="抽卡失败："+error.message;loading.style.color="#ff9b9b";}
+      return result;
+    }catch(error){loading.textContent="抽卡失败："+error.message;loading.style.color="#ff9b9b";return null;}
     finally{drawBusy=false;}
   }
   function showSinglePackOpening(pool,result,returnPage="draw"){
