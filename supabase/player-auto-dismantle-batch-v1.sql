@@ -281,7 +281,7 @@ begin
     end loop;
     v_result := jsonb_build_object(
       'kind','draw_pack','pack_id',v_pack.pack_id,
-      'pack_name',v_pack.pack_name,'packages',v_pack_count,
+      'pack_name',v_pack.pack_name,'packages',v_pack_count*v_use_count,
       'card_count',v_card_count
     );
 
