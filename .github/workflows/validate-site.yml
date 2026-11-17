@@ -107,8 +107,18 @@ jobs:
               assert f"public.{name}" in seasons, f"Missing season table: {name}"
           for name in ["sync_season_match_result", "admin_save_season_rank_reward", "admin_settle_monthly_season", "run_monthly_season_rollover", "player_list_my_seasons", "admin_resend_season_reward"]:
               assert f"function public.{name}" in seasons, f"Missing season function: {name}"
+          import re
+          fishing_base = Path("supabase/fishing-system-v1.sql").read_text(encoding="utf-8")
           fishing_v2 = Path("supabase/fishing-overhaul-v2.sql").read_text(encoding="utf-8")
           fishing_engine = Path("supabase/fishing-overhaul-v2-engine.sql").read_text(encoding="utf-8")
+          base_catalog = fishing_base.split("insert into public.fishing_fish_catalog", 1)[1].split("on conflict (fish_id)", 1)[0]
+          new_catalog = fishing_v2.split("insert into public.fishing_fish_catalog", 1)[1].split("on conflict (fish_id)", 1)[0]
+          rules_block = fishing_v2.split("insert into public.fishing_fish_rules_v2", 1)[1].split("on conflict (fish_id)", 1)[0]
+          bait_ids = r"(?:small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)"
+          fish_ids = set(re.findall(r"\\('([^']+)',\\s*'" + bait_ids + r"'", base_catalog + new_catalog))
+          rule_ids = set(re.findall(r"\\('([^']+)',\\s*'[^']+'", rules_block))
+          assert len(fish_ids) == 36, f"Expected 36 fish entries, found {len(fish_ids)}"
+          assert fish_ids <= rule_ids, f"Fish missing encounter rules: {sorted(fish_ids - rule_ids)}"
           for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
               assert name in fishing_v2, f"Fishing V2 migration missing: {name}"
           for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_get_records_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
