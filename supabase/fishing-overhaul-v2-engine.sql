@@ -5,7 +5,21 @@
 
 begin;
 
+alter table public.fishing_fish_rules_v2
+  add column if not exists size_shift_to_large numeric(5,2) not null default 0
+    check(size_shift_to_large between -20 and 20);
+
+update public.fishing_fish_rules_v2 set size_shift_to_large=5
+where fish_id in ('rain_loach','rain_catfish','amber_loach','rainbell_fish','ironback_sturgeon','whitewater_salmon');
+update public.fishing_fish_rules_v2 set size_shift_to_large=10
+where fish_id in ('stormscale_pike','thunder_crown_eel','ichigaya_fish_king_king','old_lake_dragon');
+update public.fishing_fish_rules_v2 set size_shift_to_large=5
+where fish_id in ('fog_glassfish','mistfin_trout','fog_veil_koi','abyssal_manta','aurora_ray');
+update public.fishing_fish_rules_v2 set size_shift_to_large=5
+where fish_id in ('windstone_carp','cobalt_tuna','gale_sailfish');
+
 alter table public.fishing_sessions
+  add column if not exists weather_size_shift numeric(5,2) not null default 0,
   add column if not exists location_id text not null default 'qinglan_lake',
   add column if not exists weather_id text not null default 'sunny',
   add column if not exists reel_phase_offset numeric(8,6) not null default 0,
@@ -221,6 +235,7 @@ declare
  v_hour integer;
  v_bait_qty integer;
  v_session public.fishing_sessions%rowtype;
+ v_weather_shift numeric(5,2):=0;
 begin
  if v_user is null then raise exception '请先登录'; end if;
  if p_request_id is null then raise exception '抛竿请求编号缺失'; end if;
@@ -261,7 +276,7 @@ begin
  v_previous:=v_world->>'previous_weather_id';
  v_hour:=extract(hour from (clock_timestamp() at time zone 'Asia/Shanghai'))::integer;
 
- select f.* into v_fish
+ select f,r.size_shift_to_large into v_fish,v_weather_shift
  from public.fishing_fish_catalog f
  join public.fishing_fish_rules_v2 r on r.fish_id=f.fish_id
  where f.is_active and f.bait_id=p_bait_id
@@ -298,9 +313,9 @@ begin
 
  insert into public.fishing_sessions
   (user_id,request_id,bait_id,fish_id,size_tier,size_cm,points_awarded,
-   bite_after_ms,location_id,weather_id,base_points)
+   bite_after_ms,location_id,weather_id,base_points,weather_size_shift)
  values(v_user,p_request_id,p_bait_id,v_fish.fish_id,'small',null,0,
-   1800+floor(random()*4200)::integer,v_location,v_weather,0)
+   1800+floor(random()*4200)::integer,v_location,v_weather,0,v_weather_shift)
  returning * into v_session;
 
  return jsonb_build_object(
@@ -439,6 +454,9 @@ begin
   when 'large_mixed_bait' then v_small:=20;v_medium:=50;v_large:=30;
   else v_small:=10;v_medium:=45;v_large:=45;
  end case;
+ -- Weather can move up to ten percentage points from small to large catches.
+ v_small:=v_small-v_session.weather_size_shift;
+ v_large:=v_large+v_session.weather_size_shift;
 
  v_skill:=case when v_score>=98 then 0.05 when v_score>=90 then 0.04
                when v_score>=75 then 0.02 else 0 end;
