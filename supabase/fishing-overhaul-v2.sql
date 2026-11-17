@@ -247,6 +247,24 @@ on conflict (fish_id) do update set
  required_fish_id=excluded.required_fish_id,catch_weight=excluded.catch_weight,
  is_hidden=excluded.is_hidden,clue=excluded.clue;
 
+-- Set species rarity and reuse each encounter clue as its field-guide description.
+update public.fishing_fish_catalog f
+set description=r.clue,
+    rarity=case
+      when f.fish_id in ('ichigaya_fish_king_king','old_lake_dragon') then 'mythic'
+      when f.fish_id in ('ichigaya_fish_king','rainbow_phantom','fog_veil_koi','thunder_crown_eel') then 'legendary'
+      when f.fish_id in ('delicious_mirror_fish','peerless_crucian','cobalt_tuna','ironback_sturgeon',
+                         'whitewater_salmon','ancient_shellfish','aurora_ray','abyssal_manta') then 'epic'
+      when f.fish_id in ('rare_treasure_trout','mistfin_trout','reed_whisker','jade_scale_carp',
+                         'rainbell_fish','moonlit_bass','stormscale_pike','golden_fin_bream',
+                         'deepwater_catfish','sunset_gar') then 'rare'
+      when f.fish_id in ('elegant_mirror_fish','rainbow_trout','shiro_carp','amber_loach',
+                         'glass_perch','lotus_koi','dusk_goby','bluegill','striped_minnow') then 'uncommon'
+      else 'common'
+    end
+from public.fishing_fish_rules_v2 r
+where r.fish_id=f.fish_id;
+
 -- A shared four-hour world forecast. The schedule is persisted once and read by
 -- every player; a player's browser never chooses or changes the weather.
 create or replace function public.fishing_get_world_state_v2()
