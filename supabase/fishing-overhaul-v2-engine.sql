@@ -416,6 +416,7 @@ declare
  v_size numeric(7,2);
  v_base integer;
  v_skill numeric;
+ v_transfer numeric;
  v_multiplier numeric;
  v_award integer;
  v_distinct integer;
@@ -461,11 +462,11 @@ begin
  v_skill:=case when v_score>=98 then 0.05 when v_score>=90 then 0.04
                when v_score>=75 then 0.02 else 0 end;
  if v_score>=98 then
-   v_small:=greatest(0,v_small-25);v_large:=v_large+25;
+   v_transfer:=least(v_small,25);v_small:=v_small-v_transfer;v_large:=v_large+v_transfer;
  elsif v_score>=90 then
-   v_small:=greatest(0,v_small-15);v_large:=v_large+15;
+   v_transfer:=least(v_small,15);v_small:=v_small-v_transfer;v_large:=v_large+v_transfer;
  elsif v_score>=75 then
-   v_small:=greatest(0,v_small-10);v_medium:=v_medium+10;
+   v_transfer:=least(v_small,10);v_small:=v_small-v_transfer;v_medium:=v_medium+v_transfer;
  end if;
  if round(v_small+v_medium+v_large,2)<>100
     or least(v_small,v_medium,v_large)<0 then
