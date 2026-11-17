@@ -346,7 +346,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $$
+as $fishing_fn_1$
 declare
   v_user uuid := auth.uid();
   v_now timestamptz := clock_timestamp();
@@ -397,7 +397,7 @@ begin
     'hidden_total',(select count(*) from public.fishing_fish_catalog where v2_available=true and is_hidden)
   );
 end;
-$$;
+$fishing_fn_1$;
 
 revoke all on function public.fishing_get_world_state_v2() from public,anon,authenticated;
 grant execute on function public.fishing_get_world_state_v2() to authenticated;
