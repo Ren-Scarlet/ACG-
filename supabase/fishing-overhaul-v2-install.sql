@@ -1076,6 +1076,66 @@ begin
 end;
 $function$;
 
+-- Keep the legacy dashboard contract while exposing V2 bait rewards and admin state.
+create or replace function public.fishing_get_dashboard()
+returns jsonb
+language plpgsql
+security definer
+set search_path=''
+as $dashboard_v2$
+declare
+ v_user_id uuid:=auth.uid();
+ v_stats jsonb;
+ v_baits jsonb;
+ v_fishbook jsonb;
+ v_achievements jsonb;
+ v_shop jsonb;
+begin
+ if v_user_id is null then raise exception '请先登录'; end if;
+ select to_jsonb(s) into v_stats from public.player_fishing_stats s where s.user_id=v_user_id;
+ if v_stats is null then
+   insert into public.player_fishing_stats(user_id) values(v_user_id) on conflict do nothing;
+   select to_jsonb(s) into v_stats from public.player_fishing_stats s where s.user_id=v_user_id;
+ end if;
+ select coalesce(jsonb_agg(jsonb_build_object(
+   'bait_id',b.bait_id,'bait_name',c.bait_name,'icon',c.icon,'quantity',b.quantity
+ ) order by c.sort_order),'[]'::jsonb)
+ into v_baits
+ from public.player_fishing_bait b join public.fishing_bait_catalog c using(bait_id)
+ where b.user_id=v_user_id;
+ select coalesce(jsonb_agg(jsonb_build_object(
+   'fish_id',f.fish_id,'fish_name',c.fish_name,'catch_count',f.catch_count,
+   'best_size_cm',f.best_size_cm,'best_points',f.best_points,'first_caught_at',f.first_caught_at
+ ) order by c.sort_order),'[]'::jsonb)
+ into v_fishbook
+ from public.player_fishbook f join public.fishing_fish_catalog c using(fish_id)
+ where f.user_id=v_user_id;
+ select coalesce(jsonb_agg(jsonb_build_object(
+   'achievement_id',a.achievement_id,'name',a.name,'description',a.description,
+   'condition_type',a.condition_type,'threshold',a.threshold,'reward_points',a.reward_points,
+   'reward_bait_id',a.reward_bait_id,'reward_bait_quantity',a.reward_bait_quantity,
+   'unlocked',p.achievement_id is not null,'unlocked_at',p.unlocked_at
+ ) order by a.sort_order),'[]'::jsonb)
+ into v_achievements
+ from public.fishing_achievements a
+ left join public.player_fishing_achievements p
+   on p.achievement_id=a.achievement_id and p.user_id=v_user_id
+ where a.is_active=true;
+ select coalesce(jsonb_agg(jsonb_build_object(
+   'product_id',product_id,'product_name',product_name,'description',description,
+   'icon',icon,'price_points',price_points,'reward_type',reward_type,
+   'reward_config',reward_config,'stock_limit',stock_limit,'stock_sold',stock_sold,
+   'per_player_limit',per_player_limit
+ ) order by sort_order),'[]'::jsonb)
+ into v_shop from public.fishing_shop_catalog where is_active=true;
+ return jsonb_build_object('stats',v_stats,'baits',v_baits,'fishbook',v_fishbook,
+   'achievements',v_achievements,'shop',v_shop,'is_admin',public.is_admin());
+end;
+$dashboard_v2$;
+
+revoke all on function public.fishing_get_dashboard() from public,anon,authenticated;
+grant execute on function public.fishing_get_dashboard() to authenticated;
+
 -- The existing dashboard signature and keys are preserved. Weather/forecast and
 -- location data are fetched through fishing_get_world_state_v2().
 -- Legacy V1 cast and bait-shop entry points stay enabled during the staged rollout.
