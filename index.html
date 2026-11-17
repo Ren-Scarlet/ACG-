@@ -2592,7 +2592,9 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
           if(typeof window.acgOpenPlayerCenterPage==="function")window.acgOpenPlayerCenterPage("draw");
           else window.acgPendingPlayerCenterPage="draw";
         }else if(target==="room"){
-          // Open the personal overview directly; do not route through the account/system tab.
+          // First run the shared top-level view switch so the library and every other
+          // main page are hidden; then open the player-center overview.
+          showMainView("player-center-view","tab-player-center","玩家中心");
           if(typeof window.acgOpenPlayerCenterPage==="function")window.acgOpenPlayerCenterPage("overview");
           else window.acgPendingPlayerCenterPage="overview";
         }else if(pcTab)pcTab.click();
