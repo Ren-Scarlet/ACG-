@@ -111,8 +111,12 @@ jobs:
           fishing_engine = Path("supabase/fishing-overhaul-v2-engine.sql").read_text(encoding="utf-8")
           for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
               assert name in fishing_v2, f"Fishing V2 migration missing: {name}"
-          for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
+          for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_get_records_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
               assert f"function public.{name}" in fishing_engine, f"Fishing V2 engine missing: {name}"
           assert "fishing_start_cast(text,uuid)" in fishing_engine, "Fishing V2 must disable the legacy cast entry point"
+          fishing_verify = Path("supabase/fishing-overhaul-v2-verify.sql").read_text(encoding="utf-8")
+          fishing_preflight = Path("supabase/fishing-overhaul-v2-preflight.sql").read_text(encoding="utf-8")
+          assert "player_fishing_stats" in fishing_preflight and "card_inventory" in fishing_preflight
+          assert "player_fishing_stats" in fishing_verify and "player_fishbook" in fishing_verify
           print("Key draw, item workshop, mailbox, reward, monthly season and fishing V2 functions are represented in source.")
           PY
