@@ -22,6 +22,7 @@ jobs:
           node --check auth.js
           node --check player-center.js
           node --check item-mail.js
+          node --check fishing.js
           python - <<'PY'
           from html.parser import HTMLParser
           from pathlib import Path
@@ -106,5 +107,66 @@ jobs:
               assert f"public.{name}" in seasons, f"Missing season table: {name}"
           for name in ["sync_season_match_result", "admin_save_season_rank_reward", "admin_settle_monthly_season", "run_monthly_season_rollover", "player_list_my_seasons", "admin_resend_season_reward"]:
               assert f"function public.{name}" in seasons, f"Missing season function: {name}"
-          print("Key draw, item workshop, mailbox, reward and monthly season functions are represented in source.")
+          import re
+          fishing_base = Path("supabase/fishing-system-v1.sql").read_text(encoding="utf-8")
+          fishing_v2 = Path("supabase/fishing-overhaul-v2.sql").read_text(encoding="utf-8")
+          fishing_engine = Path("supabase/fishing-overhaul-v2-engine.sql").read_text(encoding="utf-8")
+          fishing_install = Path("supabase/fishing-overhaul-v2-install.sql").read_text(encoding="utf-8")
+          fishing_js = Path("fishing.js").read_text(encoding="utf-8")
+          rules_block = fishing_v2.split("insert into public.fishing_fish_rules_v2", 1)[1].split("on conflict (fish_id)", 1)[0]
+          fish_pairs = re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", fishing_base + fishing_v2)
+          fish_ids = {fish_id for fish_id, _bait_id in fish_pairs}
+          rule_ids = set(re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(?:qinglan_lake|reed_marsh|deepwater_bay)'", rules_block))
+          assert len(fish_ids) == 36, f"Expected 36 fish entries, found {len(fish_ids)}"
+          assert fish_ids <= rule_ids, f"Fish missing encounter rules: {sorted(fish_ids - rule_ids)}"
+          unquoted_chinese_values = re.findall(r",\\s*(?:true|false)\\s*,\\s*[\\u4e00-\\u9fff][^'\\n]*[,)]", fishing_v2)
+          assert not unquoted_chinese_values, f"Unquoted Chinese SQL string values found: {unquoted_chinese_values[:3]}"
+          original_seed = fishing_v2.split("-- Ensure all ten original species exist", 1)[1].split("on conflict (fish_id)", 1)[0]
+          original_seed_ids = set(re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(?:small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", original_seed))
+          assert len(original_seed_ids) == 10, f"V2 must restore all ten original fish, found {len(original_seed_ids)}"
+          assert "v2_available boolean" in fishing_v2, "V2 fish visibility must be isolated from legacy is_active"
+          assert "is_active=case when fishing_fish_catalog.v2_available" in fishing_v2, "New fish must stay hidden from legacy V1 casts until final activation"
+          assert "v2_available=true" in fishing_v2 and "f.v2_available" in fishing_engine
+          assert '.eq("v2_available",true)' in fishing_js, "V2 frontend must read the isolated V2 catalogue"
+          for fallback in ["jade_scale_carp", "reed_whisker", "deepwater_catfish", "sunset_gar", "cobalt_tuna", "bluegill", "whitewater_salmon"]:
+              assert fallback in fishing_v2, f"Missing all-weather bait fallback: {fallback}"
+          for prerequisite in ["fishing_craft_history", "player_fishing_achievements", "fishing_points_ledger", "item_catalog"]:
+              assert prerequisite in fishing_engine, f"Engine prerequisite guard missing: {prerequisite}"
+          def without_transaction(source):
+              start = source.index("begin;") + len("begin;")
+              end = source.rindex("commit;")
+              return source[start:end].strip()
+          expected_install = (
+              "-- ACG Fishing V2 combined installer.\n"
+              "-- Run once after the existing Fishing V1 and item-workshop migrations.\n"
+              "-- Both additive migrations execute in ONE transaction: any error rolls back the entire V2 install.\n\n"
+              "begin;\n\n" + without_transaction(fishing_v2) +
+              "\n\n-- V2 server engine and special-bait rewards.\n\n" +
+              without_transaction(fishing_engine) + "\n\ncommit;\n"
+          )
+          assert fishing_install == expected_install, "Combined installer is stale; regenerate it from the two canonical migrations."
+          for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
+              assert name in fishing_v2, f"Fishing V2 migration missing: {name}"
+          for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_get_records_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
+              assert f"function public.{name}" in fishing_engine, f"Fishing V2 engine missing: {name}"
+          assert not re.search(r"^\\$;$", fishing_engine, re.MULTILINE), "Malformed PL/pgSQL dollar terminator found"
+          assert not re.search(r"^\\$;$", fishing_install, re.MULTILINE), "Malformed PL/pgSQL dollar terminator found in combined installer"
+          dollar_tags = re.findall(r"\\$[A-Za-z_][A-Za-z0-9_]*\\$", fishing_install)
+          from collections import Counter
+          assert all(count == 2 for count in Counter(dollar_tags).values()), "Every named SQL dollar-quote tag must appear exactly twice"
+          assert not re.search(r"^\\s*as \\$\\$|^\\s*\\$\\$;", fishing_install, re.MULTILINE), "Generic $ function delimiters must not be used in the combined installer"
+          assert "is_first_discovery=v_first" in fishing_engine and "is_size_record=v_record" in fishing_engine
+          assert "'duplicate_request',true" in fishing_engine and "'fish_name',v_fish.fish_name" in fishing_engine, "Repeated finish calls must return the original catch result"
+          fishing_activate = Path("supabase/fishing-overhaul-v2-activate.sql").read_text(encoding="utf-8")
+          assert "fishing_start_cast(text,uuid)" in fishing_activate, "Final activation must disable the legacy cast entry point"
+          fishing_verify = Path("supabase/fishing-overhaul-v2-verify.sql").read_text(encoding="utf-8")
+          fishing_preflight = Path("supabase/fishing-overhaul-v2-preflight.sql").read_text(encoding="utf-8")
+          fishing_activate_verify = Path("supabase/fishing-overhaul-v2-activate-verify.sql").read_text(encoding="utf-8")
+          assert "player_fishing_stats" in fishing_preflight and "card_inventory" in fishing_preflight
+          assert "player_fishing_stats" in fishing_verify and "player_fishbook" in fishing_verify
+          assert "record_reward_size_cm" in fishing_engine and "fishing_get_records_v2" in fishing_engine
+          assert "pool_ready" in fishing_verify, "Verification must check ordinary bait availability at every location"
+          assert "legacy_cast_still_executable" in fishing_activate_verify and "v2_cast_executable" in fishing_activate_verify
+          assert "set is_active=true where v2_available=true" in fishing_activate, "Activation must expose the full V2 catalogue only when disabling legacy casting"
+          print("Key draw, item workshop, mailbox, reward, monthly season and fishing V2 functions are represented in source.")
           PY
