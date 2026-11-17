@@ -151,6 +151,10 @@ jobs:
               assert f"function public.{name}" in fishing_engine, f"Fishing V2 engine missing: {name}"
           assert not re.search(r"^\\$;$", fishing_engine, re.MULTILINE), "Malformed PL/pgSQL dollar terminator found"
           assert not re.search(r"^\\$;$", fishing_install, re.MULTILINE), "Malformed PL/pgSQL dollar terminator found in combined installer"
+          dollar_tags = re.findall(r"\\$[A-Za-z_][A-Za-z0-9_]*\\$", fishing_install)
+          from collections import Counter
+          assert all(count == 2 for count in Counter(dollar_tags).values()), "Every named SQL dollar-quote tag must appear exactly twice"
+          assert not re.search(r"^\\s*as \\$\\$|^\\s*\\$\\$;", fishing_install, re.MULTILINE), "Generic $ function delimiters must not be used in the combined installer"
           assert "is_first_discovery=v_first" in fishing_engine and "is_size_record=v_record" in fishing_engine
           assert "'duplicate_request',true" in fishing_engine and "'fish_name',v_fish.fish_name" in fishing_engine, "Repeated finish calls must return the original catch result"
           fishing_activate = Path("supabase/fishing-overhaul-v2-activate.sql").read_text(encoding="utf-8")
