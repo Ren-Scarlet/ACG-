@@ -73,6 +73,11 @@ select
 from public.player_fishbook;
 
 select
+  count(*) filter (where record_reward_size_cm is not null) as fishbook_rows_with_record_reward_baseline,
+  count(*) as total_fishbook_rows
+from public.player_fishbook;
+
+select
   p.proname,
   pg_get_function_identity_arguments(p.oid) as arguments,
   has_function_privilege('authenticated',p.oid,'EXECUTE') as authenticated_can_execute
@@ -83,6 +88,7 @@ where n.nspname='public'
     'fishing_start_cast_v2',
     'fishing_hook_cast_v2',
     'fishing_finish_reel_v2',
+    'fishing_get_records_v2',
     'fishing_get_world_state_v2',
     'fishing_craft_special_bait',
     'fishing_admin_grant_special_bait'
