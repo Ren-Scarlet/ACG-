@@ -102,34 +102,6 @@
     scene.append(sky,sun,hills,shore,water,line,float,dock,caption);
     return scene;
   }
-  function syncFishingScene(){
-    const scene=root.querySelector(".fish-world-scene");
-    if(!scene)return;
-    const locations=state.world?.locations||[];
-    const selected=locations.find(x=>x.location_id===state.currentLocation)||locations[0];
-    if(!selected)return;
-    const index=Math.max(0,locations.findIndex(x=>x.location_id===selected.location_id));
-    scene.dataset.sceneIndex=String(index);
-    const title=$("fish-scene-title"),description=$("fish-scene-description"),weatherTag=$("fish-scene-weather");
-    if(title)title.textContent=selected.location_name||"钓场";
-    if(description)description.textContent=selected.description||"一处等待探索的垂钓胜地。";
-    const weatherNames={sunny:"晴天",cloudy:"阴天",rain:"雨天",fog:"浓雾",storm:"雷雨",windy:"大风"};
-    if(weatherTag)weatherTag.textContent=(weatherNames[state.world?.weather_id]||"天气未知")+" · 今日垂钓";
-    let nav=scene.querySelector(".fish-scene-locations");
-    if(!nav){nav=el("nav","fish-scene-locations");nav.setAttribute("aria-label","切换钓点");scene.append(nav);}
-    nav.replaceChildren();
-    locations.forEach((location,i)=>{
-      const button=el("button","fish-scene-location",((location.icon||"✦")+" "+location.location_name));
-      button.type="button";button.setAttribute("aria-pressed",String(location.location_id===selected.location_id));
-      button.addEventListener("click",()=>{
-        if(state.phase!=="idle"){status("本轮垂钓结束后才能更换钓点。",true);return;}
-        state.currentLocation=location.location_id;
-        syncFishingScene();
-        renderOverview();
-      });
-      nav.append(button);
-    });
-  }
   function renderOverview(){
     const host=$("fish-overview");host.replaceChildren();
     const shell=el("section","fish-game-panel"),head=el("header","fish-page-heading");
@@ -144,8 +116,12 @@
     const forecast=el("div","hint");forecast.style.marginTop="8px";
     forecast.textContent="未来天气："+(weather.forecast||[]).map(x=>(x.is_current?"现在 ":"")+ (weatherNames[x.weather_id]||x.weather_id)).join("　→　");
     const weatherNote=el("p","hint","天气会改变部分鱼类的出现机会与尺寸分布，前序天气也可能开启隐藏鱼的鱼讯。");weatherNote.style.margin="8px 0 0";
-    weatherPanel.append(weatherTop,forecast,weatherNote);
-    syncFishingScene();
+    const locationLabel=el("label","field");locationLabel.style.cssText="display:block;margin-top:12px";locationLabel.append(el("span","","选择钓点"));
+    const locationSelect=el("select","");locationSelect.style.marginTop="6px";
+    (weather.locations||[]).forEach(x=>locationSelect.add(new Option((x.icon||"🎣")+" "+x.location_name+" — "+x.description,x.location_id)));
+    locationSelect.value=state.currentLocation;
+    locationSelect.addEventListener("change",()=>{state.currentLocation=locationSelect.value;});
+    locationLabel.append(locationSelect);weatherPanel.append(weatherTop,forecast,weatherNote,locationLabel);
     const stats=el("div","fish-game-stats");
     [["钓鱼积分",$("fish-points").textContent],["累计钓获",$("fish-catches").textContent],["已发现鱼种",$("fish-species").textContent]].forEach(([k,v])=>{const c=el("article","fish-game-stat");c.append(el("span","",k),el("strong","",v));stats.append(c);});
     const title=el("div","fish-subtitle-row");title.append(el("h3","","选择你的鱼饵"),el("small","","SELECT BAIT"));
