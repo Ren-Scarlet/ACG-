@@ -447,7 +447,9 @@ alter table public.fishing_sessions
   add column if not exists weather_id text not null default 'sunny',
   add column if not exists reel_phase_offset numeric(8,6) not null default 0,
   add column if not exists action_score integer,
-  add column if not exists base_points integer not null default 0;
+  add column if not exists base_points integer not null default 0,
+  add column if not exists is_first_discovery boolean not null default false,
+  add column if not exists is_size_record boolean not null default false;
 
 alter table public.player_fishbook
   add column if not exists record_reward_size_cm numeric(7,2);
@@ -868,8 +870,22 @@ begin
  select * into v_session from public.fishing_sessions
  where id=p_session_id and user_id=v_user for update;
  if not found then raise exception '找不到这次钓鱼记录'; end if;
- if v_session.status in ('caught','escaped') then
-   return jsonb_build_object('status',v_session.status,'duplicate_request',true);
+ if v_session.status='escaped' then
+   return jsonb_build_object('status','escaped','duplicate_request',true);
+ elsif v_session.status='caught' then
+   select * into v_fish from public.fishing_fish_catalog where fish_id=v_session.fish_id;
+   return jsonb_build_object(
+     'status','caught','fish_id',v_session.fish_id,'fish_name',v_fish.fish_name,
+     'size_tier',v_session.size_tier,'size_cm',v_session.size_cm,
+     'size_label',v_session.size_cm||' cm（'||case v_session.size_tier
+       when 'small' then '小型' when 'medium' then '中型' else '大型' end||'）',
+     'points_awarded',v_session.points_awarded,'base_points',v_session.base_points,
+     'action_score',v_session.action_score,
+     'is_first_discovery',v_session.is_first_discovery,
+     'is_size_record',v_session.is_size_record,
+     'weather_id',v_session.weather_id,'location_id',v_session.location_id,
+     'duplicate_request',true
+   );
  end if;
  if v_session.reel_started_at is null then raise exception '请先完成提竿'; end if;
 
@@ -948,7 +964,9 @@ begin
 
  update public.fishing_sessions
  set status='caught',size_tier=v_tier,size_cm=v_size,base_points=v_base,
-     points_awarded=v_award,action_score=v_score,resolved_at=clock_timestamp()
+     points_awarded=v_award,action_score=v_score,
+     is_first_discovery=v_first,is_size_record=v_record,
+     resolved_at=clock_timestamp()
  where id=p_session_id;
 
  insert into public.fishing_catches
