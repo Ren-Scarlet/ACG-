@@ -111,12 +111,10 @@ jobs:
           fishing_base = Path("supabase/fishing-system-v1.sql").read_text(encoding="utf-8")
           fishing_v2 = Path("supabase/fishing-overhaul-v2.sql").read_text(encoding="utf-8")
           fishing_engine = Path("supabase/fishing-overhaul-v2-engine.sql").read_text(encoding="utf-8")
-          base_catalog = fishing_base.split("insert into public.fishing_fish_catalog", 1)[1].split("on conflict (fish_id)", 1)[0]
-          new_catalog = fishing_v2.split("insert into public.fishing_fish_catalog", 1)[1].split("on conflict (fish_id)", 1)[0]
           rules_block = fishing_v2.split("insert into public.fishing_fish_rules_v2", 1)[1].split("on conflict (fish_id)", 1)[0]
-          bait_ids = r"(?:small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)"
-          fish_ids = set(re.findall(r"\('([^']+)',\s*'" + bait_ids + r"'", base_catalog + new_catalog))
-          rule_ids = set(re.findall(r"\('([^']+)',\s*'[^']+'", rules_block))
+          fish_pairs = re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", fishing_base + fishing_v2)
+          fish_ids = {fish_id for fish_id, _bait_id in fish_pairs}
+          rule_ids = set(re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(?:qinglan_lake|reed_marsh|deepwater_bay)'", rules_block))
           assert len(fish_ids) == 36, f"Expected 36 fish entries, found {len(fish_ids)}"
           assert fish_ids <= rule_ids, f"Fish missing encounter rules: {sorted(fish_ids - rule_ids)}"
           for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
