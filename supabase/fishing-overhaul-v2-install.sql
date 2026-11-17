@@ -86,16 +86,16 @@ insert into public.fishing_fish_catalog
   size_small_min_cm,size_small_max_cm,size_medium_min_cm,size_medium_max_cm,
   size_large_min_cm,size_large_max_v2_cm,rarity,is_hidden,description,v2_available)
 values
- ('red_fish','small_mixed_bait','红鱼',9,10,11,18,10,15,25,1.3,1,5,9,10,12,13,18,'common',false,晴岚湖最常见的鱼。',true),
- ('rough_scale_crucian','small_mixed_bait','糙鳞鲫鱼',14,15,16,26,15,25,40,1.1,2,10,14,15,19,20,26,'common',false,鳞片粗糙，适应力很强的底栖鱼。',true),
- ('elegant_mirror_fish','small_mixed_bait','风雅镜鱼',19,20,21,34,20,35,55,0.8,3,12,19,20,25,26,34,'uncommon',false,鳞片会映出湖面微光的优雅鱼种。',true),
- ('rainbow_trout','medium_mixed_bait','七彩鳟鱼',29,30,31,46,35,55,85,1.0,4,20,29,30,36,37,46,'uncommon',false,色彩斑斓，喜欢水流清澈的水域。',true),
- ('shiro_carp','medium_mixed_bait','史郎鲤鱼',39,40,41,62,50,80,120,1.0,5,25,39,40,48,49,62,'uncommon',false,身形修长，常在水草边缘活动。',true),
- ('rare_treasure_trout','medium_mixed_bait','稀宝鳟鱼',49,50,51,76,70,110,170,0.65,6,28,49,50,59,60,76,'rare',false,偶尔会在清晨的深水区现身。',true),
- ('delicious_mirror_fish','large_mixed_bait','美味镜鱼',79,80,81,118,100,160,240,1.0,7,40,79,80,94,95,118,'rare',false,肉质丰腴的大型鱼，喜欢深水湾。',true),
- ('peerless_crucian','large_mixed_bait','无双鲫鱼',89,90,91,135,140,220,330,0.7,8,45,89,90,104,105,135,'epic',false,力气惊人，只有经验丰富的钓手才能驾驭。',true),
- ('ichigaya_fish_king','unknown_mixed_bait','市谷的鱼王',119,120,121,170,350,600,900,0.18,9,80,119,120,139,140,170,'legendary',false,鱼王会在浓雾中现身。',true),
- ('ichigaya_fish_king_king','unknown_mixed_bait','市谷的鱼王之王',169,171,173,230,600,1000,1500,0.05,10,120,169,170,189,190,230,'mythic',false,传说中只有经历特殊天气变化才会现身。',true)
+ ('red_fish','small_mixed_bait','红鱼',9,10,11,18,10,15,25,1.3,1,5,9,10,12,13,18,'common',false,'晴岚湖最常见的鱼。',true),
+ ('rough_scale_crucian','small_mixed_bait','糙鳞鲫鱼',14,15,16,26,15,25,40,1.1,2,10,14,15,19,20,26,'common',false,'鳞片粗糙，适应力很强的底栖鱼。',true),
+ ('elegant_mirror_fish','small_mixed_bait','风雅镜鱼',19,20,21,34,20,35,55,0.8,3,12,19,20,25,26,34,'uncommon',false,'鳞片会映出湖面微光的优雅鱼种。',true),
+ ('rainbow_trout','medium_mixed_bait','七彩鳟鱼',29,30,31,46,35,55,85,1.0,4,20,29,30,36,37,46,'uncommon',false,'色彩斑斓，喜欢水流清澈的水域。',true),
+ ('shiro_carp','medium_mixed_bait','史郎鲤鱼',39,40,41,62,50,80,120,1.0,5,25,39,40,48,49,62,'uncommon',false,'身形修长，常在水草边缘活动。',true),
+ ('rare_treasure_trout','medium_mixed_bait','稀宝鳟鱼',49,50,51,76,70,110,170,0.65,6,28,49,50,59,60,76,'rare',false,'偶尔会在清晨的深水区现身。',true),
+ ('delicious_mirror_fish','large_mixed_bait','美味镜鱼',79,80,81,118,100,160,240,1.0,7,40,79,80,94,95,118,'rare',false,'肉质丰腴的大型鱼，喜欢深水湾。',true),
+ ('peerless_crucian','large_mixed_bait','无双鲫鱼',89,90,91,135,140,220,330,0.7,8,45,89,90,104,105,135,'epic',false,'力气惊人，只有经验丰富的钓手才能驾驭。',true),
+ ('ichigaya_fish_king','unknown_mixed_bait','市谷的鱼王',119,120,121,170,350,600,900,0.18,9,80,119,120,139,140,170,'legendary',false,'鱼王会在浓雾中现身。',true),
+ ('ichigaya_fish_king_king','unknown_mixed_bait','市谷的鱼王之王',169,171,173,230,600,1000,1500,0.05,10,120,169,170,189,190,230,'mythic',false,'传说中只有经历特殊天气变化才会现身。',true)
 on conflict (fish_id) do update set
  bait_id=excluded.bait_id,fish_name=excluded.fish_name,
  small_max_cm=excluded.small_max_cm,medium_cm=excluded.medium_cm,
