@@ -232,6 +232,8 @@ values
  ('ancient_shellfish','deepwater_bay','{cloudy,fog}','{}',null,null,null,0.6,false,'深水底部的古老鱼种。'),
  ('aurora_ray','deepwater_bay','{}','{}',20,3,null,0.55,false,'夜色中才会显露光芒。'),
  ('abyssal_manta','deepwater_bay','{fog,storm}','{}',null,null,null,0.4,false,'深水湾天气恶劣时出没。'),
+ ('delicious_mirror_fish','deepwater_bay','{cloudy,rain}','{}',null,null,null,1.0,false,'深水湾的水色转暗时，肉质丰腴的大鱼会靠近。'),
+ ('peerless_crucian','deepwater_bay','{fog,storm}','{}',null,null,null,0.7,false,'雾气或风暴中，大型鲫鱼会在深水活动。'),
  ('ichigaya_fish_king','deepwater_bay','{fog}','{}',null,null,null,0.18,false,'鱼王会在浓雾中现身。'),
  ('ichigaya_fish_king_king','deepwater_bay','{storm}','{rain}',null,null,null,0.05,false,'先经历降雨，再遇雷雨，传说之物才会出现。'),
  ('rainbow_phantom','qinglan_lake','{sunny}','{rain}',5,9,null,0.18,true,'雨后初晴的清晨，水面会闪过彩色残影。'),
