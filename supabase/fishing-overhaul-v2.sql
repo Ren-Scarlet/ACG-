@@ -199,6 +199,19 @@ on conflict (fish_id) do update set
  rarity=excluded.rarity,is_hidden=excluded.is_hidden,description=excluded.description,
  is_active=true;
 
+-- Hide undiscovered fish immediately, even between the two ordered V2 migrations.
+drop policy if exists fishing_fish_catalog_read on public.fishing_fish_catalog;
+create policy fishing_fish_catalog_read on public.fishing_fish_catalog
+ for select to authenticated
+ using (
+   (is_active and not is_hidden)
+   or public.is_admin()
+   or exists (
+     select 1 from public.player_fishbook b
+     where b.user_id=auth.uid() and b.fish_id=fishing_fish_catalog.fish_id
+   )
+ );
+
 -- Habitat and encounter conditions. Empty weather arrays mean no weather restriction.
 insert into public.fishing_fish_rules_v2
  (fish_id,location_id,weather_ids,previous_weather_ids,start_hour_local,end_hour_local,
