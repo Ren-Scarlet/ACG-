@@ -123,6 +123,7 @@ jobs:
           original_seed_ids = set(re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(?:small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", original_seed))
           assert len(original_seed_ids) == 10, f"V2 must restore all ten original fish, found {len(original_seed_ids)}"
           assert "v2_available boolean" in fishing_v2, "V2 fish visibility must be isolated from legacy is_active"
+          assert "is_active=case when fishing_fish_catalog.v2_available" in fishing_v2, "New fish must stay hidden from legacy V1 casts until final activation"
           assert "v2_available=true" in fishing_v2 and "f.v2_available" in fishing_engine
           assert '.eq("v2_available",true)' in fishing_js, "V2 frontend must read the isolated V2 catalogue"
           for fallback in ["jade_scale_carp", "reed_whisker", "deepwater_catfish", "sunset_gar", "cobalt_tuna", "bluegill", "whitewater_salmon"]:
