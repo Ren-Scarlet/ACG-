@@ -1,0 +1,64 @@
+/* ACG Fishing Art Direction 2.0 — Japanese fantasy night scene */
+#fishing-view{--f2-ink:#111a31;--f2-panel:#101a31;--f2-gold:#e8ca8c;--f2-gold-dim:#9c8055;color:#e9e4d7!important}
+#fishing-view>.fish-world-shell{position:relative;overflow:hidden;border:1px solid #b99b68;background:#0b1428;box-shadow:0 24px 70px #02081788}
+#fishing-view .fish-world-scene{height:clamp(390px,43vw,590px);min-height:390px;background:linear-gradient(180deg,#101b3a,#293a5d 48%,#10243d)!important;isolation:isolate}
+#fishing-view .fish-landscape{filter:brightness(.55) saturate(.82) hue-rotate(178deg) contrast(1.08);opacity:.92}
+#fishing-view .fish-world-scene:before{content:"";position:absolute;z-index:1;pointer-events:none;inset:0;background:radial-gradient(circle at 72% 22%,#fff0c8 0 3.3%,#f7dfad88 3.5%,transparent 11%),radial-gradient(ellipse at 15% 0%,#e9b8d944 0 8%,transparent 30%),radial-gradient(ellipse at 87% 8%,#c8a5e033 0 7%,transparent 24%),linear-gradient(180deg,#09132b55 0%,transparent 36%,#08162bc9 100%)}
+#fishing-view .fish-world-scene:after{content:"";position:absolute;z-index:1;pointer-events:none;inset:0;background-image:radial-gradient(ellipse 5px 10px at 8% 13%,#f4c8d6b8 0 65%,transparent 72%),radial-gradient(ellipse 5px 10px at 11% 18%,#f1b9d0a8 0 65%,transparent 72%),radial-gradient(ellipse 5px 10px at 17% 7%,#f7d5df9c 0 65%,transparent 72%),radial-gradient(ellipse 4px 9px at 23% 16%,#edb8cda8 0 65%,transparent 72%),radial-gradient(ellipse 5px 10px at 91% 19%,#eac0d5a8 0 65%,transparent 72%),radial-gradient(ellipse 5px 10px at 95% 24%,#f7d6e0a8 0 65%,transparent 72%);background-size:100% 100%;opacity:.85}
+#fishing-view .fish-scene-shade{z-index:1;background:linear-gradient(90deg,#0a142dcc 0%,#101d38a8 35%,transparent 78%),linear-gradient(0deg,#071326b8,transparent 55%)}
+#fishing-view .fish-scene-copy{z-index:2;left:clamp(24px,5vw,76px);top:47%;max-width:min(54%,650px);text-shadow:0 3px 22px #030817}
+#fishing-view .fish-eyebrow{color:#f0d9a5;letter-spacing:.3em;font-size:10px}
+#fishing-view .fish-scene-copy h2{font-family:Georgia,"Noto Serif SC","Microsoft YaHei",serif;font-weight:600;font-size:clamp(42px,6.2vw,82px);letter-spacing:.16em;color:#fff2d2;text-shadow:0 4px 24px #020817,0 0 36px #d9b77c55}
+#fishing-view .fish-scene-copy p{color:#e9e0d0;letter-spacing:.12em;line-height:1.8}
+#fishing-view .fish-scene-tag{border:1px solid #e8ca8c99;background:#101a31a8;color:#f6e3b8;backdrop-filter:blur(10px);padding:10px 16px}
+#fishing-view .fish-scene-sign{z-index:2;right:28px;bottom:26px;border:1px solid #c6a66c;background:#101a31c9;color:#f1d9a5;box-shadow:0 8px 28px #02081766;backdrop-filter:blur(10px);padding:14px 20px}
+#fishing-view .fish-scene-sign strong{font-family:Georgia,serif;font-size:24px}
+#fishing-view .fish-hud{background:#c6a76d;border-color:#c6a76d;gap:1px}
+#fishing-view .fish-hud-stat{position:relative;padding:17px 22px;background:linear-gradient(135deg,#172541,#0d172d);color:#eee4d0}
+#fishing-view .fish-hud-stat span{color:#d7c49f;letter-spacing:.08em}
+#fishing-view .fish-hud-stat strong{color:#f1d69b;font-family:Georgia,"Noto Serif SC",serif;font-weight:500;text-shadow:0 0 18px #e8c88944}
+#fishing-view .fish-hud-stat small{color:#8f9db5;letter-spacing:.2em}
+#fishing-view .fish-tabs{background:#0b1428;border-bottom:1px solid #a98b5c;padding:8px 12px}
+#fishing-view .fish-tabs button{color:#d9d1c2!important;border-right:1px solid #ffffff12!important;letter-spacing:.05em}
+#fishing-view .fish-tabs button:hover{background:#ffffff0d!important;color:#fff0c9!important}
+#fishing-view .fish-tabs button.active{background:linear-gradient(180deg,#4b4260,#242b45)!important;color:#f5d99f!important;box-shadow:inset 0 -2px #e2bd78!important}
+#fishing-view .fish-status-line{background:#101a30;border-top:1px solid #ffffff10}
+#fishing-view .fish-status-line .status{color:#c9bd9e!important}
+#fishing-view>.fish-page{background:linear-gradient(180deg,#101a30,#0a1223)!important;color:#e7e0d3!important}
+#fishing-view .fish-game-panel,#fishing-view .fishbook-shell{background:linear-gradient(145deg,#172541,#101a30 65%,#131b2c)!important;border:1px solid #8e7956!important;border-radius:8px!important;color:#e9e1d2!important;box-shadow:0 14px 38px #02081755!important}
+#fishing-view .fish-page-heading h2,#fishing-view .fishbook-title{color:#f0d9a7!important;font-family:Georgia,"Noto Serif SC","Microsoft YaHei",serif!important;font-weight:500!important;letter-spacing:.12em!important}
+#fishing-view .fish-kicker,#fishing-view .fishbook-eyebrow{color:#c7a976!important;letter-spacing:.26em}
+#fishing-view .fish-page-heading>p:last-child,#fishing-view .fishbook-subtitle{color:#aeb9c8!important}
+#fishing-view .fish-game-stat,#fishing-view .fish-bait-tile,#fishing-view .fish-recipe-card,#fishing-view .fishbook-card,#fishing-view .fish-achievement-tile,#fishing-view .fish-podium-card{background:linear-gradient(145deg,#1c2b47,#111c32)!important;border:1px solid #6f654f!important;border-radius:7px!important;color:#e8e0d1!important}
+#fishing-view .fish-game-stat span,#fishing-view .fish-bait-tile-body p,#fishing-view .fish-recipe-body p,#fishing-view .fish-achievement-tile p,#fishing-view .fish-podium-card small{color:#aeb9c8!important}
+#fishing-view .fish-game-stat strong,#fishing-view .fish-bait-tile-body h4,#fishing-view .fish-recipe-body h3,#fishing-view .fish-achievement-tile h3,#fishing-view .fish-podium-card strong{color:#e8ce98!important}
+#fishing-view .fish-bait-tile-art,#fishing-view .fish-recipe-art,#fishing-view .fishbook-art{background:radial-gradient(ellipse at 50% 55%,#53617c,#1a2b48 70%,#101a30)!important}
+#fishing-view .fish-ui-button,#fishing-view button.primary{background:linear-gradient(135deg,#e8d19b,#a9824d)!important;border:1px solid #f2dfb4!important;color:#211d25!important;border-radius:4px!important;box-shadow:0 3px 0 #6e5638!important}
+#fishing-view button{border-radius:4px!important}
+#fishing-view input,#fishing-view select{background:#0c172b!important;color:#e9e1d2!important;border:1px solid #7c704f!important}
+#fishing-view .fish-water-stage{border:1px solid #b49a69!important;background:linear-gradient(#182747,#53617c 42%,#254e68 44%,#102b46)!important}
+#fishing-view .fish-stage-sky{background:linear-gradient(180deg,#182747,#66718a)!important}
+#fishing-view .fish-stage-sun{background:#f4e1b8!important;box-shadow:0 0 38px #f4dfb588!important}
+#fishing-view .fish-stage-hill.far{background:#374c67!important}
+#fishing-view .fish-stage-hill.near{background:#263f59!important}
+#fishing-view .fish-stage-shore{background:linear-gradient(#4e5a59,#273f48)!important}
+#fishing-view .fish-stage-water{background:linear-gradient(180deg,#477e91,#173c58 70%,#10263e)!important}
+#fishing-view .fish-stage-dock{background:repeating-linear-gradient(0deg,#604a3d 0 8px,#99714d 9px 13px)!important}
+#fishing-view .fish-stage-caption{background:#101a31d9!important;color:#f0d9a7!important;border-left-color:#e4c587!important}
+#fishing-view .fish-reel-rail{border-color:#a98b5c!important}
+#fishing-view .fishbook-progress{background:#101a30!important;border-color:#6f654f!important}
+#fishing-view .fishbook-progress-copy,#fishing-view .fishbook-facts{color:#b4bdc8!important}
+#fishing-view .fishbook-progress-copy strong,#fishing-view .fishbook-facts strong{color:#e8ce98!important}
+#fishing-view .fishbook-filters button{background:#172541!important;border-color:#786b50!important;color:#e9dfca!important}
+#fishing-view .fishbook-filters button.active{background:#a9824d!important;color:#171b27!important}
+#fishing-view .fishbook-fish-name{color:#ecd6a7!important}
+#fishing-view .fishbook-catch-count,#fishing-view .fishbook-category{color:#aeb9c8!important}
+#fishing-view .fishbook-facts{border-color:#ffffff18!important}
+@media(max-width:650px){
+ #fishing-view .fish-world-scene{height:390px;min-height:390px}
+ #fishing-view .fish-scene-copy{max-width:78%;top:48%}
+ #fishing-view .fish-scene-copy h2{font-size:43px;letter-spacing:.1em}
+ #fishing-view .fish-scene-sign{right:10px;bottom:10px;padding:9px 12px}
+ #fishing-view .fish-scene-sign strong{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){#fishing-view .fish-world-scene:before,#fishing-view .fish-world-scene:after{transition:none}}
