@@ -30,3 +30,10 @@ where product_id in (
   'shop_mystery_bait'
 )
 order by product_id;
+
+select
+  count(*) as v2_available_fish,
+  count(*) filter (where is_active) as active_fish,
+  count(*) filter (where is_hidden) as hidden_fish
+from public.fishing_fish_catalog
+where v2_available=true;
