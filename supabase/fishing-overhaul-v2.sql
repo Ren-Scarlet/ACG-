@@ -67,6 +67,37 @@ on conflict(location_id) do update set
  location_name=excluded.location_name,description=excluded.description,
  icon=excluded.icon,sort_order=excluded.sort_order,is_active=true;
 
+-- Ensure all ten original species exist even when an earlier installation
+-- contains only a partial catalogue. This is an idempotent catalogue upsert;
+-- catch history, player balances and fishbook records are not rewritten.
+insert into public.fishing_fish_catalog
+ (fish_id,bait_id,fish_name,small_max_cm,medium_cm,large_min_cm,large_max_cm,
+  small_points,medium_points,large_points,appearance_weight,sort_order,
+  size_small_min_cm,size_small_max_cm,size_medium_min_cm,size_medium_max_cm,
+  size_large_min_cm,size_large_max_v2_cm,rarity,is_hidden,description)
+values
+ ('red_fish','small_mixed_bait','红鱼',9,10,11,18,10,15,25,1.3,1,5,9,10,12,13,18,'common',false,'晴岚湖最常见的鱼。'),
+ ('rough_scale_crucian','small_mixed_bait','糙鳞鲫鱼',14,15,16,26,15,25,40,1.1,2,10,14,15,19,20,26,'common',false,'鳞片粗糙，适应力很强的底栖鱼。'),
+ ('elegant_mirror_fish','small_mixed_bait','风雅镜鱼',19,20,21,34,20,35,55,0.8,3,12,19,20,25,26,34,'uncommon',false,'鳞片会映出湖面微光的优雅鱼种。'),
+ ('rainbow_trout','medium_mixed_bait','七彩鳟鱼',29,30,31,46,35,55,85,1.0,4,20,29,30,36,37,46,'uncommon',false,'色彩斑斓，喜欢水流清澈的水域。'),
+ ('shiro_carp','medium_mixed_bait','史郎鲤鱼',39,40,41,62,50,80,120,1.0,5,25,39,40,48,49,62,'uncommon',false,'身形修长，常在水草边缘活动。'),
+ ('rare_treasure_trout','medium_mixed_bait','稀宝鳟鱼',49,50,51,76,70,110,170,0.65,6,28,49,50,59,60,76,'rare',false,'偶尔会在清晨的深水区现身。'),
+ ('delicious_mirror_fish','large_mixed_bait','美味镜鱼',79,80,81,118,100,160,240,1.0,7,40,79,80,94,95,118,'rare',false,'肉质丰腴的大型鱼，喜欢深水湾。'),
+ ('peerless_crucian','large_mixed_bait','无双鲫鱼',89,90,91,135,140,220,330,0.7,8,45,89,90,104,105,135,'epic',false,'力气惊人，只有经验丰富的钓手才能驾驭。'),
+ ('ichigaya_fish_king','unknown_mixed_bait','市谷的鱼王',119,120,121,170,350,600,900,0.18,9,80,119,120,139,140,170,'legendary',false,'鱼王会在浓雾中现身。'),
+ ('ichigaya_fish_king_king','unknown_mixed_bait','市谷的鱼王之王',169,171,173,230,600,1000,1500,0.05,10,120,169,170,189,190,230,'mythic',false,'传说中只有经历特殊天气变化才会现身。')
+on conflict (fish_id) do update set
+ bait_id=excluded.bait_id,fish_name=excluded.fish_name,
+ small_max_cm=excluded.small_max_cm,medium_cm=excluded.medium_cm,
+ large_min_cm=excluded.large_min_cm,large_max_cm=excluded.large_max_cm,
+ small_points=excluded.small_points,medium_points=excluded.medium_points,
+ large_points=excluded.large_points,appearance_weight=excluded.appearance_weight,
+ sort_order=excluded.sort_order,
+ size_small_min_cm=excluded.size_small_min_cm,size_small_max_cm=excluded.size_small_max_cm,
+ size_medium_min_cm=excluded.size_medium_min_cm,size_medium_max_cm=excluded.size_medium_max_cm,
+ size_large_min_cm=excluded.size_large_min_cm,size_large_max_v2_cm=excluded.size_large_max_v2_cm,
+ rarity=excluded.rarity,is_hidden=false,description=excluded.description,is_active=true;
+
 -- The original 10 species remain in place. Their catalogue values are adjusted
 -- to the approved lower reward economy; historical ledger entries are untouched.
 update public.fishing_fish_catalog set
@@ -259,6 +290,22 @@ on conflict (fish_id) do update set
  start_hour_local=excluded.start_hour_local,end_hour_local=excluded.end_hour_local,
  required_fish_id=excluded.required_fish_id,catch_weight=excluded.catch_weight,
  is_hidden=excluded.is_hidden,clue=excluded.clue;
+
+-- Keep a dependable fish pool at every location for every ordinary bait.
+-- Weather windows change rarity and weights, but should never make a whole
+-- bait unusable at a selected location.
+update public.fishing_fish_rules_v2
+set weather_ids='{}',previous_weather_ids='{}',start_hour_local=null,end_hour_local=null
+where fish_id in ('jade_scale_carp','reed_whisker','deepwater_catfish',
+                  'sunset_gar','cobalt_tuna');
+update public.fishing_fish_rules_v2
+set location_id='deepwater_bay',weather_ids='{}',previous_weather_ids='{}',
+    start_hour_local=null,end_hour_local=null
+where fish_id='bluegill';
+update public.fishing_fish_rules_v2
+set location_id='reed_marsh',weather_ids='{}',previous_weather_ids='{}',
+    start_hour_local=null,end_hour_local=null
+where fish_id='whitewater_salmon';
 
 -- Set species rarity and reuse each encounter clue as its field-guide description.
 update public.fishing_fish_catalog f
