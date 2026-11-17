@@ -296,10 +296,12 @@
         card.append(art,info);grid.append(card);
       });
       if(hiddenUnknown>0&&(filter==="all"||filter==="unknown")){
-        const mystery=el("article","fishbook-card is-unknown"),art=el("div","fishbook-art");
-        art.append(el("span","fishbook-number","HIDDEN"),el("span","fishbook-fish-mark","?"),el("span","fishbook-seal","隐藏鱼种"));
-        const info=el("div","fishbook-card-info");info.append(el("p","fishbook-category","尚未发现"),el("h3","fishbook-fish-name","未知的水域传说"),el("p","fishbook-locked-copy","还有 "+hiddenUnknown+" 种隐藏鱼尚未收入图鉴。天气、时段与钓点可能藏着线索。"));
-        mystery.append(art,info);grid.append(mystery);
+        for(let n=0;n<hiddenUnknown;n++){
+          const mystery=el("article","fishbook-card is-unknown"),art=el("div","fishbook-art");
+          art.append(el("span","fishbook-number","HIDDEN "+String(n+1).padStart(2,"0")),el("span","fishbook-fish-mark","?"),el("span","fishbook-seal","隐藏鱼种"));
+          const info=el("div","fishbook-card-info");info.append(el("p","fishbook-category","尚未发现"),el("h3","fishbook-fish-name","未知的水域传说"),el("p","fishbook-locked-copy","天气、时段与钓点可能藏着线索。"));
+          mystery.append(art,info);grid.append(mystery);
+        }
       }
     };
     shell.append(head,progress,filters,grid);host.append(shell);renderCards();
