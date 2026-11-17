@@ -666,7 +666,7 @@ begin
  values(p_user_id,auth.uid(),p_quantity,btrim(p_reason));
  return v_balance;
 end;
-$;
+$$;
 
 -- Server-side cast. Every eligible fish must satisfy its location, weather,
 -- previous-weather, local-time and prerequisite-fish conditions.
