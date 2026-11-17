@@ -115,12 +115,13 @@
     weatherTop.append(el("span","hint",next?"下一时段："+(weatherNames[next.weather_id]||next.weather_id):"天气预报更新中"));
     const forecast=el("div","hint");forecast.style.marginTop="8px";
     forecast.textContent="未来天气："+(weather.forecast||[]).map(x=>(x.is_current?"现在 ":"")+ (weatherNames[x.weather_id]||x.weather_id)).join("　→　");
+    const weatherNote=el("p","hint","天气会改变部分鱼类的出现机会与尺寸分布，前序天气也可能开启隐藏鱼的鱼讯。");weatherNote.style.margin="8px 0 0";
     const locationLabel=el("label","field");locationLabel.style.cssText="display:block;margin-top:12px";locationLabel.append(el("span","","选择钓点"));
     const locationSelect=el("select","");locationSelect.style.marginTop="6px";
     (weather.locations||[]).forEach(x=>locationSelect.add(new Option((x.icon||"🎣")+" "+x.location_name+" — "+x.description,x.location_id)));
     locationSelect.value=state.currentLocation;
     locationSelect.addEventListener("change",()=>{state.currentLocation=locationSelect.value;});
-    locationLabel.append(locationSelect);weatherPanel.append(weatherTop,forecast,locationLabel);
+    locationLabel.append(locationSelect);weatherPanel.append(weatherTop,forecast,weatherNote,locationLabel);
     const stats=el("div","fish-game-stats");
     [["钓鱼积分",$("fish-points").textContent],["累计钓获",$("fish-catches").textContent],["已发现鱼种",$("fish-species").textContent]].forEach(([k,v])=>{const c=el("article","fish-game-stat");c.append(el("span","",k),el("strong","",v));stats.append(c);});
     const title=el("div","fish-subtitle-row");title.append(el("h3","","选择你的鱼饵"),el("small","","SELECT BAIT"));
