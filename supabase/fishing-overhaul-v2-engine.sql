@@ -5,7 +5,7 @@
 
 begin;
 
-do $preflight$
+do $engine_preflight$
 begin
   if to_regclass('public.fishing_fish_rules_v2') is null
      or to_regclass('public.fishing_sessions') is null
@@ -25,7 +25,7 @@ begin
     raise exception 'Fishing V2 engine prerequisite missing. Apply the documented fishing and item-workshop migrations first; no V2 engine changes were applied.';
   end if;
 end
-$preflight$;
+$engine_preflight$;
 
 alter table public.fishing_fish_rules_v2
   add column if not exists size_shift_to_large numeric(5,2) not null default 0
@@ -115,7 +115,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path=''
-as $fishing_fn_1$
+as $engine_fn_1$
 declare
  v_user uuid:=auth.uid();
  v_material record;
@@ -180,7 +180,7 @@ begin
  return jsonb_build_object('bait_id','unknown_mixed_bait','quantity',1,
    'bait_balance',v_balance,'duplicate_request',false);
 end;
-$fishing_fn_1$;
+$engine_fn_1$;
 
 -- Achievement reward hook: special bait is granted once, in the same transaction
 -- that unlocks the achievement. Event/admin rewards use the RPC below.
@@ -189,7 +189,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path=''
-as $fishing_fn_2$
+as $engine_fn_2$
 declare v_bait text; v_amount integer;
 begin
  select reward_bait_id,reward_bait_quantity into v_bait,v_amount
@@ -203,7 +203,7 @@ begin
  end if;
  return new;
 end;
-$fishing_fn_2$;
+$engine_fn_2$;
 drop trigger if exists fishing_achievement_bait_reward on public.player_fishing_achievements;
 create trigger fishing_achievement_bait_reward
 after insert on public.player_fishing_achievements
@@ -249,7 +249,7 @@ returns integer
 language plpgsql
 security definer
 set search_path=''
-as $fishing_fn_3$
+as $engine_fn_3$
 declare v_balance integer;
 begin
  if auth.uid() is null or not public.is_admin() then
@@ -269,7 +269,7 @@ begin
  values(p_user_id,auth.uid(),p_quantity,btrim(p_reason));
  return v_balance;
 end;
-$fishing_fn_3$;
+$engine_fn_3$;
 
 -- Server-side cast. Every eligible fish must satisfy its location, weather,
 -- previous-weather, local-time and prerequisite-fish conditions.
@@ -279,7 +279,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path=''
-as $fishing_fn_4$
+as $engine_fn_4$
 declare
  v_user uuid:=auth.uid();
  v_existing public.fishing_sessions%rowtype;
@@ -382,7 +382,7 @@ begin
    'fish_hint',case when v_fish.is_hidden then '鱼线另一端传来奇异的震动……' else null end
  );
 end;
-$fishing_fn_4$;
+$engine_fn_4$;
 
 -- A random server-signed phase offset is stored on the session. The browser may
 -- animate it for feedback, but cannot submit a score or a catch result.
@@ -391,7 +391,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path=''
-as $fishing_fn_5$
+as $engine_fn_5$
 declare
  v_user uuid:=auth.uid();
  v_session public.fishing_sessions%rowtype;
@@ -433,7 +433,7 @@ begin
    'zone_start_pct',30,'zone_width_pct',40,
    'duplicate_request',v_session.reel_started_at is not null);
 end;
-$fishing_fn_5$;
+$engine_fn_5$;
 
 -- The server calculates score and size; no client-supplied score or success flag.
 create or replace function public.fishing_finish_reel_v2(p_session_id uuid)
@@ -441,7 +441,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path=''
-as $fishing_fn_6$
+as $engine_fn_6$
 declare
  v_user uuid:=auth.uid();
  v_session public.fishing_sessions%rowtype;
@@ -625,7 +625,7 @@ begin
    'duplicate_request',false
  );
 end;
-$fishing_fn_6$;
+$engine_fn_6$;
 
 -- Global record values are aggregated server-side; no player IDs are exposed.
 create or replace function public.fishing_get_records_v2()
