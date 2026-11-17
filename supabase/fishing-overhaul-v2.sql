@@ -26,7 +26,8 @@ alter table public.fishing_fish_catalog
   add column if not exists size_large_max_v2_cm numeric(7,2),
   add column if not exists rarity text not null default 'common',
   add column if not exists is_hidden boolean not null default false,
-  add column if not exists description text not null default '';
+  add column if not exists description text not null default '',
+  add column if not exists v2_available boolean not null default false;
 
 create table if not exists public.fishing_locations_v2 (
   location_id text primary key,
@@ -85,18 +86,18 @@ insert into public.fishing_fish_catalog
  (fish_id,bait_id,fish_name,small_max_cm,medium_cm,large_min_cm,large_max_cm,
   small_points,medium_points,large_points,appearance_weight,sort_order,
   size_small_min_cm,size_small_max_cm,size_medium_min_cm,size_medium_max_cm,
-  size_large_min_cm,size_large_max_v2_cm,rarity,is_hidden,description)
+  size_large_min_cm,size_large_max_v2_cm,rarity,is_hidden,description,v2_available)
 values
- ('red_fish','small_mixed_bait','红鱼',9,10,11,18,10,15,25,1.3,1,5,9,10,12,13,18,'common',false,'晴岚湖最常见的鱼。'),
- ('rough_scale_crucian','small_mixed_bait','糙鳞鲫鱼',14,15,16,26,15,25,40,1.1,2,10,14,15,19,20,26,'common',false,'鳞片粗糙，适应力很强的底栖鱼。'),
- ('elegant_mirror_fish','small_mixed_bait','风雅镜鱼',19,20,21,34,20,35,55,0.8,3,12,19,20,25,26,34,'uncommon',false,'鳞片会映出湖面微光的优雅鱼种。'),
- ('rainbow_trout','medium_mixed_bait','七彩鳟鱼',29,30,31,46,35,55,85,1.0,4,20,29,30,36,37,46,'uncommon',false,'色彩斑斓，喜欢水流清澈的水域。'),
- ('shiro_carp','medium_mixed_bait','史郎鲤鱼',39,40,41,62,50,80,120,1.0,5,25,39,40,48,49,62,'uncommon',false,'身形修长，常在水草边缘活动。'),
- ('rare_treasure_trout','medium_mixed_bait','稀宝鳟鱼',49,50,51,76,70,110,170,0.65,6,28,49,50,59,60,76,'rare',false,'偶尔会在清晨的深水区现身。'),
- ('delicious_mirror_fish','large_mixed_bait','美味镜鱼',79,80,81,118,100,160,240,1.0,7,40,79,80,94,95,118,'rare',false,'肉质丰腴的大型鱼，喜欢深水湾。'),
- ('peerless_crucian','large_mixed_bait','无双鲫鱼',89,90,91,135,140,220,330,0.7,8,45,89,90,104,105,135,'epic',false,'力气惊人，只有经验丰富的钓手才能驾驭。'),
- ('ichigaya_fish_king','unknown_mixed_bait','市谷的鱼王',119,120,121,170,350,600,900,0.18,9,80,119,120,139,140,170,'legendary',false,'鱼王会在浓雾中现身。'),
- ('ichigaya_fish_king_king','unknown_mixed_bait','市谷的鱼王之王',169,171,173,230,600,1000,1500,0.05,10,120,169,170,189,190,230,'mythic',false,'传说中只有经历特殊天气变化才会现身。')
+ ('red_fish','small_mixed_bait','红鱼',9,10,11,18,10,15,25,1.3,1,5,9,10,12,13,18,'common',false,'晴岚湖最常见的鱼。',true),
+ ('rough_scale_crucian','small_mixed_bait','糙鳞鲫鱼',14,15,16,26,15,25,40,1.1,2,10,14,15,19,20,26,'common',false,'鳞片粗糙，适应力很强的底栖鱼。',true),
+ ('elegant_mirror_fish','small_mixed_bait','风雅镜鱼',19,20,21,34,20,35,55,0.8,3,12,19,20,25,26,34,'uncommon',false,'鳞片会映出湖面微光的优雅鱼种。',true),
+ ('rainbow_trout','medium_mixed_bait','七彩鳟鱼',29,30,31,46,35,55,85,1.0,4,20,29,30,36,37,46,'uncommon',false,'色彩斑斓，喜欢水流清澈的水域。',true),
+ ('shiro_carp','medium_mixed_bait','史郎鲤鱼',39,40,41,62,50,80,120,1.0,5,25,39,40,48,49,62,'uncommon',false,'身形修长，常在水草边缘活动。',true),
+ ('rare_treasure_trout','medium_mixed_bait','稀宝鳟鱼',49,50,51,76,70,110,170,0.65,6,28,49,50,59,60,76,'rare',false,'偶尔会在清晨的深水区现身。',true),
+ ('delicious_mirror_fish','large_mixed_bait','美味镜鱼',79,80,81,118,100,160,240,1.0,7,40,79,80,94,95,118,'rare',false,'肉质丰腴的大型鱼，喜欢深水湾。',true),
+ ('peerless_crucian','large_mixed_bait','无双鲫鱼',89,90,91,135,140,220,330,0.7,8,45,89,90,104,105,135,'epic',false,'力气惊人，只有经验丰富的钓手才能驾驭。',true),
+ ('ichigaya_fish_king','unknown_mixed_bait','市谷的鱼王',119,120,121,170,350,600,900,0.18,9,80,119,120,139,140,170,'legendary',false,'鱼王会在浓雾中现身。',true),
+ ('ichigaya_fish_king_king','unknown_mixed_bait','市谷的鱼王之王',169,171,173,230,600,1000,1500,0.05,10,120,169,170,189,190,230,'mythic',false,'传说中只有经历特殊天气变化才会现身。',true)
 on conflict (fish_id) do update set
  bait_id=excluded.bait_id,fish_name=excluded.fish_name,
  small_max_cm=excluded.small_max_cm,medium_cm=excluded.medium_cm,
@@ -107,7 +108,7 @@ on conflict (fish_id) do update set
  size_small_min_cm=excluded.size_small_min_cm,size_small_max_cm=excluded.size_small_max_cm,
  size_medium_min_cm=excluded.size_medium_min_cm,size_medium_max_cm=excluded.size_medium_max_cm,
  size_large_min_cm=excluded.size_large_min_cm,size_large_max_v2_cm=excluded.size_large_max_v2_cm,
- rarity=excluded.rarity,is_hidden=false,description=excluded.description,is_active=true;
+ rarity=excluded.rarity,is_hidden=false,description=excluded.description,is_active=true,v2_available=true;
 
 -- The original 10 species remain in place. Their catalogue values are adjusted
 -- to the approved lower reward economy; historical ledger entries are untouched.
@@ -196,38 +197,38 @@ insert into public.fishing_fish_catalog
  (fish_id,bait_id,fish_name,small_max_cm,medium_cm,large_min_cm,large_max_cm,
   small_points,medium_points,large_points,appearance_weight,sort_order,
   size_small_min_cm,size_small_max_cm,size_medium_min_cm,size_medium_max_cm,
-  size_large_min_cm,size_large_max_v2_cm,rarity,is_hidden,description)
+  size_large_min_cm,size_large_max_v2_cm,rarity,is_hidden,description,is_active,v2_available)
 values
- ('silver_dace','small_mixed_bait','银线鱼',8,9,10,16,12,18,28,1.2,11,4,8,9,11,12,16,'common',false,'银白色细鳞在浅水中闪闪发亮。'),
- ('bluegill','small_mixed_bait','蓝鳃太阳鱼',11,12,13,20,14,22,32,1.0,12,6,11,12,14,15,20,'common',false,'常在水草与阳光交界处觅食。'),
- ('striped_minnow','small_mixed_bait','斑纹溪鳑',13,14,15,23,16,24,36,0.9,13,7,13,14,16,17,23,'common',false,'身体带有细密横纹的小鱼。'),
- ('amber_loach','small_mixed_bait','琥珀泥鳅',15,16,17,27,18,28,42,0.85,14,8,15,16,18,19,27,'uncommon',false,'喜欢藏身在湖底柔软的泥沙里。'),
- ('glass_perch','small_mixed_bait','玻璃鲈',17,18,19,30,20,32,48,0.75,15,9,17,18,20,21,30,'uncommon',false,'半透明的鱼身能映出周围水色。'),
- ('lotus_koi','small_mixed_bait','莲纹锦鲤',19,20,21,34,24,36,54,0.65,16,10,19,20,22,23,34,'rare',false,'常在莲叶下缓慢游动。'),
- ('dusk_goby','small_mixed_bait','暮色虾虎',21,22,23,36,26,40,60,0.55,17,11,21,22,24,25,36,'rare',false,'黄昏时分更容易靠近岸边。'),
+ ('silver_dace','small_mixed_bait',false,true,'银线鱼',8,9,10,16,12,18,28,1.2,11,4,8,9,11,12,16,'common',false,true,false,'银白色细鳞在浅水中闪闪发亮。',false,true),
+ ('bluegill','small_mixed_bait',false,true,'蓝鳃太阳鱼',11,12,13,20,14,22,32,1.0,12,6,11,12,14,15,20,'common',false,true,false,'常在水草与阳光交界处觅食。',false,true),
+ ('striped_minnow','small_mixed_bait',false,true,'斑纹溪鳑',13,14,15,23,16,24,36,0.9,13,7,13,14,16,17,23,'common',false,true,false,'身体带有细密横纹的小鱼。',false,true),
+ ('amber_loach','small_mixed_bait',false,true,'琥珀泥鳅',15,16,17,27,18,28,42,0.85,14,8,15,16,18,19,27,'uncommon',false,true,false,'喜欢藏身在湖底柔软的泥沙里。',false,true),
+ ('glass_perch','small_mixed_bait',false,true,'玻璃鲈',17,18,19,30,20,32,48,0.75,15,9,17,18,20,21,30,'uncommon',false,true,false,'半透明的鱼身能映出周围水色。',false,true),
+ ('lotus_koi','small_mixed_bait',false,true,'莲纹锦鲤',19,20,21,34,24,36,54,0.65,16,10,19,20,22,23,34,'rare',false,true,false,'常在莲叶下缓慢游动。',false,true),
+ ('dusk_goby','small_mixed_bait',false,true,'暮色虾虎',21,22,23,36,26,40,60,0.55,17,11,21,22,24,25,36,'rare',false,true,false,'黄昏时分更容易靠近岸边。',false,true),
 
- ('mistfin_trout','medium_mixed_bait','雾鳍鳟',25,26,27,42,38,60,92,1.15,18,14,25,26,29,30,42,'common',false,'雾气弥漫时常在水面附近活动。'),
- ('reed_whisker','medium_mixed_bait','芦苇须鲶',32,33,34,54,45,72,108,1.0,19,18,32,33,37,38,54,'common',false,'以细长触须探寻芦苇根部的食物。'),
- ('jade_scale_carp','medium_mixed_bait','青玉鳞鲤',38,39,40,64,55,88,132,0.9,20,22,38,39,44,45,64,'uncommon',false,'鳞片泛着淡淡的青绿色。'),
- ('rainbell_fish','medium_mixed_bait','雨铃鱼',42,43,44,70,62,98,148,0.8,21,25,42,43,48,49,70,'uncommon',false,'雨点落在水面时会发出清脆声响。'),
- ('moonlit_bass','medium_mixed_bait','月影鲈',48,49,50,80,72,115,172,0.75,22,28,48,49,55,56,80,'rare',false,'月光下会显现出银蓝色的背鳍。'),
- ('stormscale_pike','medium_mixed_bait','雷纹狗鱼',55,56,57,92,82,132,198,0.65,23,32,55,56,63,64,92,'rare',false,'暴雨前后会变得格外活跃。'),
- ('golden_fin_bream','medium_mixed_bait','金鳍鲷',62,63,64,105,95,150,225,0.55,24,36,62,63,72,73,105,'epic',false,'金色背鳍是它最醒目的特征。'),
- ('deepwater_catfish','medium_mixed_bait','深湾巨鲶',70,71,72,120,110,175,260,0.45,25,40,70,71,82,83,120,'epic',false,'深水湾底部的强壮掠食者。'),
+ ('mistfin_trout','medium_mixed_bait',false,true,'雾鳍鳟',25,26,27,42,38,60,92,1.15,18,14,25,26,29,30,42,'common',false,true,false,'雾气弥漫时常在水面附近活动。',false,true),
+ ('reed_whisker','medium_mixed_bait',false,true,'芦苇须鲶',32,33,34,54,45,72,108,1.0,19,18,32,33,37,38,54,'common',false,true,false,'以细长触须探寻芦苇根部的食物。',false,true),
+ ('jade_scale_carp','medium_mixed_bait',false,true,'青玉鳞鲤',38,39,40,64,55,88,132,0.9,20,22,38,39,44,45,64,'uncommon',false,true,false,'鳞片泛着淡淡的青绿色。',false,true),
+ ('rainbell_fish','medium_mixed_bait',false,true,'雨铃鱼',42,43,44,70,62,98,148,0.8,21,25,42,43,48,49,70,'uncommon',false,true,false,'雨点落在水面时会发出清脆声响。',false,true),
+ ('moonlit_bass','medium_mixed_bait',false,true,'月影鲈',48,49,50,80,72,115,172,0.75,22,28,48,49,55,56,80,'rare',false,true,false,'月光下会显现出银蓝色的背鳍。',false,true),
+ ('stormscale_pike','medium_mixed_bait',false,true,'雷纹狗鱼',55,56,57,92,82,132,198,0.65,23,32,55,56,63,64,92,'rare',false,true,false,'暴雨前后会变得格外活跃。',false,true),
+ ('golden_fin_bream','medium_mixed_bait',false,true,'金鳍鲷',62,63,64,105,95,150,225,0.55,24,36,62,63,72,73,105,'epic',false,true,false,'金色背鳍是它最醒目的特征。',false,true),
+ ('deepwater_catfish','medium_mixed_bait',false,true,'深湾巨鲶',70,71,72,120,110,175,260,0.45,25,40,70,71,82,83,120,'epic',false,true,false,'深水湾底部的强壮掠食者。',false,true),
 
- ('cobalt_tuna','large_mixed_bait','钴蓝金枪鱼',72,73,74,118,105,165,250,1.1,26,42,72,73,85,86,118,'uncommon',false,'速度极快，常在开阔水域追逐鱼群。'),
- ('sunset_gar','large_mixed_bait','赤霞雀鳝',82,83,84,135,120,190,285,1.0,27,48,82,83,97,98,135,'uncommon',false,'夕阳映照下，长吻呈现赤红色。'),
- ('ironback_sturgeon','large_mixed_bait','铁背鲟',95,96,97,158,140,225,340,0.9,28,55,95,96,113,114,158,'rare',false,'厚重骨板保护着它宽阔的身躯。'),
- ('whitewater_salmon','large_mixed_bait','白浪鲑',105,106,107,175,155,250,375,0.8,29,62,105,106,125,126,175,'rare',false,'喜欢水流湍急、含氧量高的水域。'),
- ('ancient_shellfish','large_mixed_bait','古甲鲶',118,119,120,198,175,280,420,0.7,30,70,118,119,141,142,198,'epic',false,'背部覆有古老甲片的巨型鱼类。'),
- ('aurora_ray','large_mixed_bait','极光鳐',132,133,134,220,195,315,470,0.6,31,78,132,133,158,159,220,'epic',false,'夜色中身体边缘会泛起极光般的微光。'),
- ('abyssal_manta','large_mixed_bait','渊海蝠鲼',150,151,152,250,225,360,540,0.45,32,90,150,151,180,181,250,'legendary',false,'深水湾最神秘的常驻大型鱼。'),
+ ('cobalt_tuna','large_mixed_bait',false,true,'钴蓝金枪鱼',72,73,74,118,105,165,250,1.1,26,42,72,73,85,86,118,'uncommon',false,true,false,'速度极快，常在开阔水域追逐鱼群。',false,true),
+ ('sunset_gar','large_mixed_bait',false,true,'赤霞雀鳝',82,83,84,135,120,190,285,1.0,27,48,82,83,97,98,135,'uncommon',false,true,false,'夕阳映照下，长吻呈现赤红色。',false,true),
+ ('ironback_sturgeon','large_mixed_bait',false,true,'铁背鲟',95,96,97,158,140,225,340,0.9,28,55,95,96,113,114,158,'rare',false,true,false,'厚重骨板保护着它宽阔的身躯。',false,true),
+ ('whitewater_salmon','large_mixed_bait',false,true,'白浪鲑',105,106,107,175,155,250,375,0.8,29,62,105,106,125,126,175,'rare',false,true,false,'喜欢水流湍急、含氧量高的水域。',false,true),
+ ('ancient_shellfish','large_mixed_bait',false,true,'古甲鲶',118,119,120,198,175,280,420,0.7,30,70,118,119,141,142,198,'epic',false,true,false,'背部覆有古老甲片的巨型鱼类。',false,true),
+ ('aurora_ray','large_mixed_bait',false,true,'极光鳐',132,133,134,220,195,315,470,0.6,31,78,132,133,158,159,220,'epic',false,true,false,'夜色中身体边缘会泛起极光般的微光。',false,true),
+ ('abyssal_manta','large_mixed_bait',false,true,'渊海蝠鲼',150,151,152,250,225,360,540,0.45,32,90,150,151,180,181,250,'legendary',false,true,false,'深水湾最神秘的常驻大型鱼。',false,true),
 
  -- Four hidden species. Their conditions are enforced by the v2 fishing resolver.
- ('rainbow_phantom','unknown_mixed_bait','虹影鱼',95,96,97,155,180,280,420,0.25,33,58,95,96,116,117,155,'mythic',true,'只有在雨后放晴时，湖面才会留下它的影子。'),
- ('fog_veil_koi','unknown_mixed_bait','雾隐锦鲤',110,111,112,180,220,340,510,0.2,34,65,110,111,134,135,180,'mythic',true,'浓雾笼罩芦苇湿地时，偶尔能看见一抹金色。'),
- ('thunder_crown_eel','unknown_mixed_bait','雷冠鳗',130,131,132,215,260,400,600,0.16,35,75,130,131,158,159,215,'legendary',true,'雷雨交加时，深水中会出现短暂的电光。'),
- ('old_lake_dragon','unknown_mixed_bait','古湖龙鱼',180,181,182,300,350,550,820,0.08,36,105,180,181,220,221,300,'mythic',true,'传说只有集齐古老鱼讯，才能唤醒沉睡的湖之主。')
+ ('rainbow_phantom','unknown_mixed_bait',false,true,'虹影鱼',95,96,97,155,180,280,420,0.25,33,58,95,96,116,117,155,'mythic',false,true,true,'只有在雨后放晴时，湖面才会留下它的影子。',false,true),
+ ('fog_veil_koi','unknown_mixed_bait',false,true,'雾隐锦鲤',110,111,112,180,220,340,510,0.2,34,65,110,111,134,135,180,'mythic',false,true,true,'浓雾笼罩芦苇湿地时，偶尔能看见一抹金色。',false,true),
+ ('thunder_crown_eel','unknown_mixed_bait',false,true,'雷冠鳗',130,131,132,215,260,400,600,0.16,35,75,130,131,158,159,215,'legendary',false,true,true,'雷雨交加时，深水中会出现短暂的电光。',false,true),
+ ('old_lake_dragon','unknown_mixed_bait',false,true,'古湖龙鱼',180,181,182,300,350,550,820,0.08,36,105,180,181,220,221,300,'mythic',false,true,true,'传说只有集齐古老鱼讯，才能唤醒沉睡的湖之主。',false,true)
 on conflict (fish_id) do update set
  bait_id=excluded.bait_id,fish_name=excluded.fish_name,
  small_max_cm=excluded.small_max_cm,medium_cm=excluded.medium_cm,
@@ -239,14 +240,14 @@ on conflict (fish_id) do update set
  size_medium_min_cm=excluded.size_medium_min_cm,size_medium_max_cm=excluded.size_medium_max_cm,
  size_large_min_cm=excluded.size_large_min_cm,size_large_max_v2_cm=excluded.size_large_max_v2_cm,
  rarity=excluded.rarity,is_hidden=excluded.is_hidden,description=excluded.description,
- is_active=true;
+ v2_available=true;
 
 -- Hide undiscovered fish immediately, even between the two ordered V2 migrations.
 drop policy if exists fishing_fish_catalog_read on public.fishing_fish_catalog;
 create policy fishing_fish_catalog_read on public.fishing_fish_catalog
  for select to authenticated
  using (
-   (is_active and not is_hidden)
+   ((is_active or v2_available) and not is_hidden)
    or public.is_admin()
    or exists (
      select 1 from public.player_fishbook b
@@ -390,8 +391,8 @@ begin
       'description',description,'icon',icon
     ) order by sort_order),'[]'::jsonb)
     from public.fishing_locations_v2 where is_active=true),
-    'species_total',(select count(*) from public.fishing_fish_catalog where is_active=true),
-    'hidden_total',(select count(*) from public.fishing_fish_catalog where is_active=true and is_hidden)
+    'species_total',(select count(*) from public.fishing_fish_catalog where v2_available=true),
+    'hidden_total',(select count(*) from public.fishing_fish_catalog where v2_available=true and is_hidden)
   );
 end;
 $$;
