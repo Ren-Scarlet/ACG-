@@ -233,7 +233,7 @@ values
  ('aurora_ray','deepwater_bay','{}','{}',20,3,null,0.55,false,'夜色中才会显露光芒。'),
  ('abyssal_manta','deepwater_bay','{fog,storm}','{}',null,null,null,0.4,false,'深水湾天气恶劣时出没。'),
  ('ichigaya_fish_king','deepwater_bay','{fog}','{}',null,null,null,0.18,false,'鱼王会在浓雾中现身。'),
- ('ichigaya_fish_king_king','deepwater_bay','{storm}','{rain}','{}',null,null,0.05,false,'先经历降雨，再遇雷雨，传说之物才会出现。'),
+ ('ichigaya_fish_king_king','deepwater_bay','{storm}','{rain}',null,null,null,0.05,false,'先经历降雨，再遇雷雨，传说之物才会出现。'),
  ('rainbow_phantom','qinglan_lake','{sunny}','{rain}',5,9,null,0.18,true,'雨后初晴的清晨，水面会闪过彩色残影。'),
  ('fog_veil_koi','reed_marsh','{fog}','{}',4,8,null,0.14,true,'浓雾笼罩芦苇湿地的清晨。'),
  ('thunder_crown_eel','deepwater_bay','{storm}','{}',19,23,null,0.1,true,'雷雨夜晚，深水里会闪过电光。'),
