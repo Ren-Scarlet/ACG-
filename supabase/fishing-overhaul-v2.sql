@@ -37,14 +37,14 @@ create table if not exists public.fishing_fish_rules_v2 (
   location_id text not null references public.fishing_locations_v2(location_id),
   weather_ids text[] not null default '{}',
   previous_weather_ids text[] not null default '{}',
-  start_hour_utc smallint,
-  end_hour_utc smallint,
+  start_hour_local smallint,
+  end_hour_local smallint,
   required_fish_id text references public.fishing_fish_catalog(fish_id),
   catch_weight numeric(10,4) not null default 1 check (catch_weight > 0),
   is_hidden boolean not null default false,
   clue text not null default '',
-  check (start_hour_utc is null or start_hour_utc between 0 and 23),
-  check (end_hour_utc is null or end_hour_utc between 0 and 23)
+  check (start_hour_local is null or start_hour_local between 0 and 23),
+  check (end_hour_local is null or end_hour_local between 0 and 23)
 );
 
 create index if not exists fishing_fish_rules_location_idx
@@ -201,7 +201,7 @@ on conflict (fish_id) do update set
 
 -- Habitat and encounter conditions. Empty weather arrays mean no weather restriction.
 insert into public.fishing_fish_rules_v2
- (fish_id,location_id,weather_ids,previous_weather_ids,start_hour_utc,end_hour_utc,
+ (fish_id,location_id,weather_ids,previous_weather_ids,start_hour_local,end_hour_local,
   required_fish_id,catch_weight,is_hidden,clue)
 values
  ('red_fish','qinglan_lake','{}','{}',null,null,null,1.3,false,'晴岚湖最常见的鱼。'),
@@ -243,7 +243,7 @@ values
 on conflict (fish_id) do update set
  location_id=excluded.location_id,weather_ids=excluded.weather_ids,
  previous_weather_ids=excluded.previous_weather_ids,
- start_hour_utc=excluded.start_hour_utc,end_hour_utc=excluded.end_hour_utc,
+ start_hour_local=excluded.start_hour_local,end_hour_local=excluded.end_hour_local,
  required_fish_id=excluded.required_fish_id,catch_weight=excluded.catch_weight,
  is_hidden=excluded.is_hidden,clue=excluded.clue;
 
