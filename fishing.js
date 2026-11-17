@@ -48,7 +48,7 @@
     if(!userData?.user)throw new Error("无法确认当前登录账号");
     const [baitRes,fishRes,berryRes]=await Promise.all([
       client.from("fishing_bait_catalog").select("*").eq("is_active",true).order("sort_order"),
-      client.from("fishing_fish_catalog").select("*").eq("is_active",true).order("sort_order"),
+      client.from("fishing_fish_catalog").select("*").eq("v2_available",true).order("sort_order"),
       client.from("card_inventory").select("card_id,quantity").eq("user_id",userData.user.id).gt("quantity",0)
     ]);
     if(baitRes.error)throw baitRes.error;
