@@ -421,8 +421,8 @@
         .filter(x=>x.quantity>0&&(!myWarehouseQuery||x.item.name.toLowerCase().includes(myWarehouseQuery)||x.item.item_id.toLowerCase().includes(myWarehouseQuery)));
       const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id);
       const ticketQty=Number(ticketRow?.quantity||0);
-      let savedTicketUseCount=0;try{savedTicketUseCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||0);}catch(_){}
-      const hasPendingTicketUse=Boolean(pendingTicketUseId||(()=>{try{return localStorage.getItem("acg-tree-fruit-ticket-request");}catch(_){return null;}})());
+      let savedTicketUseCount=0,savedTicketRequest=null;try{savedTicketRequest=localStorage.getItem("acg-tree-fruit-ticket-request");savedTicketUseCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||(savedTicketRequest?"1":"0"));}catch(_){}
+      const hasPendingTicketUse=Boolean(pendingTicketUseId||savedTicketRequest);
       const pendingCount=Number(pendingTicketUseCount||savedTicketUseCount||0);
       const ticketMatches=!myWarehouseQuery||TREE_FRUIT_TICKET.name.toLowerCase().includes(myWarehouseQuery)||TREE_FRUIT_TICKET.id.includes(myWarehouseQuery);
       const showTicket=myWarehouseCategory==="consumables"&&(ticketQty>0||hasPendingTicketUse)&&ticketMatches&&!catalog.some(x=>x.item_id===TREE_FRUIT_TICKET.id);
@@ -489,7 +489,7 @@
   async function useTreeFruitTicket(button,rawCount=1){
     if(consumableUseBusy)return;
     const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id),available=Number(ticketRow?.quantity||0),useCount=Number(rawCount);
-    let storedRequest=null,storedCount=0;try{storedRequest=localStorage.getItem("acg-tree-fruit-ticket-request");storedCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||0);}catch(_){}
+    let storedRequest=null,storedCount=0;try{storedRequest=localStorage.getItem("acg-tree-fruit-ticket-request");storedCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||(storedRequest?"1":"0"));}catch(_){}
     const hasPending=Boolean(storedRequest||pendingTicketUseId);
     if(!Number.isSafeInteger(useCount)||useCount<1||useCount>20){setStatus("一次最多使用 20 张树果卷。",true);return;}
     if(hasPending&&(Number(pendingTicketUseCount||storedCount)!==useCount)){setStatus("上一笔树果卷请求尚未确认，请先按原数量重试，避免重复扣除。",true);return;}
