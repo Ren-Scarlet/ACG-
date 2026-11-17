@@ -147,7 +147,7 @@
     if(state.phase!=="idle"){status("当前还有一轮钓鱼没有结束。",true);return;}
     state.phase="waiting";renderOverview();
     try{
-      const result=await rpc("fishing_start_cast",{p_bait_id:baitId,p_request_id:uuid(),p_location_id:state.currentLocation});
+      const result=await rpc("fishing_start_cast_v2",{p_bait_id:baitId,p_request_id:uuid(),p_location_id:state.currentLocation});
       state.world=result.weather||state.world;renderHeader();
       state.currentSession=result.session_id;
       const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
@@ -177,7 +177,7 @@
     box.replaceChildren(el("p","hint","正在确认提竿时机……"));
     try{
       const hookRequestStarted=performance.now();
-      const result=await rpc("fishing_hook_cast",{p_session_id:state.currentSession});
+      const result=await rpc("fishing_hook_cast_v2",{p_session_id:state.currentSession});
       const hookRoundTripMs=performance.now()-hookRequestStarted;
       if(result.status==="escaped"){
         state.phase="idle";state.currentSession=null;
@@ -217,7 +217,7 @@
     state.phase="resolving";
     $("fish-action").replaceChildren(el("p","hint","正在由服务器判定收线结果……"));
     try{
-      const result=await rpc("fishing_finish_reel",{p_session_id:state.currentSession});
+      const result=await rpc("fishing_finish_reel_v2",{p_session_id:state.currentSession});
       if(result.status==="caught"){
         const label=result.size_label||"尺寸待定";
         const caughtScene=createWaterScene("caught");
