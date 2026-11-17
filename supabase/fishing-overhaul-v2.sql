@@ -6,7 +6,7 @@
 
 begin;
 
-do $preflight$
+do $schema_preflight$
 begin
   if to_regclass('public.fishing_fish_catalog') is null
      or to_regclass('public.fishing_bait_catalog') is null
@@ -15,7 +15,7 @@ begin
     raise exception 'Fishing V2 prerequisite missing. Run the existing fishing V1 migrations first; no V2 changes were applied.';
   end if;
 end
-$preflight$;
+$schema_preflight$;
 
 alter table public.fishing_fish_catalog
   add column if not exists size_small_min_cm numeric(7,2),
@@ -346,7 +346,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $fishing_fn_1$
+as $schema_fn_1$
 declare
   v_user uuid := auth.uid();
   v_now timestamptz := clock_timestamp();
@@ -397,7 +397,7 @@ begin
     'hidden_total',(select count(*) from public.fishing_fish_catalog where v2_available=true and is_hidden)
   );
 end;
-$fishing_fn_1$;
+$schema_fn_1$;
 
 revoke all on function public.fishing_get_world_state_v2() from public,anon,authenticated;
 grant execute on function public.fishing_get_world_state_v2() to authenticated;
