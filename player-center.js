@@ -978,6 +978,7 @@
       const {data,error}=await client.rpc("player_set_auto_dismantle_settings",{p_enabled:autoToggle.checked,p_rarities:selectedStars});if(error)throw error;
       const processed=data?.processed||{};autoStatus.textContent=(autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。";
       await loadDismantle();
+      setStatus((autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。",false);
     }catch(error){autoStatus.textContent="保存失败："+error.message;autoSave.disabled=false;}});
     autoPanel.append(autoTitle,autoHint,toggleLabel,rarityOptions,autoSave,autoStatus);
     contentEl.appendChild(autoPanel);
