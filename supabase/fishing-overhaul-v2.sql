@@ -288,13 +288,13 @@ begin
   from public.fishing_weather_slots_v2
   where slot_start between v_slot and v_slot+interval '12 hours';
 
-  v_hour:=extract(hour from v_now)::integer;
+  v_hour:=extract(hour from (v_now at time zone 'Asia/Shanghai'))::integer;
   return jsonb_build_object(
     'server_time',v_now,
     'slot_ends_at',v_slot+interval '4 hours',
     'weather_id',v_current,
     'previous_weather_id',v_previous,
-    'hour_utc',v_hour,
+    'hour_local',v_hour,
     'forecast',v_forecast,
     'locations',(select coalesce(jsonb_agg(jsonb_build_object(
       'location_id',location_id,'location_name',location_name,
