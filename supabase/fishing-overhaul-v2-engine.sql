@@ -284,11 +284,11 @@ begin
    and (cardinality(r.weather_ids)=0 or v_weather=any(r.weather_ids))
    and (cardinality(r.previous_weather_ids)=0 or v_previous=any(r.previous_weather_ids))
    and (
-     r.start_hour_utc is null
-     or (r.end_hour_utc is null and v_hour=r.start_hour_utc)
-     or (r.start_hour_utc<=r.end_hour_utc and v_hour between r.start_hour_utc and r.end_hour_utc)
-     or (r.start_hour_utc>r.end_hour_utc and
-         (v_hour>=r.start_hour_utc or v_hour<=r.end_hour_utc))
+     r.start_hour_local is null
+     or (r.end_hour_local is null and v_hour=r.start_hour_local)
+     or (r.start_hour_local<=r.end_hour_local and v_hour between r.start_hour_local and r.end_hour_local)
+     or (r.start_hour_local>r.end_hour_local and
+         (v_hour>=r.start_hour_local or v_hour<=r.end_hour_local))
    )
    and (r.required_fish_id is null or exists(
      select 1 from public.player_fishbook b
