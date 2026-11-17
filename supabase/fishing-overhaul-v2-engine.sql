@@ -571,15 +571,18 @@ declare
  v_records jsonb;
 begin
  if v_user is null then raise exception '请先登录'; end if;
- select coalesce(jsonb_agg(jsonb_build_object(
-   'fish_id',fish_id,
-   'global_best_size_cm',max(size_cm),
-   'record_catches',count(*)
- ) order by fish_id),'[]'::jsonb)
+ select coalesce(jsonb_agg(record_row order by record_row->>'fish_id'),'[]'::jsonb)
  into v_records
- from public.fishing_catches
- where size_cm is not null
- group by fish_id;
+ from (
+   select jsonb_build_object(
+     'fish_id',fish_id,
+     'global_best_size_cm',max(size_cm),
+     'record_catches',count(*)
+   ) as record_row
+   from public.fishing_catches
+   where size_cm is not null
+   group by fish_id
+ ) records;
  return v_records;
 end;
 $;
