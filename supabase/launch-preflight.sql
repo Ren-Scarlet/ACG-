@@ -8,7 +8,7 @@ with expected_tables(table_name) as (
     ('matches'),('match_results'),('achievements'),('player_achievements'),
     ('draw_card_catalog'),('card_draw_pools'),('card_draw_history'),
     ('player_registry'),('legacy_card_collections'),('legacy_collection_imports'),
-    ('card_inventory_adjustments'),('battle_item_catalog'),('battle_item_deck_commits'),('card_dismantle_requests'),('consumable_use_history'),('item_catalog'),('mail_messages'),('mail_recipients'),('mail_attachments')
+    ('card_inventory_adjustments'),('battle_item_catalog'),('battle_item_deck_commits'),('card_dismantle_requests'),('consumable_use_history'),('item_catalog'),('mail_messages'),('mail_recipients'),('mail_attachments'),('player_card_auto_dismantle_settings')
 ),
 expected_columns(table_name,column_name) as (
   values
@@ -50,7 +50,7 @@ expected_columns(table_name,column_name) as (
     ('battle_item_deck_commits','item_cards'),
     ('item_catalog','item_id'),('item_catalog','effect_type'),
     ('mail_messages','title'),('mail_recipients','claimed_at'),
-    ('mail_attachments','reward_type'),('consumable_use_history','result_data')
+    ('mail_attachments','reward_type'),('consumable_use_history','result_data'),('player_card_auto_dismantle_settings','user_id'),('player_card_auto_dismantle_settings','enabled'),('player_card_auto_dismantle_settings','rarities')
 ),
 table_status as (
   select e.table_name,
@@ -99,7 +99,7 @@ function_status as (
     ('admin_save_achievement'),
     ('save_profile_display'),
     ('admin_save_item'),('use_inventory_item'),('admin_send_mail'),
-    ('admin_list_mail'),('player_list_mail'),('player_mark_mail_read'),('player_claim_mail')
+    ('admin_list_mail'),('player_list_mail'),('player_mark_mail_read'),('player_claim_mail'),('player_get_auto_dismantle_settings'),('player_set_auto_dismantle_settings')
   ) required(function_name)
 ),
 auth_triggers as (

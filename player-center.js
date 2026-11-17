@@ -376,7 +376,7 @@
     });
   }
 
-  const TREE_FRUIT_TICKET={id:"consumable_tree_fruit_ticket",name:"树果卷",icon:"🎟️",description:"使用后免费抽取一次树果包，获得 5 颗随机树果。"};
+  const TREE_FRUIT_TICKET={id:"consumable_tree_fruit_ticket",name:"树果卷",icon:"🎟️",description:"每张可免费抽取 5 颗随机树果，支持批量使用。"};
   let myWarehouseRows = [];
   let myWarehouseItems = [];
   let myWarehouseQuery = "";
@@ -421,8 +421,11 @@
         .filter(x=>x.quantity>0&&(!myWarehouseQuery||x.item.name.toLowerCase().includes(myWarehouseQuery)||x.item.item_id.toLowerCase().includes(myWarehouseQuery)));
       const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id);
       const ticketQty=Number(ticketRow?.quantity||0);
+      let savedTicketUseCount=0,savedTicketRequest=null;try{savedTicketRequest=localStorage.getItem("acg-tree-fruit-ticket-request");savedTicketUseCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||(savedTicketRequest?"1":"0"));}catch(_){}
+      const hasPendingTicketUse=Boolean(pendingTicketUseId||savedTicketRequest);
+      const pendingCount=Number(pendingTicketUseCount||savedTicketUseCount||0);
       const ticketMatches=!myWarehouseQuery||TREE_FRUIT_TICKET.name.toLowerCase().includes(myWarehouseQuery)||TREE_FRUIT_TICKET.id.includes(myWarehouseQuery);
-      const showTicket=myWarehouseCategory==="consumables"&&ticketQty>0&&ticketMatches&&!catalog.some(x=>x.item_id===TREE_FRUIT_TICKET.id);
+      const showTicket=myWarehouseCategory==="consumables"&&(ticketQty>0||hasPendingTicketUse)&&ticketMatches&&!catalog.some(x=>x.item_id===TREE_FRUIT_TICKET.id);
       const total=owned.length+(showTicket?1:0);
       summary.textContent=category.label+" · 持有 "+total+" 种";
       if(!total){host.appendChild(node("div","pc-empty",myWarehouseCategory==="consumables"?"你还没有获得消耗品。":"你还没有获得重要道具。"));return;}
@@ -430,7 +433,8 @@
         const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",TREE_FRUIT_TICKET.icon);
         icon.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
         const info=node("div","pc-card-info");info.append(node("strong","",TREE_FRUIT_TICKET.name),node("small","",TREE_FRUIT_TICKET.description),node("small","","持有数量：× "+ticketQty));
-        const use=node("button","primary","使用");use.type="button";use.addEventListener("click",()=>useTreeFruitTicket(use));row.append(icon,info,use);host.appendChild(row);
+        const controls=node("div","pc-ticket-use-controls"),countInput=node("input");countInput.type="number";countInput.min="1";countInput.max=String(Math.max(Math.min(20,ticketQty),pendingCount));countInput.step="1";countInput.value=hasPendingTicketUse&&pendingCount>0?String(pendingCount):"1";countInput.setAttribute("aria-label","使用树果卷数量");countInput.style.cssText="width:76px;min-width:76px;padding:8px;text-align:center";
+        const use=node("button","primary",hasPendingTicketUse?"重试上次使用":"批量使用");use.type="button";use.addEventListener("click",()=>useTreeFruitTicket(use,countInput.value));controls.append(countInput,use);row.append(icon,info,controls);host.appendChild(row);
       }
       owned.forEach(({item,quantity})=>{
         const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",item.icon||"🎁");
@@ -460,7 +464,7 @@
       const item=node("article","pc-inventory-card");
       let img;
       if(card.icon){img=node("div","pc-consumable-icon",card.icon);img.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";}
-      else{img=node("img");img.src=card.image||"";img.alt=card.name;img.loading="lazy";img.onerror=()=>{img.style.visibility="hidden";};}
+      else{img=node("img");img.src=card.image||"";img.alt=card.name;img.loading="lazy";img.style.cursor="zoom-in";img.addEventListener("click",event=>{event.stopPropagation();showCardImagePreview(card);});img.onerror=()=>{img.style.visibility="hidden";};}
       const info=node("div","pc-card-info");
       info.append(node("strong","",card.name),node("small","",(card.star?card.star+" 星 · ":"")+(card.type||"未知类型")+" · "+(card.pack_id||"未分类")+" · "+card.id));
       const quantity=node("div","pc-quantity-controls");
@@ -471,30 +475,38 @@
   }
   let consumableUseBusy=false;
   let pendingTicketUseId=null;
-  function getTicketUseRequestId(){
-    if(pendingTicketUseId)return pendingTicketUseId;
-    try{pendingTicketUseId=localStorage.getItem("acg-tree-fruit-ticket-request");}catch(_){}
-    if(!pendingTicketUseId){pendingTicketUseId=crypto.randomUUID();try{localStorage.setItem("acg-tree-fruit-ticket-request",pendingTicketUseId);}catch(_){}}
+  let pendingTicketUseCount=null;
+  function getTicketUseRequestId(useCount){
+    const key="acg-tree-fruit-ticket-request",countKey="acg-tree-fruit-ticket-count";
+    let savedId=null,savedCount=1;
+    try{savedId=localStorage.getItem(key);savedCount=Number(localStorage.getItem(countKey)||1);}catch(_){}
+    if(savedId){if(savedCount!==useCount)throw new Error("上一笔树果卷请求尚未确认，请先使用相同数量重试，避免重复扣除。");pendingTicketUseId=savedId;pendingTicketUseCount=savedCount;return savedId;}
+    if(pendingTicketUseId){if(pendingTicketUseCount!==useCount)throw new Error("上一笔树果卷请求尚未确认，请先使用相同数量重试。");return pendingTicketUseId;}
+    pendingTicketUseId=crypto.randomUUID();pendingTicketUseCount=useCount;
+    try{localStorage.setItem(key,pendingTicketUseId);localStorage.setItem(countKey,String(useCount));}catch(_){}
     return pendingTicketUseId;
   }
-  async function useTreeFruitTicket(button){
+  async function useTreeFruitTicket(button,rawCount=1){
     if(consumableUseBusy)return;
-    const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id);
-    if(!ticketRow||Number(ticketRow.quantity)<1){setStatus("树果卷数量不足。",true);return;}
+    const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id),available=Number(ticketRow?.quantity||0),useCount=Number(rawCount);
+    let storedRequest=null,storedCount=0;try{storedRequest=localStorage.getItem("acg-tree-fruit-ticket-request");storedCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||(storedRequest?"1":"0"));}catch(_){}
+    const hasPending=Boolean(storedRequest||pendingTicketUseId);
+    if(!Number.isSafeInteger(useCount)||useCount<1||useCount>20){setStatus("一次最多使用 20 张树果卷。",true);return;}
+    if(hasPending&&(Number(pendingTicketUseCount||storedCount)!==useCount)){setStatus("上一笔树果卷请求尚未确认，请先按原数量重试，避免重复扣除。",true);return;}
+    if(!hasPending&&(!ticketRow||available<useCount)){setStatus("树果卷数量不足。",true);return;}
     consumableUseBusy=true;if(button)button.disabled=true;
-    setStatus("正在使用树果卷并抽取树果……",false);
+    setStatus("正在使用 "+useCount+" 张树果卷并抽取 "+(useCount*5)+" 颗树果……",false);
     try{
-      const requestId=getTicketUseRequestId();
-      const {data,error}=await withTimeout(client.rpc("use_inventory_item",{p_item_id:TREE_FRUIT_TICKET.id,p_request_id:requestId}),30000,"使用请求超时。请重试，系统会沿用同一请求编号，避免重复扣除树果卷。");
-      if(error)throw error;
-      const result=Array.isArray(data)?data[0]:data;
-      if(!result?.cards||result.cards.length!==5)throw new Error("服务器未返回完整的 5 颗树果结果，请重试。");
-      pendingTicketUseId=null;try{localStorage.removeItem("acg-tree-fruit-ticket-request");}catch(_){}
-      showSinglePackOpening({pack_id:"pack_010",pack_name:"树果包",price_tokens:0,draw_mode:"uniform"},result);
-      try{await loadPage("inventory");setStatus("树果卷使用成功，获得 5 颗树果。",false);}
-      catch(refreshError){setStatus("抽卡已成功，但仓库刷新失败；重新打开仓库即可看到最新数量。",true);}
+      const requestId=getTicketUseRequestId(useCount);
+      const {data,error}=await withTimeout(client.rpc("use_inventory_item",{p_item_id:TREE_FRUIT_TICKET.id,p_request_id:requestId,p_choice_index:null,p_use_count:useCount}),30000,"使用请求超时。请重试相同数量，系统会沿用同一请求编号，避免重复扣除树果卷。");
+      if(error)throw error;const result=Array.isArray(data)?data[0]:data;
+      if(!result?.cards||result.cards.length!==useCount*5)throw new Error("服务器未返回完整的树果结果，请使用相同数量重试。");
+      pendingTicketUseId=null;pendingTicketUseCount=null;try{localStorage.removeItem("acg-tree-fruit-ticket-request");localStorage.removeItem("acg-tree-fruit-ticket-count");}catch(_){}
+      showSinglePackOpening({pack_id:"pack_010",pack_name:"树果包 ×"+useCount,price_tokens:0,draw_mode:"uniform"},result,"inventory");
+      try{await loadPage("inventory");setStatus("树果卷使用成功，获得 "+(useCount*5)+" 颗树果。",false);}
+      catch(refreshError){setStatus("树果已成功抽取，但仓库刷新失败；重新打开仓库即可看到最新数量。",true);}
     }catch(error){setStatus("树果卷使用失败："+error.message,true);}
-    finally{consumableUseBusy=false;}
+    finally{consumableUseBusy=false;if(button)button.disabled=false;}
   }
 
   async function useSelectCardTicket(item,button){
@@ -573,7 +585,7 @@
       const {data,error}=await client.rpc("use_inventory_item",{p_item_id:item.item_id,p_request_id:requestId,p_choice_index:choiceIndex});
       if(error)throw error;try{localStorage.removeItem(key);}catch(_){}
       const result=Array.isArray(data)?data[0]:data;
-      if(result?.cards?.length)showSinglePackOpening({pack_id:result.result?.pack_id||"pack_010",pack_name:result.result?.pack_name||"奖励卡包",price_tokens:0,draw_mode:item.effect_type==="draw_pack"&&packCatalog.find(x=>x.id===result.result?.pack_id)?.category==="berry"?"uniform":"rarity"},result);
+      if(result?.cards?.length)showSinglePackOpening({pack_id:result.result?.pack_id||"pack_010",pack_name:result.result?.pack_name||"奖励卡包",price_tokens:0,draw_mode:item.effect_type==="draw_pack"&&packCatalog.find(x=>x.id===result.result?.pack_id)?.category==="berry"?"uniform":"rarity"},result,"inventory");
       else if(result?.result?.kind==="tokens")setStatus("使用成功，获得 "+result.result.amount+" 代币。",false);
       else setStatus("使用成功，奖励已发放。",false);
       await loadPage("inventory");
@@ -819,6 +831,13 @@
     renderDrawLobby(drawPools,stats,history,drawCount,packNames);
   }
 
+  function showCardImagePreview(card){
+    const src=typeof card==="string"?card:card?.image;if(!src)return;
+    const overlay=node("div");overlay.style.cssText="position:fixed;inset:0;z-index:100020;background:rgba(3,8,18,.92);display:flex;align-items:center;justify-content:center;padding:22px;cursor:zoom-out";
+    const image=node("img");image.src=src;image.alt=typeof card==="string"?"卡牌大图":(card?.name||"卡牌大图");image.style.cssText="display:block;max-width:min(92vw,760px);max-height:88vh;width:auto;height:auto;object-fit:contain;box-shadow:0 12px 48px #000b;border:1px solid #d5bd76;background:#101827;cursor:default";
+    const close=node("button","","关闭 ×");close.type="button";close.style.cssText="position:absolute;top:16px;right:18px;padding:9px 14px;background:#172235;border:1px solid #8c9bb0;color:#fff;cursor:pointer";
+    const dismiss=()=>overlay.remove();overlay.addEventListener("click",event=>{if(event.target===overlay)dismiss();});close.addEventListener("click",dismiss);image.addEventListener("click",event=>event.stopPropagation());overlay.append(image,close);document.body.appendChild(overlay);
+  }
   function showTenPackOpening(pool,result) {
     const cards=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index);
     const packs=Array.from({length:10},(_,i)=>cards.slice(i*5,(i+1)*5));
@@ -868,27 +887,34 @@
       packs[current].forEach((card,i)=>{
         const info=cardsById[card.card_id]||{name:card.card_id},grade=rarityOf(card),el=node("div","acg-td-card"+(grade==="r3"||grade==="uniform"?"":" "+grade));
         const inner=node("div","acg-td-inner"),back=node("div","acg-td-face acg-td-back"),front=node("div","acg-td-face acg-td-front"),img=node("img");
-        img.src=info.image||"";img.alt=info.name;img.loading="lazy";const name=node("strong","",info.name);
+        img.src=info.image||"";img.alt=info.name;img.loading="lazy";img.decoding="async";img.style.cursor="zoom-in";img.addEventListener("click",event=>{event.stopPropagation();showCardImagePreview(info);});const name=node("strong","",info.name);
         front.append(img,name);inner.append(back,front);const label=node("div","acg-td-cardname","未揭晓");el.append(inner,label);el.addEventListener("click",()=>revealOne(i));cardGrid.appendChild(el);
       });
       nextBtn.textContent="翻开下一张";allBtn.disabled=false;
       reveal.scrollIntoView({behavior:"smooth",block:"center"});
     }
     function showComplete(){
-      finished=true;packs.forEach((_,i)=>packGrid.children[i].classList.add("opened"));
-      headTitle.textContent="TEN PACKS COMPLETE";sub.textContent="十连完成 · 50 张卡牌全部揭晓";
-      rtitle.textContent="十连抽卡结果";progress.textContent="50 / 50 已揭晓";
-      cardGrid.replaceChildren();const counts={alt:0,r5:0,r4:0,r3:0};
-      cards.forEach(card=>{
-        const grade=rarityOf(card);counts[grade]++;
-        const info=cardsById[card.card_id]||{name:card.card_id},el=node("div","acg-td-card flip"+(grade==="r3"?"":" "+grade));
-        const inner=node("div","acg-td-inner"),back=node("div","acg-td-face acg-td-back"),front=node("div","acg-td-face acg-td-front"),img=node("img");
-        img.src=info.image||"";img.alt=info.name;const name=node("strong","",info.name);front.append(img,name);inner.append(back,front);
-        el.append(inner,node("div","acg-td-cardname",info.name));cardGrid.appendChild(el);
-      });
+      if(finished)return;finished=true;packs.forEach((_,i)=>packGrid.children[i].classList.add("opened"));
+      openBtn.disabled=true;skipBtn.disabled=true;nextBtn.disabled=true;allBtn.disabled=true;
+      headTitle.textContent="TEN PACKS COMPLETE";sub.textContent="十连完成 · 服务器已保存全部 50 张卡牌";
+      rtitle.textContent="十连抽卡结果";progress.textContent="正在整理 50 张结果卡牌……";
+      cardGrid.replaceChildren();const counts={alt:0,r5:0,r4:0,r3:0};cards.forEach(card=>counts[rarityOf(card)]++);
       summary.innerHTML="十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
-      revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回玩家中心");done.type="button";done.addEventListener("click",()=>{overlay.remove();loadPage("draw");});revealActions.appendChild(done);
-      reveal.scrollIntoView({behavior:"smooth",block:"start"});
+      revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回抽卡大厅");done.type="button";done.disabled=true;done.addEventListener("click",()=>{overlay.remove();loadPage("draw");});revealActions.appendChild(done);
+      let index=0;
+      function renderResultChunk(){
+        const fragment=document.createDocumentFragment(),end=Math.min(index+10,cards.length);
+        for(;index<end;index++){
+          const card=cards[index],grade=rarityOf(card),info=cardsById[card.card_id]||{name:card.card_id};
+          const el=node("div","acg-td-card flip"+(grade==="r3"?"":" "+grade));
+          const inner=node("div","acg-td-inner"),back=node("div","acg-td-face acg-td-back"),front=node("div","acg-td-face acg-td-front"),img=node("img");
+          img.src=info.image||"";img.alt=info.name;img.loading="lazy";img.decoding="async";img.style.cursor="zoom-in";img.addEventListener("click",event=>{event.stopPropagation();showCardImagePreview(info);});
+          const name=node("strong","",info.name);front.append(img,name);inner.append(back,front);el.append(inner,node("div","acg-td-cardname",info.name));fragment.appendChild(el);
+        }
+        cardGrid.appendChild(fragment);progress.textContent=index+" / "+cards.length+" 张结果卡牌已载入";
+        if(index<cards.length)requestAnimationFrame(renderResultChunk);else{done.disabled=false;progress.textContent=cards.length+" / "+cards.length+" 张结果卡牌已载入";}
+      }
+      reveal.scrollIntoView({behavior:"smooth",block:"start"});requestAnimationFrame(renderResultChunk);
     }
     openBtn.addEventListener("click",()=>{if(finished)return;if(current===-1||flipped===5)openPackage();else{revealOne([...cardGrid.children].findIndex(el=>!el.classList.contains("flip")));}});
     nextBtn.addEventListener("click",()=>{if(flipped===5){openPackage();return;}const i=[...cardGrid.children].findIndex(el=>!el.classList.contains("flip"));if(i>=0)revealOne(i);});
@@ -913,38 +939,55 @@
     }catch(error){loading.textContent="抽卡失败："+error.message;loading.style.color="#ff9b9b";}
     finally{drawBusy=false;}
   }
-  function showSinglePackOpening(pool,result){
+  function showSinglePackOpening(pool,result,returnPage="draw"){
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
     const balance=node("div","acg-td-balance",(Number(result.charged_tokens??pool.price_tokens)===0?"树果卷 ×1 · 免费抽卡":"本次消耗 "+(result.charged_tokens??pool.price_tokens)+" 代币")+" · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
-    const close=node("button","acg-td-close","返回卡包大厅");close.type="button";close.addEventListener("click",()=>{overlay.remove();loadPage("draw");});overlay.append(top,close);
-    const main=node("div","acg-td-main"),title=node("div","acg-td-title");title.innerHTML='<small>MASTER DUEL INSPIRED · PACK OPENING</small><h2>'+pool.pack_name+'</h2><p>单包抽卡 · 5 张卡牌</p>';
+    const close=node("button","acg-td-close",returnPage==="inventory"?"返回仓库":"返回卡包大厅");close.type="button";close.addEventListener("click",()=>{overlay.remove();loadPage(returnPage);});overlay.append(top,close);
+    const main=node("div","acg-td-main"),title=node("div","acg-td-title");title.innerHTML='<small>MASTER DUEL INSPIRED · PACK OPENING</small><h2>'+pool.pack_name+'</h2><p>本次获得 · '+result.cards.length+' 张卡牌</p>';
     const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");head.append(node("b","","ONE PACK OPENING"),node("p","","点击卡牌逐张揭晓"));
     const grid=node("div","acg-td-cards");
     const rarity=card=>pool.draw_mode==="uniform"?"uniform":card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
     result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index).forEach((card,i)=>{
       const info=cardsById[card.card_id]||{name:card.card_id},grade=rarity(card),el=node("div","acg-td-card"+(grade==="r3"?"":" "+grade));
       const inner=node("div","acg-td-inner"),back=node("div","acg-td-face acg-td-back"),front=node("div","acg-td-face acg-td-front"),img=node("img");
-      img.src=info.image||"";img.alt=info.name;const name=node("strong","",info.name);front.append(img,name);inner.append(back,front);
+      img.src=info.image||"";img.alt=info.name;img.loading="lazy";img.decoding="async";img.style.cursor="zoom-in";img.addEventListener("click",event=>{event.stopPropagation();showCardImagePreview(info);});const name=node("strong","",info.name);front.append(img,name);inner.append(back,front);
       const label=node("div","acg-td-cardname","未揭晓");el.append(inner,label);
       el.addEventListener("click",()=>{if(el.classList.contains("flip"))return;el.classList.add("flip");label.textContent=info.name;});grid.appendChild(el);
     });
     const summary=node("div","acg-td-summary","点击卡牌翻开"),actions=node("div","acg-td-actions");
     const all=node("button","acg-td-btn primary","全部揭晓"),backBtn=node("button","acg-td-btn","返回卡包大厅");
     all.type=backBtn.type="button";all.addEventListener("click",()=>[...grid.children].forEach((el,i)=>setTimeout(()=>{el.classList.add("flip");el.querySelector(".acg-td-cardname").textContent=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index)[i]&&cardsById[result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index)[i].card_id]?.name||"";},i*90)));
-    backBtn.addEventListener("click",()=>{overlay.remove();loadPage("draw");});actions.append(all,backBtn);
+    backBtn.textContent=returnPage==="inventory"?"返回仓库":"返回卡包大厅";backBtn.addEventListener("click",()=>{overlay.remove();loadPage(returnPage);});actions.append(all,backBtn);
     stage.append(head,grid,summary,actions);main.append(title,stage);overlay.append(main);document.body.appendChild(overlay);
   }
   window.acgShowItemPackOpening = (pool,result) => showSinglePackOpening({ ...pool, pack_name: pool.pack_name || pool.name || "奖励卡包", draw_mode: pool.draw_mode || (pool.category==="berry"?"uniform":"rarity"), price_tokens: 0 },result);
   async function loadDismantle() {
-    const [{data:inventory,error:ie},{data:stats,error:se}]=await Promise.all([
+    const [{data:inventory,error:ie},{data:stats,error:se},{data:autoSettings,error:autoError}]=await Promise.all([
       client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id"),
-      client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle()
+      client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle(),
+      client.rpc("player_get_auto_dismantle_settings")
     ]);
-    if(ie)throw ie;if(se)throw se;
+    if(ie)throw ie;if(se)throw se;if(autoError)throw autoError;
     contentEl.replaceChildren(node("div","pc-stat","当前代币："+(stats?.tokens??0)),
       node("p","pc-muted","选择不需要的卡牌并填写分解数量。分解后卡牌会从收藏中扣除，代币立即到账。"),
       node("p","pc-muted","三星 10 · 四星 15 · 五星 20 · 异画 30 代币 / 张"));
+    const autoPanel=node("section","pc-stat"),autoTitle=node("strong","","自动分解设置"),autoHint=node("p","pc-muted","开启后，只处理勾选星级中同名卡超过 3 张的部分；开启保存时也会立即检查现有库存。未勾选星级和前 3 张不会被分解。");
+    const autoToggle=node("input");autoToggle.type="checkbox";autoToggle.checked=Boolean(autoSettings?.enabled);autoToggle.id="pc-auto-dismantle-enabled";
+    const toggleLabel=node("label","","启用自动分解");toggleLabel.htmlFor=autoToggle.id;toggleLabel.style.cssText="display:flex;align-items:center;gap:8px;margin:10px 0;font-weight:800";
+    toggleLabel.prepend(autoToggle);
+    const rarityOptions=node("div","");rarityOptions.style.cssText="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0";
+    const rarityChecks=[3,4,5].map(star=>{const input=node("input");input.type="checkbox";input.value=String(star);input.checked=(autoSettings?.rarities||[3,4,5]).includes(star);input.id="pc-auto-dismantle-"+star;const label=node("label","",""+star+" 星");label.htmlFor=input.id;label.style.cssText="display:flex;align-items:center;gap:6px";label.prepend(input);rarityOptions.appendChild(label);return input;});
+    const autoSave=node("button","primary","保存自动分解设置");autoSave.type="button";const autoStatus=node("p","pc-muted","");
+    autoSave.addEventListener("click",async()=>{autoSave.disabled=true;autoStatus.textContent="正在保存设置并检查库存……";try{
+      const selectedStars=rarityChecks.filter(input=>input.checked).map(input=>Number(input.value));
+      const {data,error}=await client.rpc("player_set_auto_dismantle_settings",{p_enabled:autoToggle.checked,p_rarities:selectedStars});if(error)throw error;
+      const processed=data?.processed||{};autoStatus.textContent=(autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。";
+      await loadDismantle();
+      setStatus((autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。",false);
+    }catch(error){autoStatus.textContent="保存失败："+error.message;autoSave.disabled=false;}});
+    autoPanel.append(autoTitle,autoHint,toggleLabel,rarityOptions,autoSave,autoStatus);
+    contentEl.appendChild(autoPanel);
     const selected=new Map(),rows=[];
     (inventory||[]).forEach(item=>{
       const info=cardsById[item.card_id]||{name:item.card_id,star:3};const alt=/异画/.test(info.name||"");
@@ -1491,7 +1534,7 @@
       const item=node("article","pc-inventory-card");
       let img;
       if(card.icon){img=node("div","pc-consumable-icon",card.icon);img.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";}
-      else{img=node("img");img.src=card.image||"";img.alt=card.name;img.loading="lazy";img.onerror=()=>{img.style.visibility="hidden";};}
+      else{img=node("img");img.src=card.image||"";img.alt=card.name;img.loading="lazy";img.style.cursor="zoom-in";img.addEventListener("click",event=>{event.stopPropagation();showCardImagePreview(card);});img.onerror=()=>{img.style.visibility="hidden";};}
       const info=node("div","pc-card-info");
       info.append(node("strong","",card.name),node("small","",card.description||((card.star?card.star+" 星 · ":"")+(card.type||"")+" · "+card.id)));
       const controls=node("div","pc-quantity-controls");
