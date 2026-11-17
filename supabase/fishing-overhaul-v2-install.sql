@@ -682,6 +682,7 @@ declare
  v_existing public.fishing_sessions%rowtype;
  v_bait public.fishing_bait_catalog%rowtype;
  v_fish public.fishing_fish_catalog%rowtype;
+ v_selected_fish_id text;
  v_world jsonb;
  v_weather text;
  v_previous text;
@@ -730,7 +731,7 @@ begin
  v_previous:=v_world->>'previous_weather_id';
  v_hour:=extract(hour from (clock_timestamp() at time zone 'Asia/Shanghai'))::integer;
 
- select f,r.size_shift_to_large into v_fish,v_weather_shift
+ select f.fish_id,r.size_shift_to_large into v_selected_fish_id,v_weather_shift
  from public.fishing_fish_catalog f
  join public.fishing_fish_rules_v2 r on r.fish_id=f.fish_id
  where f.v2_available and f.bait_id=p_bait_id
@@ -755,6 +756,10 @@ begin
  if not found then
    raise exception '当前钓点与天气下没有这种鱼饵对应的鱼讯，请换个钓点或等待天气变化';
  end if;
+
+ select * into v_fish from public.fishing_fish_catalog
+ where fish_id=v_selected_fish_id;
+ if not found then raise exception '鱼类资料读取失败，请重试'; end if;
 
  if v_bait_qty=1 then
    delete from public.player_fishing_bait
