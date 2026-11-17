@@ -147,7 +147,7 @@ jobs:
           assert fishing_install == expected_install, "Combined installer is stale; regenerate it from the two canonical migrations."
           for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
               assert name in fishing_v2, f"Fishing V2 migration missing: {name}"
-          for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_get_records_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
+          for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_get_active_session_v2", "fishing_get_records_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
               assert f"function public.{name}" in fishing_engine, f"Fishing V2 engine missing: {name}"
           assert not re.search(r"^\\$;$", fishing_engine, re.MULTILINE), "Malformed PL/pgSQL dollar terminator found"
           assert not re.search(r"^\\$;$", fishing_install, re.MULTILINE), "Malformed PL/pgSQL dollar terminator found in combined installer"
@@ -157,6 +157,7 @@ jobs:
           assert not re.search(r"^\\s*as \\$\\$|^\\s*\\$\\$;", fishing_install, re.MULTILINE), "Generic $ function delimiters must not be used in the combined installer"
           assert "is_first_discovery=v_first" in fishing_engine and "is_size_record=v_record" in fishing_engine
           assert "'duplicate_request',true" in fishing_engine and "'fish_name',v_fish.fish_name" in fishing_engine, "Repeated finish calls must return the original catch result"
+           assert "fishing_get_active_session_v2" in fishing_js, "Frontend must recover active sessions after refresh"
           fishing_activate = Path("supabase/fishing-overhaul-v2-activate.sql").read_text(encoding="utf-8")
           assert "fishing_start_cast(text,uuid)" in fishing_activate, "Final activation must disable the legacy cast entry point"
           fishing_verify = Path("supabase/fishing-overhaul-v2-verify.sql").read_text(encoding="utf-8")
