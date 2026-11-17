@@ -70,7 +70,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   if new.quantity<=3 or not exists(
     select 1
@@ -85,7 +85,7 @@ begin
   perform public.apply_player_auto_dismantle(new.user_id);
   return new;
 end;
-$;
+$$;
 
 drop trigger if exists card_inventory_auto_dismantle on public.card_inventory;
 create trigger card_inventory_auto_dismantle
