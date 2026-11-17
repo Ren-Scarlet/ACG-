@@ -760,4 +760,9 @@ grant execute on function public.fishing_get_world_state_v2() to authenticated;
 grant execute on function public.fishing_get_records_v2() to authenticated;
 grant execute on function public.fishing_admin_grant_special_bait(uuid,integer,text) to authenticated;
 
+
+-- The fish-catalog visibility policy checks the caller's own fishbook rows.
+-- SELECT is safe here because player_fishbook_own_read enforces user_id=auth.uid().
+grant select on public.player_fishbook to authenticated;
+
 commit;
