@@ -492,7 +492,7 @@
     setStatus("正在使用 "+useCount+" 张树果卷并抽取 "+(useCount*5)+" 颗树果……",false);
     try{
       const requestId=getTicketUseRequestId(useCount);
-      const {data,error}=await withTimeout(client.rpc("use_tree_fruit_tickets",{p_request_id:requestId,p_use_count:useCount}),30000,"使用请求超时。请重试相同数量，系统会沿用同一请求编号，避免重复扣除树果卷。");
+      const {data,error}=await withTimeout(client.rpc("use_inventory_item",{p_item_id:TREE_FRUIT_TICKET.id,p_request_id:requestId,p_choice_index:null,p_use_count:useCount}),30000,"使用请求超时。请重试相同数量，系统会沿用同一请求编号，避免重复扣除树果卷。");
       if(error)throw error;const result=Array.isArray(data)?data[0]:data;
       if(!result?.cards||result.cards.length!==useCount*5)throw new Error("服务器未返回完整的树果结果，请使用相同数量重试。");
       pendingTicketUseId=null;pendingTicketUseCount=null;try{localStorage.removeItem("acg-tree-fruit-ticket-request");localStorage.removeItem("acg-tree-fruit-ticket-count");}catch(_){}
@@ -957,14 +957,30 @@
   }
   window.acgShowItemPackOpening = (pool,result) => showSinglePackOpening({ ...pool, pack_name: pool.pack_name || pool.name || "奖励卡包", draw_mode: pool.draw_mode || (pool.category==="berry"?"uniform":"rarity"), price_tokens: 0 },result);
   async function loadDismantle() {
-    const [{data:inventory,error:ie},{data:stats,error:se}]=await Promise.all([
+    const [{data:inventory,error:ie},{data:stats,error:se},{data:autoSettings,error:autoError}]=await Promise.all([
       client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id"),
-      client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle()
+      client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle(),
+      client.rpc("player_get_auto_dismantle_settings")
     ]);
-    if(ie)throw ie;if(se)throw se;
+    if(ie)throw ie;if(se)throw se;if(autoError)throw autoError;
     contentEl.replaceChildren(node("div","pc-stat","当前代币："+(stats?.tokens??0)),
       node("p","pc-muted","选择不需要的卡牌并填写分解数量。分解后卡牌会从收藏中扣除，代币立即到账。"),
       node("p","pc-muted","三星 10 · 四星 15 · 五星 20 · 异画 30 代币 / 张"));
+    const autoPanel=node("section","pc-stat"),autoTitle=node("strong","","自动分解设置"),autoHint=node("p","pc-muted","开启后，只处理勾选星级中同名卡超过 3 张的部分；开启保存时也会立即检查现有库存。未勾选星级和前 3 张不会被分解。");
+    const autoToggle=node("input");autoToggle.type="checkbox";autoToggle.checked=Boolean(autoSettings?.enabled);autoToggle.id="pc-auto-dismantle-enabled";
+    const toggleLabel=node("label","","启用自动分解");toggleLabel.htmlFor=autoToggle.id;toggleLabel.style.cssText="display:flex;align-items:center;gap:8px;margin:10px 0;font-weight:800";
+    toggleLabel.prepend(autoToggle);
+    const rarityOptions=node("div","");rarityOptions.style.cssText="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0";
+    const rarityChecks=[3,4,5].map(star=>{const input=node("input");input.type="checkbox";input.value=String(star);input.checked=(autoSettings?.rarities||[3,4,5]).includes(star);input.id="pc-auto-dismantle-"+star;const label=node("label","",""+star+" 星");label.htmlFor=input.id;label.style.cssText="display:flex;align-items:center;gap:6px";label.prepend(input);rarityOptions.appendChild(label);return input;});
+    const autoSave=node("button","primary","保存自动分解设置");autoSave.type="button";const autoStatus=node("p","pc-muted","");
+    autoSave.addEventListener("click",async()=>{autoSave.disabled=true;autoStatus.textContent="正在保存设置并检查库存……";try{
+      const selectedStars=rarityChecks.filter(input=>input.checked).map(input=>Number(input.value));
+      const {data,error}=await client.rpc("player_set_auto_dismantle_settings",{p_enabled:autoToggle.checked,p_rarities:selectedStars});if(error)throw error;
+      const processed=data?.processed||{};autoStatus.textContent=(autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。";
+      await loadDismantle();
+    }catch(error){autoStatus.textContent="保存失败："+error.message;autoSave.disabled=false;}});
+    autoPanel.append(autoTitle,autoHint,toggleLabel,rarityOptions,autoSave,autoStatus);
+    contentEl.appendChild(autoPanel);
     const selected=new Map(),rows=[];
     (inventory||[]).forEach(item=>{
       const info=cardsById[item.card_id]||{name:item.card_id,star:3};const alt=/异画/.test(info.name||"");
