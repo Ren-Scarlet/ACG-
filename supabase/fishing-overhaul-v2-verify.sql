@@ -33,7 +33,7 @@ where is_active;
 select
   l.location_id,
   l.location_name,
-  f.bait_id,
+  b.bait_id,
   count(*) filter (
     where cardinality(r.weather_ids)=0
       and cardinality(r.previous_weather_ids)=0
