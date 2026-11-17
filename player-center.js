@@ -418,14 +418,14 @@
       const categoryKey=myWarehouseCategory==="consumables"?"consumable":"important";
       const catalog=myWarehouseItems.filter(item=>item.category===categoryKey);
       const owned=catalog.map(item=>({item,quantity:Number(myWarehouseRows.find(row=>row.card_id===item.item_id)?.quantity||0)}))
-        .filter(x=>x.quantity>0&&(!myWarehouseQuery||x.item.name.toLowerCase().includes(myWarehouseQuery)||x.item.item_id.toLowerCase().includes(myWarehouseQuery)));
+        .filter(x=>x.item.item_id!==TREE_FRUIT_TICKET.id&&x.quantity>0&&(!myWarehouseQuery||x.item.name.toLowerCase().includes(myWarehouseQuery)||x.item.item_id.toLowerCase().includes(myWarehouseQuery)));
       const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id);
       const ticketQty=Number(ticketRow?.quantity||0);
       let savedTicketUseCount=0,savedTicketRequest=null;try{savedTicketRequest=localStorage.getItem("acg-tree-fruit-ticket-request");savedTicketUseCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||(savedTicketRequest?"1":"0"));}catch(_){}
       const hasPendingTicketUse=Boolean(pendingTicketUseId||savedTicketRequest);
       const pendingCount=Number(pendingTicketUseCount||savedTicketUseCount||0);
       const ticketMatches=!myWarehouseQuery||TREE_FRUIT_TICKET.name.toLowerCase().includes(myWarehouseQuery)||TREE_FRUIT_TICKET.id.includes(myWarehouseQuery);
-      const showTicket=myWarehouseCategory==="consumables"&&(ticketQty>0||hasPendingTicketUse)&&ticketMatches&&!catalog.some(x=>x.item_id===TREE_FRUIT_TICKET.id);
+      const showTicket=myWarehouseCategory==="consumables"&&(ticketQty>0||hasPendingTicketUse)&&ticketMatches;
       const total=owned.length+(showTicket?1:0);
       summary.textContent=category.label+" · 持有 "+total+" 种";
       if(!total){host.appendChild(node("div","pc-empty",myWarehouseCategory==="consumables"?"你还没有获得消耗品。":"你还没有获得重要道具。"));return;}
@@ -972,13 +972,20 @@
     contentEl.replaceChildren(node("div","pc-stat","当前代币："+(stats?.tokens??0)),
       node("p","pc-muted","选择不需要的卡牌并填写分解数量。分解后卡牌会从收藏中扣除，代币立即到账。"),
       node("p","pc-muted","三星 10 · 四星 15 · 五星 20 · 异画 30 代币 / 张"));
-    const autoPanel=node("section","pc-stat"),autoTitle=node("strong","","自动分解设置"),autoHint=node("p","pc-muted","开启后，只处理勾选星级中同名卡超过 3 张的部分；开启保存时也会立即检查现有库存。未勾选星级和前 3 张不会被分解。");
+    const autoPanel=node("section","pc-stat pc-auto-dismantle-panel"),autoTitle=node("strong","pc-auto-dismantle-title","自动分解设置"),autoHint=node("p","pc-muted","开启后，只处理勾选星级中同名卡超过 3 张的部分；开启保存时也会立即检查现有库存。未勾选星级和前 3 张不会被分解。");
+    autoPanel.style.cssText="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;padding:18px 20px!important;margin:14px 0 20px!important;width:100%;box-sizing:border-box";
+    const autoHeader=node("div","pc-auto-dismantle-header");
+    autoHeader.style.cssText="display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;flex-wrap:wrap!important;width:100%";
+    autoTitle.style.cssText="display:block!important;margin:0!important;font-size:20px!important;line-height:1.3!important";
     const autoToggle=node("input");autoToggle.type="checkbox";autoToggle.checked=Boolean(autoSettings?.enabled);autoToggle.id="pc-auto-dismantle-enabled";
-    const toggleLabel=node("label","","启用自动分解");toggleLabel.htmlFor=autoToggle.id;toggleLabel.style.cssText="display:flex;align-items:center;gap:8px;margin:10px 0;font-weight:800";
-    toggleLabel.prepend(autoToggle);
-    const rarityOptions=node("div","");rarityOptions.style.cssText="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0";
-    const rarityChecks=[3,4,5].map(star=>{const input=node("input");input.type="checkbox";input.value=String(star);input.checked=(autoSettings?.rarities||[3,4,5]).includes(star);input.id="pc-auto-dismantle-"+star;const label=node("label","",""+star+" 星");label.htmlFor=input.id;label.style.cssText="display:flex;align-items:center;gap:6px";label.prepend(input);rarityOptions.appendChild(label);return input;});
-    const autoSave=node("button","primary","保存自动分解设置");autoSave.type="button";const autoStatus=node("p","pc-muted","");
+    autoToggle.style.cssText="width:18px!important;min-width:18px!important;height:18px!important;margin:0!important;flex:0 0 18px!important";
+    const toggleLabel=node("label","","启用自动分解");toggleLabel.htmlFor=autoToggle.id;toggleLabel.style.cssText="display:inline-flex!important;align-items:center!important;gap:8px!important;margin:0!important;font-weight:800!important;white-space:nowrap!important;cursor:pointer";
+    toggleLabel.prepend(autoToggle);autoHeader.append(autoTitle,toggleLabel);
+    autoHint.style.cssText="margin:0!important;line-height:1.65!important";
+    const rarityOptions=node("div","pc-auto-dismantle-rarities");rarityOptions.style.cssText="display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:22px!important;flex-wrap:wrap!important;margin:2px 0!important";
+    const rarityChecks=[3,4,5].map(star=>{const input=node("input");input.type="checkbox";input.value=String(star);input.checked=(autoSettings?.rarities||[3,4,5]).includes(star);input.id="pc-auto-dismantle-"+star;input.style.cssText="width:17px!important;min-width:17px!important;height:17px!important;margin:0!important";const label=node("label","",""+star+" 星");label.htmlFor=input.id;label.style.cssText="display:inline-flex!important;align-items:center!important;gap:7px!important;margin:0!important;white-space:nowrap!important;cursor:pointer;font-weight:700";label.prepend(input);rarityOptions.appendChild(label);return input;});
+    const autoSave=node("button","primary","保存自动分解设置");autoSave.type="button";autoSave.style.cssText="align-self:flex-start!important;margin:2px 0 0!important;min-width:160px";
+    const autoStatus=node("p","pc-muted","");autoStatus.style.cssText="margin:0!important;line-height:1.5!important";
     autoSave.addEventListener("click",async()=>{autoSave.disabled=true;autoStatus.textContent="正在保存设置并检查库存……";try{
       const selectedStars=rarityChecks.filter(input=>input.checked).map(input=>Number(input.value));
       const {data,error}=await client.rpc("player_set_auto_dismantle_settings",{p_enabled:autoToggle.checked,p_rarities:selectedStars});if(error)throw error;
@@ -986,7 +993,7 @@
       await loadDismantle();
       setStatus((autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。",false);
     }catch(error){autoStatus.textContent="保存失败："+error.message;autoSave.disabled=false;}});
-    autoPanel.append(autoTitle,autoHint,toggleLabel,rarityOptions,autoSave,autoStatus);
+    autoPanel.append(autoHeader,autoHint,rarityOptions,autoSave,autoStatus);
     contentEl.appendChild(autoPanel);
     const selected=new Map(),rows=[];
     (inventory||[]).forEach(item=>{
