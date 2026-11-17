@@ -824,16 +824,17 @@
     main.append(config,rates,status,historySection);root.append(top,main);document.body.appendChild(root);
   }
   async function loadDraw() {
-    await loadCardNames();
-    const {data:pools,error}=await client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled,cover_card_id").eq("enabled",true).order("pack_id");
-    if(error)throw error;drawPools=pools||[];
-    const {data:stats,error:statsError}=await client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle();
-    if(statsError)throw statsError;
-    const [{data:history,error:historyError,count:drawCount},{data:packRows,error:packError}]=await Promise.all([
+    const [_,poolsResult,statsResult,historyResult,packsResult]=await Promise.all([
+      loadCardNames(),
+      client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled,cover_card_id").eq("enabled",true).order("pack_id"),
+      client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle(),
       client.from("card_draw_history").select("id,pack_id,card_id,cost_tokens,draw_index,created_at",{count:"exact"}).eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(30),
       client.from("card_draw_pools").select("pack_id,pack_name")
     ]);
-    if(historyError)throw historyError;if(packError)throw packError;
+    const {data:pools,error}=poolsResult;if(error)throw error;drawPools=pools||[];
+    const {data:stats,error:statsError}=statsResult;if(statsError)throw statsError;
+    const {data:history,error:historyError,count:drawCount}=historyResult;if(historyError)throw historyError;
+    const {data:packRows,error:packError}=packsResult;if(packError)throw packError;
     const packNames=Object.fromEntries((packRows||[]).map(pack=>[pack.pack_id,pack.pack_name]));
     contentEl.replaceChildren();
     if(!drawPools.length){renderDrawNotice("目前没有开放的卡池。请等待管理员完成卡池设置。",false);return;}
