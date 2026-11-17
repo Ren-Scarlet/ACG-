@@ -148,10 +148,12 @@
     state.phase="waiting";renderOverview();
     try{
       const result=await rpc("fishing_start_cast",{p_bait_id:baitId,p_request_id:uuid(),p_location_id:state.currentLocation});
+      state.world=result.weather||state.world;renderHeader();
       state.currentSession=result.session_id;
       const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
       const scene=createWaterScene("waiting");
       box.append(el("h3","","鱼线已经抛出"),el("p","hint","湖面很平静……留意水面上的鱼漂。"),scene);
+      if(result.fish_hint)box.append(el("p","hint",result.fish_hint));
       const wait=Math.max(1000,Math.min(10000,Number(result.bite_after_ms)||3000));
       window.setTimeout(()=>{
         if(state.phase!=="waiting")return;
