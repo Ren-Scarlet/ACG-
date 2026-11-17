@@ -421,8 +421,11 @@
         .filter(x=>x.quantity>0&&(!myWarehouseQuery||x.item.name.toLowerCase().includes(myWarehouseQuery)||x.item.item_id.toLowerCase().includes(myWarehouseQuery)));
       const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id);
       const ticketQty=Number(ticketRow?.quantity||0);
+      let savedTicketUseCount=0;try{savedTicketUseCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||0);}catch(_){}
+      const hasPendingTicketUse=Boolean(pendingTicketUseId||(()=>{try{return localStorage.getItem("acg-tree-fruit-ticket-request");}catch(_){return null;}})());
+      const pendingCount=Number(pendingTicketUseCount||savedTicketUseCount||0);
       const ticketMatches=!myWarehouseQuery||TREE_FRUIT_TICKET.name.toLowerCase().includes(myWarehouseQuery)||TREE_FRUIT_TICKET.id.includes(myWarehouseQuery);
-      const showTicket=myWarehouseCategory==="consumables"&&ticketQty>0&&ticketMatches&&!catalog.some(x=>x.item_id===TREE_FRUIT_TICKET.id);
+      const showTicket=myWarehouseCategory==="consumables"&&(ticketQty>0||hasPendingTicketUse)&&ticketMatches&&!catalog.some(x=>x.item_id===TREE_FRUIT_TICKET.id);
       const total=owned.length+(showTicket?1:0);
       summary.textContent=category.label+" · 持有 "+total+" 种";
       if(!total){host.appendChild(node("div","pc-empty",myWarehouseCategory==="consumables"?"你还没有获得消耗品。":"你还没有获得重要道具。"));return;}
@@ -430,8 +433,8 @@
         const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",TREE_FRUIT_TICKET.icon);
         icon.style.cssText="width:58px;height:82px;display:grid;place-items:center;flex:0 0 58px;border-radius:6px;background:#263d55;font-size:30px";
         const info=node("div","pc-card-info");info.append(node("strong","",TREE_FRUIT_TICKET.name),node("small","",TREE_FRUIT_TICKET.description),node("small","","持有数量：× "+ticketQty));
-        const controls=node("div","pc-ticket-use-controls"),countInput=node("input");countInput.type="number";countInput.min="1";countInput.max=String(Math.min(20,ticketQty));countInput.step="1";countInput.value="1";countInput.setAttribute("aria-label","使用树果卷数量");countInput.style.cssText="width:76px;min-width:76px;padding:8px;text-align:center";
-        const use=node("button","primary","批量使用");use.type="button";use.addEventListener("click",()=>useTreeFruitTicket(use,countInput.value));controls.append(countInput,use);row.append(icon,info,controls);host.appendChild(row);
+        const controls=node("div","pc-ticket-use-controls"),countInput=node("input");countInput.type="number";countInput.min="1";countInput.max=String(Math.max(Math.min(20,ticketQty),pendingCount));countInput.step="1";countInput.value=hasPendingTicketUse&&pendingCount>0?String(pendingCount):"1";countInput.setAttribute("aria-label","使用树果卷数量");countInput.style.cssText="width:76px;min-width:76px;padding:8px;text-align:center";
+        const use=node("button","primary",hasPendingTicketUse?"重试上次使用":"批量使用");use.type="button";use.addEventListener("click",()=>useTreeFruitTicket(use,countInput.value));controls.append(countInput,use);row.append(icon,info,controls);host.appendChild(row);
       }
       owned.forEach(({item,quantity})=>{
         const row=node("article","pc-inventory-card"),icon=node("div","pc-consumable-icon",item.icon||"🎁");
@@ -486,8 +489,11 @@
   async function useTreeFruitTicket(button,rawCount=1){
     if(consumableUseBusy)return;
     const ticketRow=myWarehouseRows.find(row=>row.card_id===TREE_FRUIT_TICKET.id),available=Number(ticketRow?.quantity||0),useCount=Number(rawCount);
-    if(!Number.isSafeInteger(useCount)||useCount<1||useCount>Math.min(20,available)){setStatus("请输入 1 至 "+Math.min(20,available)+" 之间的树果卷数量。",true);return;}
-    if(!ticketRow||available<useCount){setStatus("树果卷数量不足。",true);return;}
+    let storedRequest=null,storedCount=0;try{storedRequest=localStorage.getItem("acg-tree-fruit-ticket-request");storedCount=Number(localStorage.getItem("acg-tree-fruit-ticket-count")||0);}catch(_){}
+    const hasPending=Boolean(storedRequest||pendingTicketUseId);
+    if(!Number.isSafeInteger(useCount)||useCount<1||useCount>20){setStatus("一次最多使用 20 张树果卷。",true);return;}
+    if(hasPending&&(Number(pendingTicketUseCount||storedCount)!==useCount)){setStatus("上一笔树果卷请求尚未确认，请先按原数量重试，避免重复扣除。",true);return;}
+    if(!hasPending&&(!ticketRow||available<useCount)){setStatus("树果卷数量不足。",true);return;}
     consumableUseBusy=true;if(button)button.disabled=true;
     setStatus("正在使用 "+useCount+" 张树果卷并抽取 "+(useCount*5)+" 颗树果……",false);
     try{
