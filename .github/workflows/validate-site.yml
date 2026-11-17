@@ -117,6 +117,13 @@ jobs:
           rule_ids = set(re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(?:qinglan_lake|reed_marsh|deepwater_bay)'", rules_block))
           assert len(fish_ids) == 36, f"Expected 36 fish entries, found {len(fish_ids)}"
           assert fish_ids <= rule_ids, f"Fish missing encounter rules: {sorted(fish_ids - rule_ids)}"
+          original_seed = fishing_v2.split("-- Ensure all ten original species exist", 1)[1].split("on conflict (fish_id)", 1)[0]
+          original_seed_ids = set(re.findall(r"\('([a-z0-9_]+)'\s*,\s*'(?:small_mixed_bait|medium_mixed_bait|large_mixed_bait|unknown_mixed_bait)'", original_seed))
+          assert len(original_seed_ids) == 10, f"V2 must restore all ten original fish, found {len(original_seed_ids)}"
+          for fallback in ["jade_scale_carp", "reed_whisker", "deepwater_catfish", "sunset_gar", "cobalt_tuna", "bluegill", "whitewater_salmon"]:
+              assert fallback in fishing_v2, f"Missing all-weather bait fallback: {fallback}"
+          for prerequisite in ["fishing_craft_history", "player_fishing_achievements", "fishing_points_ledger", "item_catalog"]:
+              assert prerequisite in fishing_engine, f"Engine prerequisite guard missing: {prerequisite}"
           for name in ["fishing_locations_v2", "fishing_weather_slots_v2", "fishing_fish_rules_v2", "rainbow_phantom", "fog_veil_koi", "thunder_crown_eel", "old_lake_dragon"]:
               assert name in fishing_v2, f"Fishing V2 migration missing: {name}"
           for name in ["fishing_start_cast_v2", "fishing_hook_cast_v2", "fishing_finish_reel_v2", "fishing_get_records_v2", "fishing_craft_special_bait", "fishing_admin_grant_special_bait"]:
