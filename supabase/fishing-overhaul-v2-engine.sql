@@ -565,7 +565,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path=''
-as $
+as $function$
 declare
  v_user uuid:=auth.uid();
  v_records jsonb;
@@ -590,7 +590,7 @@ begin
  ) records;
  return v_records;
 end;
-$;
+$function$;
 
 -- The existing dashboard signature and keys are preserved. Weather/forecast and
 -- location data are fetched through fishing_get_world_state_v2().
