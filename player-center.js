@@ -667,23 +667,40 @@
       const label=category==="battle_item"?"对战道具 · "+((card.battle_item_class||card.item_class)==="important"?"贵重":"普通"):category==="berry"?"树果":"普通卡牌";
       return (card.name||card.id)+"（"+label+" · "+card.id+"）";
     };
+    const categoryOf=card=>packCatalog.find(p=>p.id===card?.pack_id)?.category||"normal";
+    const categoryLabel=card=>{const category=categoryOf(card);return category==="battle_item"?"对战道具 · "+((card.battle_item_class||card.item_class)==="important"?"贵重":"普通"):category==="berry"?"树果":"普通卡牌";};
     const picker=(heading,options,stockLimited)=>{
       const section=node("section","pc-stat");section.style.margin="12px 0";section.append(node("h4","",heading));
-      const row=node("div","pc-search"),sf=node("div","field"),sel=node("select"),qf=node("div","field"),qty=node("input"),add=node("button","primary","加入清单");
-      sel.add(new Option("选择物品",""));options.forEach(card=>{
-        const stock=stockLimited?owned.find(x=>x.card_id===card.id)?.quantity||0:null;
-        sel.add(new Option(describe(card)+(stockLimited?" · 持有 "+stock:""),card.id));
-      });
-      sf.append(node("label","","物品"),sel);qty.type="number";qty.min="1";qty.max="999";qty.step="1";qty.value="1";qf.append(node("label","","数量"),qty);
-      add.type="button";row.append(sf,qf,add);section.append(row);
+      const filters=node("div","pc-search"),categoryField=node("div","field"),searchField=node("div","field"),resultField=node("div","field"),qtyField=node("div","field");
+      const categorySelect=node("select"),search=node("input"),sel=node("select"),qty=node("input"),add=node("button","primary","加入清单");
+      [["all","全部物品"],["normal","普通卡牌"],["battle_item","对战道具"],["berry","树果"]].forEach(([value,label])=>categorySelect.add(new Option(label,value)));
+      categoryField.append(node("label","","物品类别"),categorySelect);
+      search.type="search";search.placeholder="输入卡牌名称或编号搜索";searchField.append(node("label","","搜索物品"),search);
+      sel.add(new Option("先输入关键词，或选择类别后查看物品",""));resultField.append(node("label","","搜索结果"),sel);
+      qty.type="number";qty.min="1";qty.max="999";qty.step="1";qty.value="1";qtyField.append(node("label","","数量"),qty);
+      filters.append(categoryField,searchField,resultField,qtyField,add);section.append(filters);
       const list=node("div","pc-stat");list.style.marginTop="10px";section.append(list);const chosen=new Map();
-      function render(){list.replaceChildren();if(!chosen.size){list.append(node("p","pc-muted","尚未添加物品。"));return;}
-        chosen.forEach((n,id)=>{const line=node("div","pc-row"),remove=node("button","","移除");remove.type="button";line.append(node("span","",describe(byId.get(id))+" × "+n),remove);remove.addEventListener("click",()=>{chosen.delete(id);render();});list.append(line);});
+      const stockMap=new Map(owned.map(x=>[x.card_id,x.quantity]));
+      function updateResults(){
+        const term=search.value.trim().toLocaleLowerCase(),category=categorySelect.value;
+        const matches=options.filter(card=>(category==="all"||categoryOf(card)===category)&&(!term||(card.name||"").toLocaleLowerCase().includes(term)||card.id.toLocaleLowerCase().includes(term)));
+        sel.replaceChildren();
+        if(!term&&category==="all"){sel.add(new Option("请输入名称/编号，或先选择物品类别",""));return;}
+        if(!matches.length){sel.add(new Option("没有找到符合条件的物品",""));return;}
+        matches.slice(0,50).forEach(card=>{
+          const stock=stockLimited?stockMap.get(card.id)||0:null;
+          sel.add(new Option((card.name||card.id)+"（"+categoryLabel(card)+" · "+card.id+(stockLimited?" · 持有 "+stock:"")+"）",card.id));
+        });
+        if(matches.length>50)sel.add(new Option("结果超过 50 项，请继续输入关键词缩小范围",""));
       }
-      add.addEventListener("click",()=>{const id=sel.value,n=Math.floor(Number(qty.value));if(!id||!Number.isInteger(n)||n<1||n>999){setStatus("请选择有效物品和数量。",true);return;}
-        if(stockLimited&&(n+(chosen.get(id)||0)>(owned.find(x=>x.card_id===id)?.quantity||0))){setStatus("加入数量超过当前库存。",true);return;}
+      function render(){list.replaceChildren();if(!chosen.size){list.append(node("p","pc-muted","尚未添加物品。"));return;}
+        chosen.forEach((n,id)=>{const line=node("div","pc-row"),remove=node("button","","移除");line.append(node("span","",describe(byId.get(id))+" × "+n),remove);remove.type="button";remove.addEventListener("click",()=>{chosen.delete(id);render();});list.append(line);});
+      }
+      categorySelect.addEventListener("change",updateResults);search.addEventListener("input",updateResults);
+      add.type="button";add.addEventListener("click",()=>{const id=sel.value,n=Math.floor(Number(qty.value));if(!id||!byId.has(id)||!Number.isInteger(n)||n<1||n>999){setStatus("请先筛选并选择有效物品和数量。",true);return;}
+        if(stockLimited&&(n+(chosen.get(id)||0)>(stockMap.get(id)||0))){setStatus("加入数量超过当前库存。",true);return;}
         chosen.set(id,(chosen.get(id)||0)+n);render();
-      });render();return {section,chosen};
+      });render();updateResults();return {section,chosen};
     };
     const recipient=node("section","pc-stat"),recipientInput=node("input");recipientInput.placeholder="玩家中文 ID 或玩家编号（如 P013）";recipientInput.maxLength=40;
     recipient.append(node("h4","","交易对象"),node("label","","输入玩家 ID"),recipientInput);
