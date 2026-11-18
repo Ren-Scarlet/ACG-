@@ -30,7 +30,8 @@ begin
  if v_it>1 then raise exception '贵重对战道具最多构筑 1 个';end if;
  for v_item in select x.card_id,x.quantity,c.item_class from jsonb_to_recordset(p_item_cards) x(card_id text,quantity integer) left join public.battle_item_catalog c on c.card_id=x.card_id and c.enabled order by x.card_id loop
   if v_item.item_class is null then raise exception '无效对战道具：%',v_item.card_id;end if;
-  if v_item.item_class='normal' then select quantity into v_qty from public.card_inventory where user_id=v_user_id and card_id=v_item.card_id for update;if not found or v_qty<v_item.quantity then raise exception '普通对战道具库存不足：%',v_item.card_id;end if;end if;
+  select quantity into v_qty from public.card_inventory where user_id=v_user_id and card_id=v_item.card_id for update;
+  if not found or v_qty<v_item.quantity then raise exception '对战道具库存不足：%',v_item.card_id;end if;
  end loop;
  if exists(select 1 from jsonb_to_recordset(p_berry_cards) x(card_id text,quantity integer) left join public.draw_card_catalog d on d.card_id=x.card_id left join public.card_draw_pools p on p.pack_id=d.pack_id and p.draw_mode='uniform' where p.pack_id is null) then raise exception '构筑列表包含非树果卡牌';end if;
  for v_item in select x.card_id,x.quantity from jsonb_to_recordset(p_berry_cards) x(card_id text,quantity integer) order by x.card_id loop select quantity into v_qty from public.card_inventory where user_id=v_user_id and card_id=v_item.card_id for update;if not found or v_qty<v_item.quantity then raise exception '树果库存不足：%',v_item.card_id;end if;end loop;
