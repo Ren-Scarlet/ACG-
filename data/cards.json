@@ -1785,5 +1785,203 @@
     "pack_id": "pack_006",
     "effect": "等级4 冰属性。\n暴击，快速，前进1-2格，对0-1格内一名目标造成3点暗属性伤害，造成伤害时弃除目标一张手牌。\n\n①当敌方目标受到此卡以外的攻击伤害时，此卡可以从手牌特殊打出，这张卡基础伤害+1。",
     "image": "./images/card_158.jpg"
+  },
+  {
+    "id": "card_159",
+    "name": "班基拉斯进化石",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "贵重\n若你场上有「班基拉斯」\n你可以将其替换为「超级班基拉斯」",
+    "image": ""
+  },
+  {
+    "id": "card_160",
+    "name": "贝壳之铃",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "当你造成攻击伤害时，你恢复1点生命值",
+    "image": ""
+  },
+  {
+    "id": "card_161",
+    "name": "冰萝卜",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "贵重\n从牌库、弃牌堆、移除区将一张「雪暴马」特殊打出。\n\n每局游戏限制一次。",
+    "image": ""
+  },
+  {
+    "id": "card_162",
+    "name": "不融冰",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "使你下一张冰属性攻击卡最终伤害+1",
+    "image": ""
+  },
+  {
+    "id": "card_163",
+    "name": "吃剩的东西",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "回合结束时，你恢复1点生命值",
+    "image": ""
+  },
+  {
+    "id": "card_164",
+    "name": "巨沼怪进化石",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "贵重\n若你场上有「巨沼怪」\n你可以将其替换为「超级巨沼怪」",
+    "image": ""
+  },
+  {
+    "id": "card_165",
+    "name": "觉醒之石",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "贵重\n从牌库、弃牌堆、移除区将一张「雪童子」\n或「奇鲁莉安」特殊打出。\n\n每局游戏限制一次。",
+    "image": ""
+  },
+  {
+    "id": "card_166",
+    "name": "木炭",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "使你下一张火属性攻击卡最终伤害+1",
+    "image": ""
+  },
+  {
+    "id": "card_167",
+    "name": "喷火龙进化石Y",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "贵重\n若你场上有「喷火龙」\n你可以将其替换为「超级喷火龙Y」",
+    "image": ""
+  },
+  {
+    "id": "card_168",
+    "name": "气势头带",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "当你被击败时，投掷一个硬币\u0003若结果为正面：取消这次击败，将生命值恢复至1点\n\n每局游戏限制一次",
+    "image": ""
+  },
+  {
+    "id": "card_169",
+    "name": "锐利之爪",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "暴击结果+1\n若你场上有「纽拉」且当前为夜晚回合，\n你可以将其替换为「纽拉」",
+    "image": ""
+  },
+  {
+    "id": "card_170",
+    "name": "神秘水滴",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "使你下一张水属性攻击卡最终伤害+1",
+    "image": ""
+  },
+  {
+    "id": "card_171",
+    "name": "生命宝珠",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "你下一张专属攻击卡基础伤害+1\n命中时自身损失1点生命值",
+    "image": ""
+  },
+  {
+    "id": "card_172",
+    "name": "凸凸头盔",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "当你被近战攻击命中时\n对攻击目标造成1点效果伤害\n\n多段伤害会多次触发该效果",
+    "image": ""
+  },
+  {
+    "id": "card_173",
+    "name": "突击背心",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "使你受到的魔法伤害减少3点\n\n本回合你无法使用能力卡",
+    "image": ""
+  },
+  {
+    "id": "card_174",
+    "name": "现形镜",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "贵重\n选择以下一项\u0003·从牌库、弃牌堆、移除区将一张「土地云」特殊打出\n·使你场上的「土地云」替换为「化身形态」或「灵兽形态」\n「灵兽形态」仅能暗置打出。\n\n每局游戏限制一次。",
+    "image": ""
+  },
+  {
+    "id": "card_175",
+    "name": "雪妖女进化石",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "唯一\n若你场上有「雪妖女」\n你可以将其替换为「超级雪妖女」",
+    "image": ""
+  },
+  {
+    "id": "card_176",
+    "name": "硬石头",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "normal",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "使你下一张土属性攻击卡最终伤害+1",
+    "image": ""
   }
 ]
