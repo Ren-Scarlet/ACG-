@@ -281,6 +281,7 @@
       const result=await rpc("fishing_hook_cast_v2",{p_session_id:state.currentSession});
       const hookRoundTripMs=performance.now()-hookRequestStarted;
       if(result.status==="escaped"){
+        fishingAudio.escape();
         state.phase="idle";state.currentSession=null;
         box.replaceChildren(el("h3","","鱼逃走了"),el("p","hint","提竿太晚，这次没有收获，鱼饵不会返还。"));
         status("提竿太晚，鱼逃走了。",true);
@@ -288,6 +289,7 @@
         box.append(again);await loadDashboard();renderOverview();return;
       }
       state.phase="reeling";
+      fishingAudio.hook();fishingAudio.startReel();
       const scene=createWaterScene("reeling");
       const rail=el("div","fish-reel-rail"),zone=el("div","fish-reel-zone"),needle=el("div","fish-reel-needle");
       const zoneStart=Number(result.zone_start_pct??15),zoneWidth=Number(result.zone_width_pct??70);
@@ -315,11 +317,13 @@
   async function finishReel(){
     if(state.phase!=="reeling")return;
     cancelAnimationFrame(state.raf);
+    fishingAudio.stopReel();
     state.phase="resolving";
     $("fish-action").replaceChildren(el("p","hint","正在由服务器判定收线结果……"));
     try{
       const result=await rpc("fishing_finish_reel_v2",{p_session_id:state.currentSession});
       if(result.status==="caught"){
+        fishingAudio.catch();
         const label=result.size_label||"尺寸待定";
         const caughtScene=createWaterScene("caught");
         const catchMark=el("div","fish-catch-spark","🎣");
@@ -329,6 +333,7 @@
         $("fish-action").replaceChildren(caughtScene,catchTitle,el("p","",label+" · 获得 "+result.points_awarded+" 钓鱼积分"),el("p","hint",rewardLabel+" · 收线评分 "+result.action_score+" · 天气 "+({sunny:"晴天",cloudy:"阴天",rain:"雨天",fog:"浓雾",storm:"雷雨",windy:"大风"}[result.weather_id]||"未知")));
         status("成功钓获 "+result.fish_name+"！");
       }else{
+        fishingAudio.escape();
         $("fish-action").replaceChildren(el("h3","","鱼逃走了"),el("p","hint","收线时机不合适，这次没有收获，鱼饵不会返还。"));
         status("鱼逃走了，下次再试试。",true);
       }
