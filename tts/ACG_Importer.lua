@@ -112,8 +112,15 @@ local function ACG_encodePath(path)
 end
 
 local function ACG_absoluteImageUrl(path)
-    if string.match(path or "", "^https?://") then return path end
-    return ACG_BASE_URL .. ACG_encodePath(path)
+    path = path or ""
+    if string.match(path, "^https?://") then return path end
+
+    -- Keep the version query separate from the encoded path. A changed image gets a new URL,
+    -- so Tabletop Simulator treats it as a fresh download instead of reusing the old cache.
+    local imagePath, query = string.match(path, "^([^?]*)%??(.*)$")
+    local url = ACG_BASE_URL .. ACG_encodePath(imagePath)
+    if query and query ~= "" then url = url .. "?" .. query end
+    return url
 end
 
 local function ACG_spawnCard(card, index, onDone)
@@ -169,7 +176,9 @@ function ACG_importDeck(player, value, id)
     end
 
     ACG_status("正在读取卡牌资料……", "#FFE08A")
-    WebRequest.get(ACG_CARDS_JSON_URL, function(request)
+    -- Avoid stale catalog responses in TTS / intermediate caches on every import.
+    local catalogUrl = ACG_CARDS_JSON_URL .. "?v=" .. tostring(os.time()) .. "-" .. tostring(math.random(100000, 999999))
+    WebRequest.get(catalogUrl, function(request)
         if request.is_error then
             ACG_status("读取卡牌资料失败：" .. tostring(request.error), "#FF7777")
             return
