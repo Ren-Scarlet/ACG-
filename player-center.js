@@ -799,7 +799,7 @@
       if(!selectedPool)return;
       configTitle.textContent=selectedPool.pack_name;configDesc.textContent="每包 5 张 · 单包 "+selectedPool.price_tokens+" 代币";
       rates.innerHTML=selectedPool.draw_mode==="uniform"
-        ? '<span>🍃 树果等概率</span><span class="adl-muted">每张树果卡被抽中的概率相同 · 不设星级与异画概率</span>'
+        ? '<span>🍃 特殊卡包等概率</span><span class="adl-muted">卡包内每张卡被抽中的概率相同 · 不设星级与异画概率</span>'
         : '<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
     }
     updateConfig();
@@ -2103,7 +2103,7 @@
       const row=node("div","pc-row"),info=node("div"),actions=node("div");
       const ready=pool.price_tokens!==null&&(pool.draw_mode==="uniform"||(pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null));
       const config=ready
-        ? (pool.draw_mode==="uniform"?"每包 "+pool.price_tokens+" 代币 · 树果等概率":"每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%")
+        ? (pool.draw_mode==="uniform"?"每包 "+pool.price_tokens+" 代币 · 特殊卡包等概率":"每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%")
         : "尚未设置价格和概率";
       info.append(node("strong","",pool.pack_name),node("div","pc-muted",config),
         node("div",pool.enabled?"pc-positive":"pc-muted",pool.enabled?"开放中":"未开放"));
@@ -2168,7 +2168,7 @@
       if(error)throw error;
       const {error:coverError}=await client.rpc("admin_set_draw_pool_cover",{p_pack_id:values.p_pack_id,p_cover_card_id:view.querySelector("#pc-pool-cover").value||null});
       if(coverError)throw new Error("价格和概率已保存，但封面保存失败："+coverError.message+"。请确认已执行卡包封面 SQL。");
-      status.textContent=isUniformPool?"树果卡池已开放：每张树果等概率抽取。":"卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
+      status.textContent=isUniformPool?"树果卡池已开放：每张特殊卡包等概率抽取。":"卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
       await loadAdminPools();
     }catch(error){status.textContent="保存失败："+error.message;status.className="status bad";}
     finally{button.disabled=false;}
