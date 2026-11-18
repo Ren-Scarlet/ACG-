@@ -9,44 +9,57 @@
   if (!root) { window.addEventListener("DOMContentLoaded", () => { if (!window.acgFishingInitialized) boot(); }, { once: true }); return; }
   const $ = (id) => root.querySelector("#" + id);
   const fishingAudio = (() => {
-    let ctx=null, master=null, reelTimer=null;
+    let reelAudio=null,ambientAudio=null;
     let enabled=localStorage.getItem("acg-fishing-sfx-enabled")!=="false";
     let volume=Math.max(0,Math.min(100,Number(localStorage.getItem("acg-fishing-sfx-volume")||55)));
-    const ensure=()=>{
-      const Ctx=window.AudioContext||window.webkitAudioContext;
-      if(!Ctx)return null;
-      if(!ctx){ctx=new Ctx();master=ctx.createGain();master.gain.value=enabled?volume/100:0;master.connect(ctx.destination);}
-      if(ctx.state==="suspended")ctx.resume().catch(()=>{});
-      return ctx;
+    const files={
+      cast:"./audio/fishing/rod_swish.ogg",
+      plop:"./audio/fishing/plop.ogg",
+      reel:"./audio/fishing/reel_wind.ogg",
+      splash:"./audio/fishing/fish_splash.ogg",
+      flop:"./audio/fishing/fish_flop.ogg",
+      snap:"./audio/fishing/line_snap.ogg",
+      ambient:"./audio/fishing/pier_lap.ogg"
     };
-    const set=()=>{if(master)master.gain.setTargetAtTime(enabled?volume/100:0,ctx.currentTime,.04);};
-    const tone=(freq,duration=.16,wave="sine",peak=.12,endFreq=null)=>{
-      const c=ensure();if(!c||!enabled)return;
-      const o=c.createOscillator(),g=c.createGain();o.type=wave;o.frequency.setValueAtTime(freq,c.currentTime);
-      if(endFreq)o.frequency.exponentialRampToValueAtTime(Math.max(30,endFreq),c.currentTime+duration);
-      g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(peak,c.currentTime+.012);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+duration);
-      o.connect(g);g.connect(master);o.start();o.stop(c.currentTime+duration+.02);
+    const clips={};
+    const gains={cast:.62,plop:.42,reel:.25,splash:.42,flop:.48,snap:.34,ambient:.12};
+    const audio=(name)=>{
+      if(!clips[name]){clips[name]=new Audio(files[name]);clips[name].preload="auto";}
+      return clips[name];
     };
-    const noise=(duration=.22,peak=.16,cutoff=1200)=>{
-      const c=ensure();if(!c||!enabled)return;
-      const length=Math.max(1,Math.floor(c.sampleRate*duration)),buffer=c.createBuffer(1,length,c.sampleRate),data=buffer.getChannelData(0);
-      for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(1-i/length);
-      const src=c.createBufferSource(),filter=c.createBiquadFilter(),g=c.createGain();
-      filter.type="lowpass";filter.frequency.value=cutoff;g.gain.setValueAtTime(peak,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+duration);
-      src.buffer=buffer;src.connect(filter);filter.connect(g);g.connect(master);src.start();src.stop(c.currentTime+duration);
+    const playClip=(name,start,duration)=>{
+      if(!enabled||volume===0)return;
+      const a=audio(name);a.loop=false;a.pause();
+      try{a.currentTime=start;}catch(_){}
+      a.volume=(volume/100)*(gains[name]||.4);
+      const p=a.play();if(p&&p.catch)p.catch(()=>{});
+      if(duration)window.setTimeout(()=>{a.pause();try{a.currentTime=0;}catch(_){}},duration*1000);
     };
+    const stopLoop=(a)=>{if(a){a.pause();try{a.currentTime=0;}catch(_){}}};
     return {
       settings(){return {enabled,volume};},
-      toggle(){enabled=!enabled;localStorage.setItem("acg-fishing-sfx-enabled",String(enabled));set();if(enabled)this.cast();return enabled;},
-      volumeTo(v){volume=Math.max(0,Math.min(100,Number(v)||0));localStorage.setItem("acg-fishing-sfx-volume",String(volume));set();},
-      cast(){noise(.34,.2,1500);tone(260,.22,"sine",.08,110);},
-      bite(){tone(740,.11,"triangle",.13);setTimeout(()=>tone(980,.16,"triangle",.12),105);},
-      hook(){noise(.09,.22,2600);tone(180,.18,"square",.09,90);},
-      reel(){noise(.12,.09,1900);tone(310,.08,"triangle",.035,250);},
-      startReel(){this.stopReel();this.reel();reelTimer=setInterval(()=>this.reel(),520);},
-      stopReel(){if(reelTimer){clearInterval(reelTimer);reelTimer=null;}},
-      catch(){this.stopReel();tone(523,.22,"triangle",.11);setTimeout(()=>tone(659,.22,"triangle",.11),130);setTimeout(()=>tone(784,.34,"triangle",.13),260);},
-      escape(){this.stopReel();noise(.22,.15,700);tone(155,.3,"sine",.08,65);}
+      toggle(){enabled=!enabled;localStorage.setItem("acg-fishing-sfx-enabled",String(enabled));if(!enabled){this.stopReel();this.stopAmbient();}return enabled;},
+      volumeTo(v){volume=Math.max(0,Math.min(100,Number(v)||0));localStorage.setItem("acg-fishing-sfx-volume",String(volume));if(reelAudio)reelAudio.volume=(volume/100)*gains.reel;if(ambientAudio)ambientAudio.volume=(volume/100)*gains.ambient;},
+      cast(){playClip("cast",.08,.404);window.setTimeout(()=>playClip("plop",.08,.624),260);this.startAmbient();},
+      bite(){playClip("plop",.784,.264);},
+      hook(){playClip("splash",.08,.464);},
+      reel(){if(!reelAudio)this.startReel();},
+      startReel(){
+        this.stopReel();if(!enabled||volume===0)return;
+        reelAudio=audio("reel");reelAudio.loop=true;reelAudio.currentTime=0;
+        reelAudio.volume=(volume/100)*gains.reel;
+        const p=reelAudio.play();if(p&&p.catch)p.catch(()=>{});
+      },
+      stopReel(){stopLoop(reelAudio);reelAudio=null;},
+      startAmbient(){
+        if(!enabled||volume===0)return;
+        if(!ambientAudio){ambientAudio=audio("ambient");ambientAudio.loop=true;}
+        ambientAudio.volume=(volume/100)*gains.ambient;
+        const p=ambientAudio.play();if(p&&p.catch)p.catch(()=>{});
+      },
+      stopAmbient(){stopLoop(ambientAudio);ambientAudio=null;},
+      catch(){this.stopReel();this.stopAmbient();playClip("splash",1.612,1.204);window.setTimeout(()=>playClip("flop",.08,1.354),180);},
+      escape(){this.stopReel();this.stopAmbient();playClip("snap",.08,.554);window.setTimeout(()=>playClip("splash",.08,.464),160);}
     };
   })();
   const installFishingAudioControls=()=>{
