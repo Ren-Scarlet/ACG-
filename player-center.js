@@ -2029,12 +2029,14 @@
       status.className="status bad";return;
     }
     const isBerryPack=pack.category==="berry";
+    const isBattleItemPack=pack.category==="battle_item";
+    const isUniformPack=isBerryPack||isBattleItemPack;
     const payload=cards.map(card=>({
       card_id:card.id,
-      rarity:isBerryPack?1:Number(card.star),
-      is_alt:isBerryPack?false:/（异画）|\(异画\)/.test(card.name||"")
+      rarity:isUniformPack?1:Number(card.star),
+      is_alt:isUniformPack?false:/（异画）|\(异画\)/.test(card.name||"")
     }));
-    if(payload.some(card=>!card.card_id||(!isBerryPack&&(!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)))){
+    if(payload.some(card=>!card.card_id||(!isUniformPack&&(!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)))){
       status.textContent="同步中止：卡牌编号或星级资料不完整，请先检查卡牌资料。";
       status.className="status bad";return;
     }
@@ -2046,7 +2048,7 @@
         p_pack_id:packId,p_pack_name:pack.name,p_cards:payload,p_category:pack.category||"normal"
       });
       if(error)throw error;
-      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。"+(isBerryPack?"树果将以 1 星存储并采用全卡等概率抽取。":"现在可以设置价格、概率并开放卡池。");
+      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。"+(isUniformPack?(isBerryPack?"树果包采用全卡等概率抽取。":"对战道具包采用全卡等概率抽取，不使用卡牌星级。"):"现在可以设置价格、概率并开放卡池。");
       status.className="status good";
       await loadAdminPools();
       view.querySelector("#pc-pool-id").value=packId;
