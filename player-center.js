@@ -981,7 +981,7 @@
     const main=node("div","acg-td-main"),title=node("div","acg-td-title");title.innerHTML='<small>MASTER DUEL INSPIRED · PACK OPENING</small><h2>'+pool.pack_name+'</h2><p>本次获得 · '+result.cards.length+' 张卡牌</p>';
     const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");head.append(node("b","","ONE PACK OPENING"),node("p","","点击卡牌逐张揭晓"));
     const grid=node("div","acg-td-cards");
-    const rarity=card=>pool.draw_mode==="uniform"?"uniform":card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
+    const rarity=card=>pool.draw_mode==="uniform"?"uniform":pool.draw_mode==="battle_item"?(card.item_class==="important"?"r5":"r3"):card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
     result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index).forEach((card,i)=>{
       const info=cardsById[card.card_id]||{name:card.card_id},grade=rarity(card),el=node("div","acg-td-card"+(grade==="r3"?"":" "+grade));
       const inner=node("div","acg-td-inner"),back=node("div","acg-td-face acg-td-back"),front=node("div","acg-td-face acg-td-front"),img=node("img");
