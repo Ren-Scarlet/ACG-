@@ -253,13 +253,15 @@
       state.world=result.weather||state.world;renderHeader();
       state.currentSession=result.session_id;
       const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
-      fishingAudio.cast();\n      const scene=createWaterScene("waiting");
+      fishingAudio.cast();
+      const scene=createWaterScene("waiting");
       box.append(el("h3","","鱼线已经抛出"),el("p","hint","湖面很平静……留意水面上的鱼漂。"),scene);
       if(result.fish_hint)box.append(el("p","hint",result.fish_hint));
       const wait=Math.max(1000,Math.min(10000,Number(result.bite_after_ms)||3000));
       window.setTimeout(()=>{
         if(state.phase!=="waiting")return;
-        fishingAudio.bite();\n        scene.classList.remove("waiting");scene.classList.add("bite");
+        fishingAudio.bite();
+        scene.classList.remove("waiting");scene.classList.add("bite");
         const caption=scene.querySelector(".fish-stage-caption");
         if(caption)caption.textContent="咬钩了！鱼漂沉下去了！";
         const title=el("h3","","！鱼咬钩了！");
@@ -382,7 +384,8 @@
         const card=el("article","fishbook-card"+(item?" is-discovered":" is-unknown"));
         const art=el("div","fishbook-art");
         const seal=el("span","fishbook-seal",item?"已收录":"未发现");
-        const fishMark=el("span","fishbook-fish-mark",item?fishVisualFor(f):"?");\n        if(item){fishMark.classList.add("fishbook-fish-mark-varied");fishMark.style.setProperty("--fish-hue",String((index*47)%360)+"deg");}
+        const fishMark=el("span","fishbook-fish-mark",item?fishVisualFor(f):"?");
+        if(item){fishMark.classList.add("fishbook-fish-mark-varied");fishMark.style.setProperty("--fish-hue",String((index*47)%360)+"deg");}
         const number=el("span","fishbook-number","NO. "+String(state.fish.indexOf(f)+1).padStart(2,"0"));
         art.append(number,fishMark,seal);
         const info=el("div","fishbook-card-info");
