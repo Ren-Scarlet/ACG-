@@ -2318,7 +2318,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     document.getElementById("tab-account").addEventListener("click", () => showMainView("account-view","tab-account","玩家账号"));
     document.getElementById("tab-fishing").addEventListener("click", () => showMainView("fishing-view","tab-fishing","钓场"));
     document.getElementById("load-builder-player").addEventListener("click", loadBuilderPlayer);
-    function resetBuilderPages(){builderPages.relic=builderPages.special=builderPages.battleItem=1;}
+    function resetBuilderPages(){builderPages.relic=builderPages.special=builderPages.battleItem=builderPages.importantBattleItem=builderPages.berry=1;}
     function applyBuilderFilter(){resetBuilderPages();renderBuilder();}
     document.getElementById("builder-card-search").addEventListener("input",applyBuilderFilter);
     ["builder-pack-filter","builder-star-filter","builder-type-filter","builder-sort-filter"].forEach(id=>document.getElementById(id).addEventListener("change",applyBuilderFilter));
