@@ -2030,7 +2030,8 @@
     }
     const isBerryPack=pack.category==="berry";
     const isBattleItemPack=pack.category==="battle_item";
-    const isUniformPack=isBerryPack||isBattleItemPack;
+    const isUniformPack=isBerryPack;
+    const isSpecialPack=isBerryPack||isBattleItemPack;
     const payload=cards.map(card=>({
       card_id:card.id,
       rarity:isUniformPack?1:Number(card.star),
@@ -2048,7 +2049,7 @@
         p_pack_id:packId,p_pack_name:pack.name,p_cards:payload,p_category:pack.category||"normal"
       });
       if(error)throw error;
-      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。"+(isUniformPack?(isBerryPack?"树果包采用全卡等概率抽取。":"对战道具包采用全卡等概率抽取，不使用卡牌星级。"):"现在可以设置价格、概率并开放卡池。");
+      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。"+(isBerryPack?"树果包采用全卡等概率抽取。":isBattleItemPack?"普通道具 75%，贵重道具 25%。":"现在可以设置价格、概率并开放卡池。");
       status.className="status good";
       await loadAdminPools();
       view.querySelector("#pc-pool-id").value=packId;
