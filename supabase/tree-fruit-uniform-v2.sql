@@ -44,7 +44,7 @@ begin
     raise exception '卡包至少需要一张卡牌才能同步';
   end if;
 
-  v_mode := case when p_category='berry' then 'uniform' else 'rarity' end;
+  v_mode := case when p_category in ('berry','battle_item') then 'uniform' else 'rarity' end;
 
   if exists (
     select 1 from jsonb_array_elements(p_cards) as item(value)
@@ -61,8 +61,8 @@ begin
 
   insert into public.draw_card_catalog(card_id,pack_id,rarity,is_alt,enabled)
   select item.value->>'card_id',p_pack_id,
-         case when p_category='berry' then 1 else (item.value->>'rarity')::integer end,
-         case when p_category='berry' then false else (item.value->>'is_alt')::boolean end,
+         case when p_category in ('berry','battle_item') then 1 else (item.value->>'rarity')::integer end,
+         case when p_category in ('berry','battle_item') then false else (item.value->>'is_alt')::boolean end,
          true
   from jsonb_array_elements(p_cards) as item(value)
   on conflict(card_id) do update
@@ -208,7 +208,7 @@ begin
   if v_pool.draw_mode='uniform' and not exists(
     select 1 from public.draw_card_catalog where pack_id=p_pack_id and enabled
   ) then
-    raise exception '树果卡池没有可抽取的卡牌';
+    raise exception '该特殊卡包没有可抽取的卡牌';
   end if;
 
   v_total_cost := v_pool.price_tokens * p_pack_count;
