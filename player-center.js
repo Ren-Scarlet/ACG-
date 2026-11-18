@@ -401,6 +401,8 @@
       button.setAttribute("aria-pressed",String(myWarehouseCategory===category.id));
       button.addEventListener("click",()=>{
         myWarehouseCategory=category.id;
+        myWarehousePack="";
+        myWarehouseItemClass="";
         pcListPages["my-inventory"]=1;
         renderMyWarehouse();
       });
