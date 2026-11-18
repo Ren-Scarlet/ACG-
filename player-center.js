@@ -2034,10 +2034,11 @@
     const isSpecialPack=isBerryPack||isBattleItemPack;
     const payload=cards.map(card=>({
       card_id:card.id,
-      rarity:isUniformPack?1:Number(card.star),
-      is_alt:isUniformPack?false:/（异画）|\(异画\)/.test(card.name||"")
+      rarity:isSpecialPack?1:Number(card.star),
+      is_alt:isSpecialPack?false:/（异画）|\(异画\)/.test(card.name||""),
+      item_class:isBattleItemPack?(card.battle_item_class==="important"?"important":"normal"):null
     }));
-    if(payload.some(card=>!card.card_id||(!isUniformPack&&(!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)))){
+    if(payload.some(card=>!card.card_id||(!isSpecialPack&&(!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)))){
       status.textContent="同步中止：卡牌编号或星级资料不完整，请先检查卡牌资料。";
       status.className="status bad";return;
     }
