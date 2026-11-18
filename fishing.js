@@ -8,6 +8,72 @@
   const root = document.getElementById("fishing-view");
   if (!root) { window.addEventListener("DOMContentLoaded", () => { if (!window.acgFishingInitialized) boot(); }, { once: true }); return; }
   const $ = (id) => root.querySelector("#" + id);
+  const fishingAudio = (() => {
+    let ctx=null, master=null, reelTimer=null;
+    let enabled=localStorage.getItem("acg-fishing-sfx-enabled")!=="false";
+    let volume=Math.max(0,Math.min(100,Number(localStorage.getItem("acg-fishing-sfx-volume")||55)));
+    const ensure=()=>{
+      const Ctx=window.AudioContext||window.webkitAudioContext;
+      if(!Ctx)return null;
+      if(!ctx){ctx=new Ctx();master=ctx.createGain();master.gain.value=enabled?volume/100:0;master.connect(ctx.destination);}
+      if(ctx.state==="suspended")ctx.resume().catch(()=>{});
+      return ctx;
+    };
+    const set=()=>{if(master)master.gain.setTargetAtTime(enabled?volume/100:0,ctx.currentTime,.04);};
+    const tone=(freq,duration=.16,wave="sine",peak=.12,endFreq=null)=>{
+      const c=ensure();if(!c||!enabled)return;
+      const o=c.createOscillator(),g=c.createGain();o.type=wave;o.frequency.setValueAtTime(freq,c.currentTime);
+      if(endFreq)o.frequency.exponentialRampToValueAtTime(Math.max(30,endFreq),c.currentTime+duration);
+      g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(peak,c.currentTime+.012);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+duration);
+      o.connect(g);g.connect(master);o.start();o.stop(c.currentTime+duration+.02);
+    };
+    const noise=(duration=.22,peak=.16,cutoff=1200)=>{
+      const c=ensure();if(!c||!enabled)return;
+      const length=Math.max(1,Math.floor(c.sampleRate*duration)),buffer=c.createBuffer(1,length,c.sampleRate),data=buffer.getChannelData(0);
+      for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(1-i/length);
+      const src=c.createBufferSource(),filter=c.createBiquadFilter(),g=c.createGain();
+      filter.type="lowpass";filter.frequency.value=cutoff;g.gain.setValueAtTime(peak,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+duration);
+      src.buffer=buffer;src.connect(filter);filter.connect(g);g.connect(master);src.start();src.stop(c.currentTime+duration);
+    };
+    return {
+      settings(){return {enabled,volume};},
+      toggle(){enabled=!enabled;localStorage.setItem("acg-fishing-sfx-enabled",String(enabled));set();if(enabled)this.cast();return enabled;},
+      volumeTo(v){volume=Math.max(0,Math.min(100,Number(v)||0));localStorage.setItem("acg-fishing-sfx-volume",String(volume));set();},
+      cast(){noise(.34,.2,1500);tone(260,.22,"sine",.08,110);},
+      bite(){tone(740,.11,"triangle",.13);setTimeout(()=>tone(980,.16,"triangle",.12),105);},
+      hook(){noise(.09,.22,2600);tone(180,.18,"square",.09,90);},
+      reel(){noise(.12,.09,1900);tone(310,.08,"triangle",.035,250);},
+      startReel(){this.stopReel();this.reel();reelTimer=setInterval(()=>this.reel(),520);},
+      stopReel(){if(reelTimer){clearInterval(reelTimer);reelTimer=null;}},
+      catch(){this.stopReel();tone(523,.22,"triangle",.11);setTimeout(()=>tone(659,.22,"triangle",.11),130);setTimeout(()=>tone(784,.34,"triangle",.13),260);},
+      escape(){this.stopReel();noise(.22,.15,700);tone(155,.3,"sine",.08,65);}
+    };
+  })();
+  const installFishingAudioControls=()=>{
+    const line=root.querySelector(".fish-status-line");if(!line||line.querySelector(".fish-sfx-controls"))return;
+    const wrap=el("div","fish-sfx-controls"),toggle=el("button","fish-sfx-toggle"),label=el("label","fish-sfx-volume-label","音效");
+    const slider=el("input","fish-sfx-volume");slider.type="range";slider.min="0";slider.max="100";slider.step="5";
+    const sync=()=>{const s=fishingAudio.settings();toggle.textContent=s.enabled?"♫":"♪";toggle.setAttribute("aria-label",s.enabled?"关闭钓鱼音效":"开启钓鱼音效");toggle.classList.toggle("muted",!s.enabled);slider.value=String(s.volume);};
+    toggle.type="button";toggle.addEventListener("click",()=>{fishingAudio.toggle();sync();});
+    slider.addEventListener("input",()=>fishingAudio.volumeTo(slider.value));
+    label.append(slider);wrap.append(toggle,label);line.append(wrap);sync();
+    if(!document.getElementById("fish-sfx-style")){const style=el("style");style.id="fish-sfx-style";style.textContent=".fish-status-line{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.fish-sfx-controls{margin-left:auto;display:flex;align-items:center;gap:10px;color:#e5d5a6;font-size:12px}.fish-sfx-toggle{width:32px;height:30px;border:1px solid rgba(220,190,120,.48);border-radius:8px;background:rgba(12,27,47,.8);color:#f2d58d;cursor:pointer}.fish-sfx-toggle.muted{opacity:.55}.fish-sfx-volume-label{display:flex;align-items:center;gap:6px}.fish-sfx-volume{width:88px;accent-color:#d7b66b}@media(max-width:560px){.fish-sfx-controls{width:100%;margin-left:20px}}";document.head.append(style);}
+  };
+  const fishVisualFor=(fish)=>{
+    const id=String(fish.fish_id||"").toLowerCase(),name=String(fish.fish_name||"");
+    if(/king|王|legend|mythic/.test(id+" "+name))return "🐉";
+    if(/puffer|河豚|ふぐ/.test(id+" "+name))return "🐡";
+    if(/trout|鳟/.test(id+" "+name))return "🐠";
+    if(/carp|鲤/.test(id+" "+name))return "🐟";
+    if(/crucian|鲫/.test(id+" "+name))return "🐠";
+    if(/eel|鳗/.test(id+" "+name))return "〰️";
+    if(/catfish|鲶/.test(id+" "+name))return "🐟";
+    if(/shark|鲨/.test(id+" "+name))return "🦈";
+    if(/ray|鳐/.test(id+" "+name))return "🪽";
+    const variants=["🐟","🐠","🐡","🦈","🐬","🐳","🐋","🦑","🪼","🦐","🦀","🦞","🦭","🐙","🪸","🐚","🐟","🐠"];
+    let hash=0;for(const ch of id)hash=(hash*31+ch.charCodeAt(0))>>>0;
+    return variants[hash%variants.length];
+  };
   const state = { dashboard:null, world:null, globalRecords:[], currentLocation:"qinglan_lake", baits:[], fish:[], berries:[], specialMaterials:[], shopCards:[], shopItems:[], currentSession:null, raf:0, phase:"idle" };
   const el = (tag, cls, text) => {
     const n=document.createElement(tag);
@@ -73,6 +139,7 @@
     const rareMaterials=[["fishing_ancient_scale","古代鱼鳞"],["fishing_moon_pearl","月光珍珠"],["fishing_storm_core","风暴核心"]];
     state.specialMaterials=rareMaterials.map(([id,name])=>({id,name,quantity:Number((berryRes.data||[]).find(r=>r.card_id===id)?.quantity||0)}));
     renderHeader();
+    installFishingAudioControls();
   }
   function renderHeader(){
     const s=state.dashboard.stats||{};
@@ -186,13 +253,13 @@
       state.world=result.weather||state.world;renderHeader();
       state.currentSession=result.session_id;
       const box=$("fish-action");box.classList.remove("hidden");box.replaceChildren();
-      const scene=createWaterScene("waiting");
+      fishingAudio.cast();\n      const scene=createWaterScene("waiting");
       box.append(el("h3","","鱼线已经抛出"),el("p","hint","湖面很平静……留意水面上的鱼漂。"),scene);
       if(result.fish_hint)box.append(el("p","hint",result.fish_hint));
       const wait=Math.max(1000,Math.min(10000,Number(result.bite_after_ms)||3000));
       window.setTimeout(()=>{
         if(state.phase!=="waiting")return;
-        scene.classList.remove("waiting");scene.classList.add("bite");
+        fishingAudio.bite();\n        scene.classList.remove("waiting");scene.classList.add("bite");
         const caption=scene.querySelector(".fish-stage-caption");
         if(caption)caption.textContent="咬钩了！鱼漂沉下去了！";
         const title=el("h3","","！鱼咬钩了！");
@@ -215,6 +282,7 @@
       const result=await rpc("fishing_hook_cast_v2",{p_session_id:state.currentSession});
       const hookRoundTripMs=performance.now()-hookRequestStarted;
       if(result.status==="escaped"){
+        fishingAudio.escape();
         state.phase="idle";state.currentSession=null;
         box.replaceChildren(el("h3","","鱼逃走了"),el("p","hint","提竿太晚，这次没有收获，鱼饵不会返还。"));
         status("提竿太晚，鱼逃走了。",true);
@@ -222,6 +290,7 @@
         box.append(again);await loadDashboard();renderOverview();return;
       }
       state.phase="reeling";
+      fishingAudio.hook();fishingAudio.startReel();
       const scene=createWaterScene("reeling");
       const rail=el("div","fish-reel-rail"),zone=el("div","fish-reel-zone"),needle=el("div","fish-reel-needle");
       const zoneStart=Number(result.zone_start_pct??15),zoneWidth=Number(result.zone_width_pct??70);
@@ -249,11 +318,13 @@
   async function finishReel(){
     if(state.phase!=="reeling")return;
     cancelAnimationFrame(state.raf);
+    fishingAudio.stopReel();
     state.phase="resolving";
     $("fish-action").replaceChildren(el("p","hint","正在由服务器判定收线结果……"));
     try{
       const result=await rpc("fishing_finish_reel_v2",{p_session_id:state.currentSession});
       if(result.status==="caught"){
+        fishingAudio.catch();
         const label=result.size_label||"尺寸待定";
         const caughtScene=createWaterScene("caught");
         const catchMark=el("div","fish-catch-spark","🎣");
@@ -263,6 +334,7 @@
         $("fish-action").replaceChildren(caughtScene,catchTitle,el("p","",label+" · 获得 "+result.points_awarded+" 钓鱼积分"),el("p","hint",rewardLabel+" · 收线评分 "+result.action_score+" · 天气 "+({sunny:"晴天",cloudy:"阴天",rain:"雨天",fog:"浓雾",storm:"雷雨",windy:"大风"}[result.weather_id]||"未知")));
         status("成功钓获 "+result.fish_name+"！");
       }else{
+        fishingAudio.escape();
         $("fish-action").replaceChildren(el("h3","","鱼逃走了"),el("p","hint","收线时机不合适，这次没有收获，鱼饵不会返还。"));
         status("鱼逃走了，下次再试试。",true);
       }
@@ -310,7 +382,7 @@
         const card=el("article","fishbook-card"+(item?" is-discovered":" is-unknown"));
         const art=el("div","fishbook-art");
         const seal=el("span","fishbook-seal",item?"已收录":"未发现");
-        const fishMark=el("span","fishbook-fish-mark",item?"🐟":"?");
+        const fishMark=el("span","fishbook-fish-mark",item?fishVisualFor(f):"?");\n        if(item){fishMark.classList.add("fishbook-fish-mark-varied");fishMark.style.setProperty("--fish-hue",String((index*47)%360)+"deg");}
         const number=el("span","fishbook-number","NO. "+String(state.fish.indexOf(f)+1).padStart(2,"0"));
         art.append(number,fishMark,seal);
         const info=el("div","fishbook-card-info");
