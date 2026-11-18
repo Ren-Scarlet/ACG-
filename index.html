@@ -2149,7 +2149,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             failed.push(file.name + "：" + uploadError.message);
             continue;
           }
-          card.image = "./images/" + file.name;
+          const imageVersion = result.content?.sha || Date.now().toString(36);
+          card.image = "./images/" + file.name + "?v=" + encodeURIComponent(imageVersion);
           success++;
           const completedPercent = prepared.slice(0, i + 1).reduce((sum, item) => sum + item.file.size, 0) / (prepared.reduce((sum, item) => sum + item.file.size, 0) || 1) * 100;
           updateAdminProgress("card-image-upload", completedPercent, "已上传 " + (i + 1) + "/" + prepared.length, true);
