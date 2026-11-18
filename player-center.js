@@ -875,7 +875,7 @@
   function showTenPackOpening(pool,result) {
     const cards=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index);
     const packs=Array.from({length:10},(_,i)=>cards.slice(i*5,(i+1)*5));
-    const rarityOf=card=>card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
+    const rarityOf=card=>pool.draw_mode==="battle_item"?(card.item_class==="important"?"r5":"r3"):card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
     const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*10)+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
@@ -905,7 +905,7 @@
       el.classList.add("flip");el.querySelector(".acg-td-cardname").textContent=cardsById[packs[current][index].card_id]?.name||packs[current][index].card_id;
       flipped++;progress.textContent=flipped+" / 5 已揭晓";
       const pack=packs[current],count={alt:0,r5:0,r4:0,r3:0};pack.forEach(c=>count[rarityOf(c)]++);
-      summary.innerHTML="异画 <b>"+count.alt+"</b>　五星 <b>"+count.r5+"</b>　四星 <b>"+count.r4+"</b>　三星 <b>"+count.r3+"</b>";
+      summary.innerHTML=pool.draw_mode==="battle_item"?"普通道具 <b>"+count.r3+"</b>　贵重道具 <b>"+count.r5+"</b>":"异画 <b>"+count.alt+"</b>　五星 <b>"+count.r5+"</b>　四星 <b>"+count.r4+"</b>　三星 <b>"+count.r3+"</b>";
       const grade=rarityOf(pack[index]);if(grade==="alt")sub.textContent="✦ 异画卡降临！";else if(grade==="r5")sub.textContent="★★★★★ 五星卡牌登场！";
       if(flipped===5){nextBtn.textContent=current===9?"查看完整结果":"OPEN · 开启下一包";allBtn.disabled=true;}
     }
@@ -933,7 +933,7 @@
       headTitle.textContent="TEN PACKS COMPLETE";sub.textContent="十连完成 · 服务器已保存全部 50 张卡牌";
       rtitle.textContent="十连抽卡结果";progress.textContent="正在整理 50 张结果卡牌……";
       cardGrid.replaceChildren();const counts={alt:0,r5:0,r4:0,r3:0};cards.forEach(card=>counts[rarityOf(card)]++);
-      summary.innerHTML="十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
+      summary.innerHTML=pool.draw_mode==="battle_item"?"十连结果：普通道具 <b>"+counts.r3+"</b>　贵重道具 <b>"+counts.r5+"</b>":"十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
       revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回抽卡大厅");done.type="button";done.disabled=true;done.addEventListener("click",()=>overlay.remove());revealActions.appendChild(done);
       let index=0;
       function renderResultChunk(){
