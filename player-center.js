@@ -236,18 +236,21 @@
     input.title=hasAlt?"当前卡包包含异画卡，可以设置异画概率。":"当前卡包没有异画卡，异画概率固定为 0%。";
   }
   function syncPoolModeControls(packId){
-    const isUniform=packCatalog.find(item=>item.id===packId)?.category==="berry";
+    const packCategory=packCatalog.find(item=>item.id===packId)?.category;
+    const isUniform=packCategory==="berry";
+    const isBattleItem=packCategory==="battle_item";
+    const isSpecial=isUniform||isBattleItem;
     ["#pc-pool-alt","#pc-pool-r5","#pc-pool-r4","#pc-pool-r3"].forEach(selector=>{
       const input=view.querySelector(selector);
       if(!input)return;
       const field=input.closest(".field");
-      if(field)field.hidden=isUniform;
-      input.required=!isUniform;
+      if(field)field.hidden=isSpecial;
+      input.required=!isSpecial;
     });
     const priceLabel=view.querySelector('label[for="pc-pool-price"]');
     if(priceLabel)priceLabel.textContent=isUniform?"树果包价格（代币）":"单包价格（代币）";
     const submit=view.querySelector('#pc-pool-form button[type="submit"]');
-    if(submit)submit.textContent=isUniform?"保存价格并开放树果包":"保存并开放卡池";
+    if(submit)submit.textContent=isUniform?"保存价格并开放树果包":isBattleItem?"保存价格并开放对战道具包":"保存并开放卡池";
   }
   function fillPoolCoverOptions(packId,selectedId=""){
     const select=view.querySelector("#pc-pool-cover");
@@ -799,8 +802,10 @@
       if(!selectedPool)return;
       configTitle.textContent=selectedPool.pack_name;configDesc.textContent="每包 5 张 · 单包 "+selectedPool.price_tokens+" 代币";
       rates.innerHTML=selectedPool.draw_mode==="uniform"
-        ? '<span>🍃 树果等概率</span><span class="adl-muted">每张树果卡被抽中的概率相同 · 不设星级与异画概率</span>'
-        : '<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
+        ? '<span>🍃 树果包等概率</span><span class="adl-muted">卡包内每张卡被抽中的概率相同</span>'
+        : selectedPool.draw_mode==="battle_item"
+          ? '<span>普通道具 75%</span><span>贵重道具 25%</span><span class="adl-muted">每张卡独立判定，按道具分类抽取</span>'
+          : '<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
     }
     updateConfig();
     const historySection=node("div","adl-history"),historyTitle=node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张");
@@ -845,7 +850,7 @@
   async function loadDraw() {
     const [_,poolsResult,statsResult,historyResult,packsResult]=await Promise.all([
       loadCardNames(),
-      client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled,cover_card_id").eq("enabled",true).order("pack_id"),
+      client.from("card_draw_pools").select("pack_id,pack_name,draw_mode,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled,cover_card_id").eq("enabled",true).order("pack_id"),
       client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle(),
       client.from("card_draw_history").select("id,pack_id,card_id,cost_tokens,draw_index,created_at",{count:"exact"}).eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(30),
       client.from("card_draw_pools").select("pack_id,pack_name")
@@ -870,7 +875,7 @@
   function showTenPackOpening(pool,result) {
     const cards=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index);
     const packs=Array.from({length:10},(_,i)=>cards.slice(i*5,(i+1)*5));
-    const rarityOf=card=>card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
+    const rarityOf=card=>pool.draw_mode==="battle_item"?(card.item_class==="important"?"r5":"r3"):card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
     const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*10)+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
@@ -900,7 +905,7 @@
       el.classList.add("flip");el.querySelector(".acg-td-cardname").textContent=cardsById[packs[current][index].card_id]?.name||packs[current][index].card_id;
       flipped++;progress.textContent=flipped+" / 5 已揭晓";
       const pack=packs[current],count={alt:0,r5:0,r4:0,r3:0};pack.forEach(c=>count[rarityOf(c)]++);
-      summary.innerHTML="异画 <b>"+count.alt+"</b>　五星 <b>"+count.r5+"</b>　四星 <b>"+count.r4+"</b>　三星 <b>"+count.r3+"</b>";
+      summary.innerHTML=pool.draw_mode==="battle_item"?"普通道具 <b>"+count.r3+"</b>　贵重道具 <b>"+count.r5+"</b>":"异画 <b>"+count.alt+"</b>　五星 <b>"+count.r5+"</b>　四星 <b>"+count.r4+"</b>　三星 <b>"+count.r3+"</b>";
       const grade=rarityOf(pack[index]);if(grade==="alt")sub.textContent="✦ 异画卡降临！";else if(grade==="r5")sub.textContent="★★★★★ 五星卡牌登场！";
       if(flipped===5){nextBtn.textContent=current===9?"查看完整结果":"OPEN · 开启下一包";allBtn.disabled=true;}
     }
@@ -928,7 +933,7 @@
       headTitle.textContent="TEN PACKS COMPLETE";sub.textContent="十连完成 · 服务器已保存全部 50 张卡牌";
       rtitle.textContent="十连抽卡结果";progress.textContent="正在整理 50 张结果卡牌……";
       cardGrid.replaceChildren();const counts={alt:0,r5:0,r4:0,r3:0};cards.forEach(card=>counts[rarityOf(card)]++);
-      summary.innerHTML="十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
+      summary.innerHTML=pool.draw_mode==="battle_item"?"十连结果：普通道具 <b>"+counts.r3+"</b>　贵重道具 <b>"+counts.r5+"</b>":"十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
       revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回抽卡大厅");done.type="button";done.disabled=true;done.addEventListener("click",()=>overlay.remove());revealActions.appendChild(done);
       let index=0;
       function renderResultChunk(){
@@ -976,7 +981,7 @@
     const main=node("div","acg-td-main"),title=node("div","acg-td-title");title.innerHTML='<small>MASTER DUEL INSPIRED · PACK OPENING</small><h2>'+pool.pack_name+'</h2><p>本次获得 · '+result.cards.length+' 张卡牌</p>';
     const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");head.append(node("b","","ONE PACK OPENING"),node("p","","点击卡牌逐张揭晓"));
     const grid=node("div","acg-td-cards");
-    const rarity=card=>pool.draw_mode==="uniform"?"uniform":card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
+    const rarity=card=>pool.draw_mode==="uniform"?"uniform":pool.draw_mode==="battle_item"?(card.item_class==="important"?"r5":"r3"):card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
     result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index).forEach((card,i)=>{
       const info=cardsById[card.card_id]||{name:card.card_id},grade=rarity(card),el=node("div","acg-td-card"+(grade==="r3"?"":" "+grade));
       const inner=node("div","acg-td-inner"),back=node("div","acg-td-face acg-td-back"),front=node("div","acg-td-face acg-td-front"),img=node("img");
@@ -2029,12 +2034,16 @@
       status.className="status bad";return;
     }
     const isBerryPack=pack.category==="berry";
+    const isBattleItemPack=pack.category==="battle_item";
+    const isUniformPack=isBerryPack;
+    const isSpecialPack=isBerryPack||isBattleItemPack;
     const payload=cards.map(card=>({
       card_id:card.id,
-      rarity:isBerryPack?1:Number(card.star),
-      is_alt:isBerryPack?false:/（异画）|\(异画\)/.test(card.name||"")
+      rarity:isSpecialPack?1:Number(card.star),
+      is_alt:isSpecialPack?false:/（异画）|\(异画\)/.test(card.name||""),
+      item_class:isBattleItemPack?(card.battle_item_class==="important"?"important":"normal"):null
     }));
-    if(payload.some(card=>!card.card_id||(!isBerryPack&&(!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)))){
+    if(payload.some(card=>!card.card_id||(!isSpecialPack&&(!Number.isInteger(card.rarity)||card.rarity<1||card.rarity>5)))){
       status.textContent="同步中止：卡牌编号或星级资料不完整，请先检查卡牌资料。";
       status.className="status bad";return;
     }
@@ -2046,7 +2055,7 @@
         p_pack_id:packId,p_pack_name:pack.name,p_cards:payload,p_category:pack.category||"normal"
       });
       if(error)throw error;
-      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。"+(isBerryPack?"树果将以 1 星存储并采用全卡等概率抽取。":"现在可以设置价格、概率并开放卡池。");
+      status.textContent="同步成功：「"+pack.name+"」已同步 "+(Number(data)||payload.length)+" 张卡牌。"+(isBerryPack?"树果包采用全卡等概率抽取。":isBattleItemPack?"普通道具 75%，贵重道具 25%。":"现在可以设置价格、概率并开放卡池。");
       status.className="status good";
       await loadAdminPools();
       view.querySelector("#pc-pool-id").value=packId;
@@ -2099,9 +2108,9 @@
     syncPoolModeControls(selectedPool.pack_id);
     data.forEach(pool=>{
       const row=node("div","pc-row"),info=node("div"),actions=node("div");
-      const ready=pool.price_tokens!==null&&(pool.draw_mode==="uniform"||(pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null));
+      const ready=pool.price_tokens!==null&&(pool.draw_mode==="uniform"||pool.draw_mode==="battle_item"||(pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null));
       const config=ready
-        ? (pool.draw_mode==="uniform"?"每包 "+pool.price_tokens+" 代币 · 树果等概率":"每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%")
+        ? (pool.draw_mode==="uniform"?"每包 "+pool.price_tokens+" 代币 · 树果包等概率":pool.draw_mode==="battle_item"?"每包 "+pool.price_tokens+" 代币 · 普通道具 75% / 贵重道具 25%":"每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%")
         : "尚未设置价格和概率";
       info.append(node("strong","",pool.pack_name),node("div","pc-muted",config),
         node("div",pool.enabled?"pc-positive":"pc-muted",pool.enabled?"开放中":"未开放"));
@@ -2166,7 +2175,7 @@
       if(error)throw error;
       const {error:coverError}=await client.rpc("admin_set_draw_pool_cover",{p_pack_id:values.p_pack_id,p_cover_card_id:view.querySelector("#pc-pool-cover").value||null});
       if(coverError)throw new Error("价格和概率已保存，但封面保存失败："+coverError.message+"。请确认已执行卡包封面 SQL。");
-      status.textContent=isUniformPool?"树果卡池已开放：每张树果等概率抽取。":"卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
+      status.textContent=isUniformPool?"树果卡池已开放：每张特殊卡包等概率抽取。":"卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
       await loadAdminPools();
     }catch(error){status.textContent="保存失败："+error.message;status.className="status bad";}
     finally{button.disabled=false;}
