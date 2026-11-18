@@ -2156,18 +2156,20 @@
     const form=event.currentTarget,button=form.querySelector("button[type=submit]"),status=view.querySelector("#pc-pool-status");
     const selectedPack=packCatalog.find(item=>item.id===view.querySelector("#pc-pool-id").value);
     const isUniformPool=selectedPack?.category==="berry";
+    const isBattleItemPool=selectedPack?.category==="battle_item";
+    const isSpecialPool=isUniformPool||isBattleItemPool;
     const values={
       p_pack_id:view.querySelector("#pc-pool-id").value,
       p_price_tokens:Number(view.querySelector("#pc-pool-price").value),
-      p_rate_alt:isUniformPool?0:Number(view.querySelector("#pc-pool-alt").value),
-      p_rate_3:isUniformPool?100:Number(view.querySelector("#pc-pool-r3").value),
-      p_rate_4:isUniformPool?0:Number(view.querySelector("#pc-pool-r4").value),
-      p_rate_5:isUniformPool?0:Number(view.querySelector("#pc-pool-r5").value)
+      p_rate_alt:isSpecialPool?0:Number(view.querySelector("#pc-pool-alt").value),
+      p_rate_3:isSpecialPool?100:Number(view.querySelector("#pc-pool-r3").value),
+      p_rate_4:isSpecialPool?0:Number(view.querySelector("#pc-pool-r4").value),
+      p_rate_5:isSpecialPool?0:Number(view.querySelector("#pc-pool-r5").value)
     };
     if(!Number.isSafeInteger(values.p_price_tokens)||values.p_price_tokens<=0||
-       (!isUniformPool&&([values.p_rate_alt,values.p_rate_3,values.p_rate_4,values.p_rate_5].some(x=>!Number.isFinite(x)||x<0||x>100||Math.round(x*100)!==x*100)||
+       (!isSpecialPool&&([values.p_rate_alt,values.p_rate_3,values.p_rate_4,values.p_rate_5].some(x=>!Number.isFinite(x)||x<0||x>100||Math.round(x*100)!==x*100)||
        Math.round((values.p_rate_alt+values.p_rate_3+values.p_rate_4+values.p_rate_5)*100)!==10000))){
-      status.textContent=isUniformPool?"每包价格必须为正整数。":"每包价格必须为正整数；异画、五星、四星、三星概率须为 0–100 的数字（最多两位小数），总和必须为 100%。";status.className="status bad";return;
+      status.textContent=isSpecialPool?"每包价格必须为正整数。":"每包价格必须为正整数；异画、五星、四星、三星概率须为 0–100 的数字（最多两位小数），总和必须为 100%。";status.className="status bad";return;
     }
     button.disabled=true;status.textContent="正在保存卡池……";status.className="status";
     try{
@@ -2175,7 +2177,7 @@
       if(error)throw error;
       const {error:coverError}=await client.rpc("admin_set_draw_pool_cover",{p_pack_id:values.p_pack_id,p_cover_card_id:view.querySelector("#pc-pool-cover").value||null});
       if(coverError)throw new Error("价格和概率已保存，但封面保存失败："+coverError.message+"。请确认已执行卡包封面 SQL。");
-      status.textContent=isUniformPool?"树果卡池已开放：每张特殊卡包等概率抽取。":"卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
+      status.textContent=isUniformPool?"树果卡池已开放：每张特殊卡包等概率抽取。":isBattleItemPool?"对战道具卡池已开放：普通道具 75%，贵重道具 25%。":"卡池设置与封面均已保存，玩家现在可以抽取。";status.className="status good";
       await loadAdminPools();
     }catch(error){status.textContent="保存失败："+error.message;status.className="status bad";}
     finally{button.disabled=false;}
