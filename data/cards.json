@@ -2012,5 +2012,16 @@
     "pack_id": "pack_003",
     "effect": "场上有斗属性的攻击礼装卡才能发动：\n前进1-3格，对0-1格内一名目标造成7点斗属性伤害，造成伤害时弃除目标一张手牌。\n\n①若此卡未造成伤害，你损失4点生命值。",
     "image": "./images/card_178.jpg?v=74fbef3b223d4a4a0bbf950dff97c971b374980d"
+  },
+  {
+    "id": "card_179",
+    "name": "火焰鸡进化石",
+    "star": null,
+    "type": "对战道具",
+    "battle_item_class": "important",
+    "tags": [],
+    "pack_id": "pack_011",
+    "effect": "贵重\n若你场上有「火焰鸡」\n你可以将其替换为「超级火焰鸡」",
+    "image": "./images/card_179.jpg?v=df9d0311ab3163ade9d003d9b06434a409588ba2"
   }
 ]
