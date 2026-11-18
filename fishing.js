@@ -70,7 +70,7 @@
     if(/catfish|鲶/.test(id+" "+name))return "🐟";
     if(/shark|鲨/.test(id+" "+name))return "🦈";
     if(/ray|鳐/.test(id+" "+name))return "🪽";
-    const variants=["🐟","🐠","🐡","🐟","🐠","🐟"];
+    const variants=["🐟","🐠","🐡","🦈","🐬","🐳","🐋","🦑","🪼","🦐","🦀","🦞","🦭","🐙","🪸","🐚","🐟","🐠"];
     let hash=0;for(const ch of id)hash=(hash*31+ch.charCodeAt(0))>>>0;
     return variants[hash%variants.length];
   };
