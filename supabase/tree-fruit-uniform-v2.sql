@@ -188,7 +188,7 @@ begin
       raise exception '抽卡请求编号已被其他抽卡操作使用，请刷新后重试';
     end if;
     select jsonb_agg(jsonb_build_object(
-      'card_id',h.card_id,'draw_index',h.draw_index,'rarity',c.rarity,'is_alt',c.is_alt
+      'card_id',h.card_id,'draw_index',h.draw_index,'rarity',c.rarity,'is_alt',c.is_alt,'item_class',c.item_class
     ) order by h.draw_index) into v_cards
     from public.card_draw_history h
     join public.draw_card_catalog c on c.card_id=h.card_id
@@ -213,6 +213,10 @@ begin
   ) then
     raise exception '该特殊卡包没有可抽取的卡牌';
   end if;
+  if v_pool.draw_mode='battle_item' and (
+    not exists(select 1 from public.draw_card_catalog where pack_id=p_pack_id and enabled and item_class='normal') or
+    not exists(select 1 from public.draw_card_catalog where pack_id=p_pack_id and enabled and item_class='important')
+  ) then raise exception '对战道具卡包必须同时包含普通道具和贵重道具'; end if;
 
   v_total_cost := v_pool.price_tokens * p_pack_count;
   if v_balance < v_total_cost then
@@ -272,7 +276,7 @@ begin
 
     if v_cards is null then v_cards := '[]'::jsonb; end if;
     v_cards := v_cards || jsonb_build_array(jsonb_build_object(
-      'card_id',v_card_id,'draw_index',v_i,'rarity',v_rarity,'is_alt',v_is_alt
+      'card_id',v_card_id,'draw_index',v_i,'rarity',v_rarity,'is_alt',v_is_alt,'item_class',(select item_class from public.draw_card_catalog where card_id=v_card_id)
     ));
     v_card_id := null;
   end loop;
