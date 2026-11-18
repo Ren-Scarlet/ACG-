@@ -1896,7 +1896,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       const pack = allPacks.find(item => item.id === packId);
       const category = pack?.category || "normal";
       const berry = category === "berry";
-      const battleItem = category === "battle_item";
+      const battleItem = category === "battle_item" || document.getElementById("edit-card-type").value.trim() === "对战道具";
       const field = document.getElementById("edit-card-star-field");
       const input = document.getElementById("edit-card-star");
       field.classList.toggle("hidden", berry || battleItem);
