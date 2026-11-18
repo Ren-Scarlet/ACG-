@@ -418,6 +418,18 @@
     if(!host||!summary||!tabsHost)return;
     tabsHost.replaceChildren();
     renderWarehouseCategoryTabs(tabsHost);
+    const packSelect=contentEl.querySelector("#pc-warehouse-pack-filter");
+    if(packSelect){
+      const selectedPack=myWarehousePack;
+      packSelect.replaceChildren(new Option("全部卡包",""));
+      [...new Set(Object.values(cardsById).filter(card=>{
+        const packType=packCatalog.find(item=>item.id===card.pack_id)?.category;
+        return myWarehouseCategory==="battle-items"?packType==="battle_item":myWarehouseCategory==="berries"?packType==="berry":packType!=="battle_item"&&packType!=="berry";
+      }).map(card=>card.pack_id).filter(Boolean))].sort().forEach(id=>packSelect.add(new Option(packCatalog.find(item=>item.id===id)?.name||id,id)));
+      packSelect.value=selectedPack;
+    }
+    const classWrap=contentEl.querySelector("#pc-warehouse-item-class-wrap");
+    if(classWrap)classWrap.hidden=myWarehouseCategory!=="battle-items";
     const category=warehouseCategories.find(x=>x.id===myWarehouseCategory)||warehouseCategories[0];
     description.textContent=category.description;
     host.replaceChildren();
@@ -615,25 +627,19 @@
     const filters=node("div","pc-search");
     const searchWrap=node("div","field"),searchLabel=node("label","","搜索"+(myWarehouseCategory==="berries"?"树果":"卡牌")),search=node("input");
     search.placeholder="输入名称或编号";search.value=myWarehouseQuery;searchLabel.appendChild(search);searchWrap.append(searchLabel);
-    const packWrap=node("div","field"),packLabel=node("label","","卡包筛选"),pack=node("select");
+    const packWrap=node("div","field"),packLabel=node("label","","卡包筛选"),pack=node("select");pack.id="pc-warehouse-pack-filter";
     pack.add(new Option("全部卡包",""));
-    [...new Set(Object.values(cardsById).filter(card=>{
-      const category=packCatalog.find(item=>item.id===card.pack_id)?.category;
-      return myWarehouseCategory==="battle-items"?category==="battle_item":myWarehouseCategory==="berries"?category==="berry":category!=="battle_item"&&category!=="berry";
-    }).map(card=>card.pack_id).filter(Boolean))].sort().forEach(id=>pack.add(new Option(packCatalog.find(item=>item.id===id)?.name||id,id)));
     pack.value=myWarehousePack;packLabel.appendChild(pack);packWrap.append(packLabel);
-    filters.append(searchWrap,packWrap);
-    if(myWarehouseCategory==="battle-items"){
-      const classWrap=node("div","field"),classLabel=node("label","","道具类别"),classSelect=node("select");
-      classSelect.add(new Option("全部对战道具",""));classSelect.add(new Option("普通对战道具","normal"));classSelect.add(new Option("贵重对战道具","important"));
-      classSelect.value=myWarehouseItemClass;classLabel.appendChild(classSelect);classWrap.append(classLabel);filters.appendChild(classWrap);
-      classSelect.addEventListener("change",()=>{myWarehouseItemClass=classSelect.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
-    }
+    const classWrap=node("div","field"),classLabel=node("label","","道具类别"),classSelect=node("select");classWrap.id="pc-warehouse-item-class-wrap";classWrap.hidden=myWarehouseCategory!=="battle-items";
+    classSelect.add(new Option("全部对战道具",""));classSelect.add(new Option("普通对战道具","normal"));classSelect.add(new Option("贵重对战道具","important"));
+    classSelect.value=myWarehouseItemClass;classLabel.appendChild(classSelect);classWrap.append(classLabel);
+    filters.append(searchWrap,packWrap,classWrap);
     const summary=node("p","pc-muted");summary.id="pc-warehouse-summary";
     const host=node("div","pc-inventory-grid");host.id="pc-warehouse-cards";
     contentEl.append(heading,tabsHost,description,filters,summary,host);
     search.addEventListener("input",()=>{myWarehouseQuery=search.value.trim().toLowerCase();pcListPages["my-inventory"]=1;renderMyWarehouse();});
     pack.addEventListener("change",()=>{myWarehousePack=pack.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
+    classSelect.addEventListener("change",()=>{myWarehouseItemClass=classSelect.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
     host.appendChild(node("div","pc-empty","正在读取你的仓库……"));
     const [{data:inventory,error},{data:itemCatalog,error:itemError}]=await Promise.all([
       client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id"),
