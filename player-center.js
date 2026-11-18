@@ -850,7 +850,7 @@
   async function loadDraw() {
     const [_,poolsResult,statsResult,historyResult,packsResult]=await Promise.all([
       loadCardNames(),
-      client.from("card_draw_pools").select("pack_id,pack_name,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled,cover_card_id").eq("enabled",true).order("pack_id"),
+      client.from("card_draw_pools").select("pack_id,pack_name,draw_mode,price_tokens,rate_alt,rate_3,rate_4,rate_5,enabled,cover_card_id").eq("enabled",true).order("pack_id"),
       client.from("player_stats").select("tokens").eq("user_id",currentUser.id).maybeSingle(),
       client.from("card_draw_history").select("id,pack_id,card_id,cost_tokens,draw_index,created_at",{count:"exact"}).eq("user_id",currentUser.id).order("created_at",{ascending:false}).limit(30),
       client.from("card_draw_pools").select("pack_id,pack_name")
@@ -2108,9 +2108,9 @@
     syncPoolModeControls(selectedPool.pack_id);
     data.forEach(pool=>{
       const row=node("div","pc-row"),info=node("div"),actions=node("div");
-      const ready=pool.price_tokens!==null&&(pool.draw_mode==="uniform"||(pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null));
+      const ready=pool.price_tokens!==null&&(pool.draw_mode==="uniform"||pool.draw_mode==="battle_item"||(pool.rate_alt!==null&&pool.rate_3!==null&&pool.rate_4!==null&&pool.rate_5!==null));
       const config=ready
-        ? (pool.draw_mode==="uniform"?"每包 "+pool.price_tokens+" 代币 · 特殊卡包等概率":"每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%")
+        ? (pool.draw_mode==="uniform"?"每包 "+pool.price_tokens+" 代币 · 树果包等概率":pool.draw_mode==="battle_item"?"每包 "+pool.price_tokens+" 代币 · 普通道具 75% / 贵重道具 25%":"每包 "+pool.price_tokens+" 代币 · 异画 "+pool.rate_alt+"% / 五星 "+pool.rate_5+"% / 四星 "+pool.rate_4+"% / 三星 "+pool.rate_3+"%")
         : "尚未设置价格和概率";
       info.append(node("strong","",pool.pack_name),node("div","pc-muted",config),
         node("div",pool.enabled?"pc-positive":"pc-muted",pool.enabled?"开放中":"未开放"));
