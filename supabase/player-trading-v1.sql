@@ -42,7 +42,7 @@ begin
     select 1 from jsonb_to_recordset(p_items) as x(card_id text,quantity integer)
     left join public.draw_card_catalog c on c.card_id=x.card_id
     left join public.card_draw_pools p on p.pack_id=c.pack_id
-    where c.card_id is null or p.draw_mode not in ('rarity','battle_item','uniform')
+    where c.card_id is null or p.draw_mode is null or p.draw_mode not in ('rarity','battle_item','uniform')
   ) then raise exception '只能交换普通卡牌、对战道具和树果'; end if;
 end;
 $$;
