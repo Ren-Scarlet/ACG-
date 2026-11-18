@@ -459,14 +459,15 @@
       });
       return;
     }
-    const isBerryCard=card=>{
-      const pack=packCatalog.find(item=>item.id===card?.pack_id);
-      return pack?.category==="berry";
-    };
+    const packCategory=card=>packCatalog.find(item=>item.id===card?.pack_id)?.category;
     const filtered=myWarehouseRows.filter(row=>{
       const card=cardsById[row.card_id]||{id:row.card_id,name:row.card_id,pack_id:""};
-      const belongsHere=myWarehouseCategory==="berries"?isBerryCard(card):!isBerryCard(card);
-      return belongsHere&&(!myWarehouseQuery||String(card.name).toLowerCase().includes(myWarehouseQuery)||String(card.id).toLowerCase().includes(myWarehouseQuery))&&(!myWarehousePack||card.pack_id===myWarehousePack);
+      const category=packCategory(card);
+      const belongsHere=myWarehouseCategory==="berries"?category==="berry":
+        myWarehouseCategory==="battle-items"?category==="battle_item":category!=="berry"&&category!=="battle_item";
+      const itemClass=card.battle_item_class||card.item_class||"normal";
+      const classMatches=myWarehouseCategory!=="battle-items"||!myWarehouseItemClass||itemClass===myWarehouseItemClass;
+      return belongsHere&&classMatches&&(!myWarehouseQuery||String(card.name).toLowerCase().includes(myWarehouseQuery)||String(card.id).toLowerCase().includes(myWarehouseQuery))&&(!myWarehousePack||card.pack_id===myWarehousePack);
     }).sort((a,b)=>compareCardsByStar(cardsById[a.card_id]||{name:a.card_id,star:0},cardsById[b.card_id]||{name:b.card_id,star:0}));
     const total=filtered.reduce((sum,row)=>sum+Number(row.quantity||0),0);
     summary.textContent=category.label+"：拥有 "+filtered.length+" 种，共 "+total+" 张";
@@ -608,7 +609,7 @@
     await loadCardNames();
     contentEl.replaceChildren();
     const heading=node("div","pc-warehouse-heading");
-    heading.append(node("h3","","我的玩家仓库"),node("p","pc-muted","仓库分为卡牌、重要道具、消耗品和树果四个分类。对战道具等消耗品将在对应库存接入后显示。"));
+    heading.append(node("h3","","我的玩家仓库"),node("p","pc-muted","可按卡牌、对战道具、重要道具、消耗品和树果分类查看，并通过名称、编号及卡包筛选库存。"));
     const tabsHost=node("div");tabsHost.id="pc-warehouse-tabs-host";
     const description=node("p","pc-muted");description.id="pc-warehouse-category-description";
     const filters=node("div","pc-search");
@@ -616,9 +617,18 @@
     search.placeholder="输入名称或编号";search.value=myWarehouseQuery;searchLabel.appendChild(search);searchWrap.append(searchLabel);
     const packWrap=node("div","field"),packLabel=node("label","","卡包筛选"),pack=node("select");
     pack.add(new Option("全部卡包",""));
-    [...new Set(Object.values(cardsById).map(card=>card.pack_id).filter(Boolean))].sort().forEach(id=>pack.add(new Option(id,id)));
+    [...new Set(Object.values(cardsById).filter(card=>{
+      const category=packCatalog.find(item=>item.id===card.pack_id)?.category;
+      return myWarehouseCategory==="battle-items"?category==="battle_item":myWarehouseCategory==="berries"?category==="berry":category!=="battle_item"&&category!=="berry";
+    }).map(card=>card.pack_id).filter(Boolean))].sort().forEach(id=>pack.add(new Option(packCatalog.find(item=>item.id===id)?.name||id,id)));
     pack.value=myWarehousePack;packLabel.appendChild(pack);packWrap.append(packLabel);
     filters.append(searchWrap,packWrap);
+    if(myWarehouseCategory==="battle-items"){
+      const classWrap=node("div","field"),classLabel=node("label","","道具类别"),classSelect=node("select");
+      classSelect.add(new Option("全部对战道具",""));classSelect.add(new Option("普通对战道具","normal"));classSelect.add(new Option("贵重对战道具","important"));
+      classSelect.value=myWarehouseItemClass;classLabel.appendChild(classSelect);classWrap.append(classLabel);filters.appendChild(classWrap);
+      classSelect.addEventListener("change",()=>{myWarehouseItemClass=classSelect.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
+    }
     const summary=node("p","pc-muted");summary.id="pc-warehouse-summary";
     const host=node("div","pc-inventory-grid");host.id="pc-warehouse-cards";
     contentEl.append(heading,tabsHost,description,filters,summary,host);
