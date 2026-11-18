@@ -1381,8 +1381,8 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       document.getElementById("current-deck-pagination").replaceChildren();
       const selected = allCards.filter(card => deckCardCount(card.id) > 0).sort(compareCardsByStar);
       const counts = deckCounts();
-      const total = counts.relic + counts.special + counts.battleItems;
-      summary.textContent = "共 " + total + " 张：礼装卡 " + counts.relic + " 张 · 特殊攻击卡 " + counts.special + " 张 · 对战道具 " + counts.battleItems + " 张";
+      const total = counts.relic + counts.special + counts.battleItems + counts.berries;
+      summary.textContent = "共 " + total + " 张：礼装卡 " + counts.relic + " 张 · 特殊攻击卡 " + counts.special + " 张 · 对战道具 " + counts.battleItems + " 个（贵重 " + counts.importantBattleItems + "）· 树果 " + counts.berries + " 个";
       if (!selected.length) {
         list.innerHTML = '<div class="empty">当前卡组还没有加入卡牌。</div>';
         return;
