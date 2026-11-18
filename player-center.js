@@ -659,7 +659,7 @@
     const note=node("p","pc-muted","仅可交换普通卡牌、对战道具（普通/贵重）和树果。发起交易不会立即扣除物品；接收方确认时服务器会重新核对双方库存并一次性结算。若库存发生变化，交易失败且双方物品不变。");
     const inventoryResult=await client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id");
     if(inventoryResult.error)throw inventoryResult.error;
-    const tradable=Object.values(cardsById).filter(card=>["normal","battle_item","berry"].includes(packCatalog.find(p=>p.id===card.pack_id)?.category));
+    const tradable=Object.values(cardsById).filter(card=>["normal","battle_item","berry"].includes(packCatalog.find(p=>p.id===card.pack_id)?.category||"normal"));
     const byId=new Map(tradable.map(card=>[card.id,card]));
     const owned=(inventoryResult.data||[]).filter(row=>byId.has(row.card_id));
     const describe=card=>{
