@@ -802,8 +802,10 @@
       if(!selectedPool)return;
       configTitle.textContent=selectedPool.pack_name;configDesc.textContent="每包 5 张 · 单包 "+selectedPool.price_tokens+" 代币";
       rates.innerHTML=selectedPool.draw_mode==="uniform"
-        ? '<span>🍃 特殊卡包等概率</span><span class="adl-muted">卡包内每张卡被抽中的概率相同 · 不设星级与异画概率</span>'
-        : '<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
+        ? '<span>🍃 树果包等概率</span><span class="adl-muted">卡包内每张卡被抽中的概率相同</span>'
+        : selectedPool.draw_mode==="battle_item"
+          ? '<span>普通道具 75%</span><span>贵重道具 25%</span><span class="adl-muted">每张卡独立判定，按道具分类抽取</span>'
+          : '<span class="alt">✦ 异画 '+Number(selectedPool.rate_alt||0)+'%</span><span class="r5">★★★★★ 五星 '+selectedPool.rate_5+'%</span><span class="r4">★★★★ 四星 '+selectedPool.rate_4+'%</span><span>★★★ 三星 '+selectedPool.rate_3+'%</span><span class="adl-muted">每张卡独立判定</span>';
     }
     updateConfig();
     const historySection=node("div","adl-history"),historyTitle=node("h3","","抽卡记录 · 累计 "+(drawCount??0)+" 张");
