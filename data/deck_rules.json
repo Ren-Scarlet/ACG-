@@ -1,8 +1,8 @@
 {
-  "version": "test-1",
+  "version": "test-2",
   "relicDeck": {
-    "min": 10,
-    "max": 15,
+    "min": 15,
+    "max": 20,
     "maxCopiesPerName": 3
   },
   "specialAttackDeck": {
@@ -11,11 +11,16 @@
       "调律攻击卡",
       "共鸣攻击卡"
     ],
-    "maxTotal": 5,
+    "maxTotal": 10,
     "maxCopiesPerName": 3
   },
   "battleItemType": "对战道具",
-  "battleItemDeck": { "maxTotal": 3, "maxImportant": 1 },
-  "berryDeck": { "maxTotal": 1 },
-  "note": "测试阶段规则。修改本文件中的数字即可调整构筑数量限制。"
+  "battleItemDeck": {
+    "maxTotal": 3,
+    "maxImportant": 1
+  },
+  "berryDeck": {
+    "maxTotal": 1
+  },
+  "note": "礼装卡构筑数量为15～20张；超越、调律、共鸣攻击卡合计最多10张。修改本文件中的数字即可调整构筑数量限制。"
 }
