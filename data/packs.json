@@ -43,5 +43,10 @@
     "id": "pack_010",
     "name": "树果包",
     "category": "berry"
+  },
+  {
+    "id": "pack_011",
+    "name": "对战道具组合",
+    "category": "battle_item"
   }
 ]
