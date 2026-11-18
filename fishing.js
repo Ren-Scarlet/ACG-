@@ -139,6 +139,7 @@
     const rareMaterials=[["fishing_ancient_scale","古代鱼鳞"],["fishing_moon_pearl","月光珍珠"],["fishing_storm_core","风暴核心"]];
     state.specialMaterials=rareMaterials.map(([id,name])=>({id,name,quantity:Number((berryRes.data||[]).find(r=>r.card_id===id)?.quantity||0)}));
     renderHeader();
+    installFishingAudioControls();
   }
   function renderHeader(){
     const s=state.dashboard.stats||{};
