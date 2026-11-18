@@ -1099,7 +1099,7 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
             <div class="admin-form-grid">
               <div class="field"><label for="edit-card-name">卡牌名称</label><input id="edit-card-name" maxlength="100" placeholder="输入卡牌名称"></div>
               <div class="field" id="edit-card-star-field"><label for="edit-card-star">星级</label><input id="edit-card-star" type="number" min="1" max="12" step="1" value="3"><small class="hint">树果包不使用星级，选择树果包后会自动隐藏此项。</small></div>
-              <div class="field"><label for="edit-card-type">卡牌类型</label><input id="edit-card-type" maxlength="60" placeholder="例如：能力卡"></div><div class="field hidden" id="edit-battle-item-class-field"><label for="edit-battle-item-class">对战道具分类</label><select id="edit-battle-item-class"><option value="normal">普通物品（构筑后消耗）</option><option value="important">贵重物品（构筑后保留）</option></select></div>
+              <div class="field" id="edit-card-type-field"><label for="edit-card-type">卡牌类型</label><input id="edit-card-type" maxlength="60" placeholder="例如：能力卡"></div><div class="field hidden" id="edit-battle-item-class-field"><label for="edit-battle-item-class">对战道具分类</label><select id="edit-battle-item-class"><option value="normal">普通物品（构筑后消耗）</option><option value="important">贵重物品（构筑后保留）</option></select></div>
               <div class="field"><label for="edit-card-pack">所属卡包（可留空）</label><select id="edit-card-pack"><option value="">不属于任何卡包（独立卡牌）</option></select><small class="hint">独立卡牌不会进入任何卡包抽取，但仍可录入收藏并由管理员发放。</small></div>
               <div class="field wide"><label for="edit-card-effect">卡牌效果</label><textarea id="edit-card-effect" placeholder="输入完整卡牌效果"></textarea></div>
               <div class="field wide"><label for="edit-card-image">卡图路径</label><input id="edit-card-image" maxlength="500" placeholder="./images/卡牌图片.jpg"></div>
@@ -1894,16 +1894,25 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
     function updateCardStarField() {
       const packId = document.getElementById("edit-card-pack").value;
       const pack = allPacks.find(item => item.id === packId);
+      const category = pack?.category || "normal";
+      const berry = category === "berry";
+      const battleItem = category === "battle_item";
       const field = document.getElementById("edit-card-star-field");
       const input = document.getElementById("edit-card-star");
-      const berry = (pack?.category || "normal") === "berry";
-      field.classList.toggle("hidden", berry);
-      input.disabled = berry;
-      if (berry) input.value = "";
+      field.classList.toggle("hidden", berry || battleItem);
+      input.disabled = berry || battleItem;
+      if (berry || battleItem) input.value = "";
       else if (!input.value) input.value = "3";
       updateBattleItemClassField();
     }
-    function updateBattleItemClassField(){const field=document.getElementById("edit-battle-item-class-field"),input=document.getElementById("edit-battle-item-class"),active=document.getElementById("edit-card-type").value.trim()==="对战道具";field.classList.toggle("hidden",!active);input.disabled=!active;if(!active)input.value="normal";}
+    function updateBattleItemClassField(){
+      const pack=allPacks.find(item=>item.id===document.getElementById("edit-card-pack").value);
+      const active=pack?.category==="battle_item" || document.getElementById("edit-card-type").value.trim()==="对战道具";
+      const field=document.getElementById("edit-battle-item-class-field"),input=document.getElementById("edit-battle-item-class"),typeField=document.getElementById("edit-card-type-field"),typeInput=document.getElementById("edit-card-type");
+      field.classList.toggle("hidden",!active);input.disabled=!active;
+      typeField.classList.toggle("hidden",active);typeInput.disabled=active;
+      if(active){typeInput.value="对战道具";}else{input.value="normal";}
+    }
     function resetCardForm() {
       editingCardId = null;
       document.getElementById("edit-card-name").value = "";
@@ -2239,17 +2248,19 @@ body:not(.acg-home-active) main>section:not(.hidden) button:not(.acg-subnav butt
       const packId = document.getElementById("edit-card-pack").value;
       const selectedPack = allPacks.find(pack => pack.id === packId);
       const berry = (selectedPack?.category || "normal") === "berry";
-      const star = berry ? null : Number(document.getElementById("edit-card-star").value);
+      const battleItem = selectedPack?.category === "battle_item" || type === "对战道具";
+      const finalType = battleItem ? "对战道具" : type;
+      const star = (berry || battleItem) ? null : Number(document.getElementById("edit-card-star").value);
       const effect = document.getElementById("edit-card-effect").value.trim();
       const image = document.getElementById("edit-card-image").value.trim();
       const tags = document.getElementById("edit-card-tags").value.split(/[,，]/).map(x => x.trim()).filter(Boolean);
-      if (!name || !type) { setStatus(document.getElementById("card-editor-status"), "卡牌名称和类型不能为空。", "bad"); return; }
-      if (!berry && (!Number.isInteger(star) || star < 1 || star > 12)) { setStatus(document.getElementById("card-editor-status"), "星级必须是 1～12 的整数。", "bad"); return; }
+      if (!name || (!battleItem && !finalType)) { setStatus(document.getElementById("card-editor-status"), "卡牌名称和类型不能为空。", "bad"); return; }
+      if (!berry && !battleItem && (!Number.isInteger(star) || star < 1 || star > 12)) { setStatus(document.getElementById("card-editor-status"), "星级必须是 1～12 的整数。", "bad"); return; }
       if (packId && !selectedPack) { setStatus(document.getElementById("card-editor-status"), "请选择有效的所属卡包，或选择独立卡牌。", "bad"); return; }
       const id = editingCardId || nextDataId(allCards, "card");
       if (allCards.some(card => card.id === id && card.id !== editingCardId)) { setStatus(document.getElementById("card-editor-status"), "卡牌 ID 重复，请刷新资料后重试。", "bad"); return; }
-      const battle_item_class=type==="对战道具"?(document.getElementById("edit-battle-item-class").value==="important"?"important":"normal"):null;
-      const record = { id, name, star, type, battle_item_class, tags, pack_id: packId || null, effect, image };
+      const battle_item_class=battleItem?(document.getElementById("edit-battle-item-class").value==="important"?"important":"normal"):null;
+      const record = { id, name, star, type:finalType, battle_item_class, tags, pack_id: packId || null, effect, image };
       if (editingCardId) {
         const index = allCards.findIndex(card => card.id === editingCardId);
         if (index < 0) { setStatus(document.getElementById("card-editor-status"), "找不到正在编辑的卡牌，请重新读取资料。", "bad"); return; }
