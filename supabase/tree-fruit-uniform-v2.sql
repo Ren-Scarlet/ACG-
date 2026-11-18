@@ -10,7 +10,9 @@ alter table public.card_draw_pools
   drop constraint if exists card_draw_pools_draw_mode_check;
 alter table public.card_draw_pools
   add constraint card_draw_pools_draw_mode_check
-  check (draw_mode in ('rarity','uniform'));
+  check (draw_mode in ('rarity','uniform','battle_item'));
+
+alter table public.draw_card_catalog add column if not exists item_class text not null default 'normal';
 
 -- Replace the old 3-argument RPC. The frontend will send p_category explicitly.
 drop function if exists public.admin_sync_draw_pack_catalog(text,text,jsonb);
@@ -44,26 +46,27 @@ begin
     raise exception '卡包至少需要一张卡牌才能同步';
   end if;
 
-  v_mode := case when p_category in ('berry','battle_item') then 'uniform' else 'rarity' end;
+  v_mode := case when p_category='berry' then 'uniform' when p_category='battle_item' then 'battle_item' else 'rarity' end;
 
   if exists (
     select 1 from jsonb_array_elements(p_cards) as item(value)
     where coalesce(item.value->>'card_id','') = ''
        or coalesce(item.value->>'rarity','') !~ '^[1-5]$'
        or coalesce(item.value->>'is_alt','') not in ('true','false')
+       or (p_category='battle_item' and coalesce(item.value->>'item_class','') not in ('normal','important'))
   ) then
-    raise exception '卡牌编号、星级或异画标记格式不正确';
+    raise exception '卡牌编号、分类或星级资料格式不正确';
   end if;
   if (select count(*) from jsonb_array_elements(p_cards))
      <> (select count(distinct value->>'card_id') from jsonb_array_elements(p_cards)) then
     raise exception '卡牌列表中存在重复编号';
   end if;
 
-  insert into public.draw_card_catalog(card_id,pack_id,rarity,is_alt,enabled)
+  insert into public.draw_card_catalog(card_id,pack_id,rarity,is_alt,enabled,item_class)
   select item.value->>'card_id',p_pack_id,
          case when p_category in ('berry','battle_item') then 1 else (item.value->>'rarity')::integer end,
          case when p_category in ('berry','battle_item') then false else (item.value->>'is_alt')::boolean end,
-         true
+         true,case when p_category='battle_item' then item.value->>'item_class' else 'normal' end
   from jsonb_array_elements(p_cards) as item(value)
   on conflict(card_id) do update
     set pack_id=excluded.pack_id,
@@ -114,7 +117,7 @@ begin
   from public.card_draw_pools where pack_id=p_pack_id;
   if v_pack_name is null then raise exception '卡包不存在'; end if;
 
-  if v_draw_mode='uniform' then
+  if v_draw_mode in ('uniform','battle_item') then
     update public.card_draw_pools
     set price_tokens=p_price_tokens, rate_alt=0, rate_5=0, rate_4=0, rate_3=100,
         enabled=true, updated_at=now()
@@ -200,12 +203,12 @@ begin
   if not found or v_pool.price_tokens is null then
     raise exception '这个卡池尚未开放';
   end if;
-  if v_pool.draw_mode is distinct from 'uniform' and
+  if v_pool.draw_mode not in ('uniform','battle_item') and
      (v_pool.rate_alt is null or v_pool.rate_3 is null or v_pool.rate_4 is null or v_pool.rate_5 is null) then
     raise exception '这个卡池尚未开放';
   end if;
 
-  if v_pool.draw_mode='uniform' and not exists(
+  if v_pool.draw_mode in ('uniform','battle_item') and not exists(
     select 1 from public.draw_card_catalog where pack_id=p_pack_id and enabled
   ) then
     raise exception '该特殊卡包没有可抽取的卡牌';
@@ -225,6 +228,16 @@ begin
       from public.draw_card_catalog c
       where c.pack_id=p_pack_id and c.enabled=true
       order by random() limit 1;
+    elsif v_pool.draw_mode='battle_item' then
+      if random()<0.75 then
+        select c.card_id into v_card_id from public.draw_card_catalog c
+        where c.pack_id=p_pack_id and c.enabled=true and c.item_class='normal'
+        order by random() limit 1;
+      else
+        select c.card_id into v_card_id from public.draw_card_catalog c
+        where c.pack_id=p_pack_id and c.enabled=true and c.item_class='important'
+        order by random() limit 1;
+      end if;
     else
       v_roll := random() * 100;
       v_rarity := null;
