@@ -89,7 +89,7 @@
   view.innerHTML = [
     '<div class="panel"><h3>玩家中心</h3><p class="hint">查看公开玩家主页，以及自己的对战记录、代币、收藏和成就。</p><p id="pc-status" class="status">正在连接玩家中心……</p></div>',
     '<div class="panel"><h3>公开个人主页</h3><div class="pc-search"><div class="field"><label for="pc-public-name">玩家中文 ID / 登录昵称</label><input id="pc-public-name" maxlength="40" placeholder="输入玩家中文 ID 或登录昵称"></div><button id="pc-public-search" class="primary" type="button">查看主页</button></div><div id="pc-public-result" style="margin-top:14px"><p class="pc-muted">输入昵称即可查看公开主页。登录后也可以直接查看自己的主页。</p></div></div>',
-    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="seasons">月度赛季</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">玩家仓库</button><button type="button" data-page="draw">🎴 抽卡</button><button type="button" data-page="dismantle">卡牌分解</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>个人资料装扮</h4><div class="pc-avatar-editor"><img id="pc-avatar-preview" class="pc-avatar-preview" alt="玩家头像预览"><div class="pc-avatar-editor-copy"><strong>玩家头像</strong><small>上传 JPG、PNG 或 WebP 图片，最大 2MB。选择后可调整圆形裁剪范围。</small><input id="pc-avatar-file" type="file" accept="image/png,image/jpeg,image/webp"><p id="pc-avatar-status" class="status"></p></div></div><div class="pc-avatar-frame-settings"><strong>头像框</strong><p class="pc-muted">选择一个装饰框，保存后会显示在个人主页。</p><div id="pc-avatar-frame-picker" class="pc-avatar-frame-picker"></div><button id="pc-save-avatar-frame" type="button">保存头像框</button><p id="pc-avatar-frame-status" class="status"></p></div><div id="pc-avatar-crop-modal" class="pc-avatar-crop-modal" style="display:none"><div class="pc-avatar-crop-dialog"><h4>调整头像</h4><p>拖动滑块调整取景范围，圆形区域外的部分不会被保留。</p><div class="pc-avatar-crop-window"><img id="pc-avatar-crop-image" alt="头像裁剪预览"></div><label>水平位置 <input id="pc-avatar-crop-x" type="range" min="0" max="100" value="50"></label><label>垂直位置 <input id="pc-avatar-crop-y" type="range" min="0" max="100" value="50"></label><label>缩放 <input id="pc-avatar-crop-zoom" type="range" min="100" max="300" value="100"></label><div class="pc-avatar-crop-actions"><button id="pc-avatar-crop-cancel" type="button">取消</button><button id="pc-upload-avatar" type="button">确认裁剪并上传</button></div></div></div><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
+    '<div class="panel"><h3>我的玩家资料</h3><p id="pc-login-hint" class="pc-muted">登录后可查看个人数据。</p><div id="pc-personal" class="hidden"><div class="pc-tabs" role="tablist"><button type="button" data-page="overview" class="active">总览</button><button type="button" data-page="matches">对战记录</button><button type="button" data-page="seasons">月度赛季</button><button type="button" data-page="tokens">代币中心</button><button type="button" data-page="inventory">玩家仓库</button><button type="button" data-page="trade">玩家交换</button><button type="button" data-page="draw">🎴 抽卡</button><button type="button" data-page="dismantle">卡牌分解</button><button type="button" data-page="achievements">成就收藏册</button></div><div id="pc-personal-content"></div><div id="pc-display-editor" style="margin-top:20px;border-top:1px solid #383d50;padding-top:16px"><h4>个人资料装扮</h4><div class="pc-avatar-editor"><img id="pc-avatar-preview" class="pc-avatar-preview" alt="玩家头像预览"><div class="pc-avatar-editor-copy"><strong>玩家头像</strong><small>上传 JPG、PNG 或 WebP 图片，最大 2MB。选择后可调整圆形裁剪范围。</small><input id="pc-avatar-file" type="file" accept="image/png,image/jpeg,image/webp"><p id="pc-avatar-status" class="status"></p></div></div><div class="pc-avatar-frame-settings"><strong>头像框</strong><p class="pc-muted">选择一个装饰框，保存后会显示在个人主页。</p><div id="pc-avatar-frame-picker" class="pc-avatar-frame-picker"></div><button id="pc-save-avatar-frame" type="button">保存头像框</button><p id="pc-avatar-frame-status" class="status"></p></div><div id="pc-avatar-crop-modal" class="pc-avatar-crop-modal" style="display:none"><div class="pc-avatar-crop-dialog"><h4>调整头像</h4><p>拖动滑块调整取景范围，圆形区域外的部分不会被保留。</p><div class="pc-avatar-crop-window"><img id="pc-avatar-crop-image" alt="头像裁剪预览"></div><label>水平位置 <input id="pc-avatar-crop-x" type="range" min="0" max="100" value="50"></label><label>垂直位置 <input id="pc-avatar-crop-y" type="range" min="0" max="100" value="50"></label><label>缩放 <input id="pc-avatar-crop-zoom" type="range" min="100" max="300" value="100"></label><div class="pc-avatar-crop-actions"><button id="pc-avatar-crop-cancel" type="button">取消</button><button id="pc-upload-avatar" type="button">确认裁剪并上传</button></div></div></div><h4>主页展示设置</h4><p class="pc-muted">只能选择已经解锁的成就。称号选择一项，主页徽章最多三项。</p><div class="field"><label for="pc-title-choice">个人称号</label><select id="pc-title-choice"><option value="">不展示称号</option></select></div><div class="field"><label>主页徽章（最多三个）</label><div id="pc-badge-choices" class="pc-grid"></div></div><button id="pc-save-display" type="button">保存主页展示</button><p id="pc-display-status" class="status"></p></div></div></div>',
     '<div id="pc-admin-panel" class="panel hidden"><h3>管理员 · 玩家管理</h3><p class="pc-muted">新玩家先注册账号，再由管理员把账号绑定到现有玩家编号。绑定后会自动导入该编号原有的收藏数据。</p><div class="pc-grid"><div class="field"><label for="pc-bind-number">待分配玩家编号</label><select id="pc-bind-number"></select></div><div class="field"><label for="pc-bind-user">绑定到已注册账号</label><select id="pc-bind-user"></select></div></div><button id="pc-bind-submit" type="button">绑定玩家编号并导入旧收藏</button><p id="pc-bind-status" class="status"></p><p class="pc-muted">下方中文 ID 会公开显示，所有玩家都能看到；请勿填写隐私信息。</p><div id="pc-bind-list" class="pc-muted"></div><h4 style="margin-top:22px">玩家收藏管理</h4><p class="pc-muted">先选择玩家，再按物品类别管理库存。普通卡牌、对战道具和树果可直接调整；尚未接入的类别会明确标记。</p><div class="pc-grid"><div class="field"><label for="pc-inventory-user">选择玩家账号</label><select id="pc-inventory-user"><option value="">请选择玩家</option></select></div><div class="field"><label for="pc-inventory-reason">调整记录备注</label><input id="pc-inventory-reason" maxlength="120" value="管理员库存调整" placeholder="例如：活动奖励"></div></div><div id="pc-inventory-category-tabs" class="pc-tabs" role="group" aria-label="库存类别"><button type="button" data-inventory-category="cards" class="active">普通卡牌</button><button type="button" data-inventory-category="battle">对战道具</button><button type="button" data-inventory-category="berries">树果</button><button type="button" data-inventory-category="important" disabled>重要道具 · 未接入</button><button type="button" data-inventory-category="consumables">消耗品</button></div><div id="pc-inventory-filters" class="pc-search pc-inventory-filters"><div class="field"><label for="pc-inventory-search">关键词搜索</label><input id="pc-inventory-search" placeholder="输入卡牌名称或编号"></div><div class="field"><label for="pc-inventory-pack-filter">卡包</label><select id="pc-inventory-pack-filter"><option value="">全部卡包</option></select></div><div class="field"><label for="pc-inventory-star-filter">星级</label><select id="pc-inventory-star-filter"><option value="">全部星级</option></select></div><div class="field"><label for="pc-inventory-type-filter">卡牌类型</label><select id="pc-inventory-type-filter"><option value="">全部类型</option></select></div><div class="field"><label for="pc-inventory-owned-filter">库存状态</label><select id="pc-inventory-owned-filter"><option value="all">全部卡牌</option><option value="owned">只看已拥有</option><option value="unowned">只看未拥有</option></select></div></div><p id="pc-inventory-status" class="status"></p><div id="pc-inventory-summary" class="pc-muted"></div><div id="pc-inventory-cards" class="pc-inventory-grid"><div class="pc-empty">请先选择玩家。</div></div><h3 style="margin-top:24px">管理员 · 比赛管理</h3><p class="pc-muted">登记或更正四人 2v2 比赛。提交后系统会重算四名玩家的场次、胜负和胜率，并检查比赛成就。</p><form id="pc-match-form"><input id="pc-match-id" type="hidden"><div class="field"><label for="pc-match-description">比赛备注（可选）</label><input id="pc-match-description" maxlength="120" placeholder="例如：周末友谊赛"></div><div class="pc-grid"><div class="field"><label for="pc-blue-1">蓝队玩家 1</label><select id="pc-blue-1" required></select></div><div class="field"><label for="pc-blue-2">蓝队玩家 2</label><select id="pc-blue-2" required></select></div><div class="field"><label for="pc-red-1">红队玩家 1</label><select id="pc-red-1" required></select></div><div class="field"><label for="pc-red-2">红队玩家 2</label><select id="pc-red-2" required></select></div></div><div class="field"><label for="pc-winning-team">获胜队伍</label><select id="pc-winning-team"><option value="blue">蓝队胜利</option><option value="red">红队胜利</option></select></div><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"><button class="primary" type="submit" id="pc-match-submit">登记比赛</button><button type="button" id="pc-match-cancel" class="hidden">取消更正</button></div><p id="pc-match-status" class="status" style="margin-top:10px"></p></form><section id="pc-legacy-import" style="margin-top:22px;padding:16px;border:1px solid var(--border-color,#9bb);border-radius:12px;background:var(--surface,#fff)"><h4 style="margin-top:0">历史累计战绩导入</h4><p class="pc-muted">只导入过去累计胜场和败场，不会创建虚假的比赛记录。每行格式：玩家编号、胜场、败场。支持从 Excel 直接复制粘贴。</p><div class="field"><label for="pc-legacy-data">批量数据（每行一名玩家）</label><textarea id="pc-legacy-data" rows="7" style="width:100%;box-sizing:border-box" placeholder="玩家编号&#9;胜场&#9;败场&#10;P001&#9;25&#9;12&#10;P002&#9;18&#9;9"></textarea></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" id="pc-legacy-preview">检查导入数据</button><button type="button" class="primary" id="pc-legacy-submit" disabled>确认导入历史战绩</button></div><p id="pc-legacy-status" class="status"></p><div id="pc-legacy-preview-list" class="pc-muted"></div><h4 style="margin-top:18px">已导入的历史战绩</h4><div id="pc-legacy-list" class="pc-muted">正在读取……</div></section><h4 style="margin-top:22px">卡池设置</h4><p class="pc-muted">设置每包价格及每张卡的稀有度概率。每包 5 张；十连为 10 包共 50 张。异画概率独立设置。</p><div id="pc-admin-pool-list" class="pc-muted">正在读取卡池状态……</div><div class="field" style="margin:12px 0"><button id="pc-sync-pack-catalog" type="button">同步所选卡包到抽卡系统</button><p id="pc-sync-pack-status" class="status">新增卡包或卡牌后，先同步一次抽卡目录；之后无需再执行 SQL。</p></div><form id="pc-pool-form"><div class="pc-grid"><div class="field"><label for="pc-pool-id">卡包</label><select id="pc-pool-id"><option value="">正在读取卡包……</option></select></div><div class="field"><label for="pc-pool-cover">卡包封面（选择本卡包内任意卡牌）</label><select id="pc-pool-cover"><option value="">正在读取卡牌……</option></select><div id="pc-pool-cover-preview" style="display:flex;align-items:center;gap:12px;margin-top:8px"></div></div><div class="field"><label for="pc-pool-price">单包价格（代币）</label><input id="pc-pool-price" type="number" min="1" step="1" required></div><div class="field"><label for="pc-pool-alt">异画概率（%）</label><input id="pc-pool-alt" type="number" min="0" max="100" step="0.01" value="0.1" required></div><div class="field"><label for="pc-pool-r5">五星概率（%）</label><input id="pc-pool-r5" type="number" min="0" max="100" step="0.01" value="1.2" required></div><div class="field"><label for="pc-pool-r4">四星概率（%）</label><input id="pc-pool-r4" type="number" min="0" max="100" step="0.01" value="5" required></div><div class="field"><label for="pc-pool-r3">三星概率（%）</label><input id="pc-pool-r3" type="number" min="0" max="100" step="0.01" value="93.7" required></div></div><button type="submit">保存并开放卡池</button><p id="pc-pool-status" class="status"></p></form><h4 style="margin-top:22px">代币余额修正</h4><p class="pc-muted">此处用于后台纠错或即时补正。活动奖励、补偿和日常发放请使用「邮件管理」，由玩家自行领取。</p><form id="pc-token-form"><div class="pc-grid"><div class="field"><label for="pc-token-player">玩家</label><select id="pc-token-player" required></select></div><div class="field"><label for="pc-token-action">调整方式</label><select id="pc-token-action"><option value="grant">发放代币</option><option value="deduct">扣除代币</option></select></div><div class="field"><label for="pc-token-amount">调整数量</label><input id="pc-token-amount" type="number" min="1" step="1" required></div><div class="field"><label for="pc-token-reason">调整原因</label><input id="pc-token-reason" maxlength="120" placeholder="例如：活动奖励" required></div></div><button type="submit">确认发放代币</button><p id="pc-token-status" class="status"></p></form><h4 style="margin-top:22px">成就管理</h4><p class="pc-muted">创建或编辑成就名称、说明、解锁条件、启用状态和首次解锁奖励。停用成就不会删除已经获得的记录。</p><form id="pc-achievement-form"><div class="pc-grid"><div class="field"><label for="pc-ach-id">成就 ID（创建后不可更改）</label><input id="pc-ach-id" maxlength="50" pattern="[a-z0-9][a-z0-9_-]{1,49}" placeholder="例如：matches_100" required></div><div class="field"><label for="pc-ach-name">成就名称</label><input id="pc-ach-name" maxlength="40" required></div><div class="field"><label for="pc-ach-description">成就描述</label><input id="pc-ach-description" maxlength="160" required></div><div class="field"><label for="pc-ach-reward">首次解锁奖励（代币）</label><input id="pc-ach-reward" type="number" min="0" step="1" value="0" required></div><div class="field"><label for="pc-ach-type">解锁条件</label><select id="pc-ach-type"><option value="matches">完成比赛场次</option><option value="wins">累计胜场</option><option value="win_streak">连续胜场</option><option value="win_rate">比赛胜率</option><option value="collection">拥有不同卡牌</option><option value="draws">累计抽卡次数</option></select></div><div class="field"><label for="pc-ach-threshold">达成目标</label><input id="pc-ach-threshold" type="number" min="1" step="1" value="1" required></div><div class="field" id="pc-ach-min-games-wrap"><label for="pc-ach-min-games">计算胜率至少需要的比赛场次</label><input id="pc-ach-min-games" type="number" min="1" step="1" value="10"></div></div><label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input id="pc-ach-active" type="checkbox" checked> 启用此成就（允许新玩家解锁）</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="submit" id="pc-ach-submit">创建成就</button><button type="button" id="pc-ach-reset">清空表单</button></div><p id="pc-ach-status" class="status"></p></form><h4 style="margin-top:18px">现有成就</h4><div id="pc-admin-achievement-list" class="pc-muted">正在读取……</div><h4 style="margin-top:22px">最近登记的比赛</h4><div id="pc-admin-match-list" class="pc-muted">正在读取……</div></div>'
   ].join("");
   main.appendChild(view);
@@ -652,7 +652,88 @@
 
 
 
-  const BADGE_THEMES=[{glyph:"⚔",light:"#ffe1a3",main:"#d98b35",dark:"#82431f"},{glyph:"🏆",light:"#d8f0ff",main:"#4c9fc2",dark:"#20516f"},{glyph:"✦",light:"#fff0b0",main:"#d7a638",dark:"#80531e"},{glyph:"♛",light:"#f6d6ff",main:"#9c69c8",dark:"#533778"},{glyph:"◆",light:"#c7f4e7",main:"#299b8a",dark:"#14594f"},{glyph:"♜",light:"#ffd4d9",main:"#d85c78",dark:"#762b4a"}];
+  
+  async function loadTrading(){
+    await loadCardNames();contentEl.replaceChildren();
+    const title=node("h3","","玩家交换");
+    const note=node("p","pc-muted","仅可交换普通卡牌、对战道具（普通/贵重）和树果。发起交易不会立即扣除物品；接收方确认时服务器会重新核对双方库存并一次性结算。若库存发生变化，交易失败且双方物品不变。");
+    const inventoryResult=await client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id");
+    if(inventoryResult.error)throw inventoryResult.error;
+    const tradable=Object.values(cardsById).filter(card=>["normal","battle_item","berry"].includes(packCatalog.find(p=>p.id===card.pack_id)?.category));
+    const byId=new Map(tradable.map(card=>[card.id,card]));
+    const owned=(inventoryResult.data||[]).filter(row=>byId.has(row.card_id));
+    const describe=card=>{
+      const category=packCatalog.find(p=>p.id===card.pack_id)?.category;
+      const label=category==="battle_item"?"对战道具 · "+((card.battle_item_class||card.item_class)==="important"?"贵重":"普通"):category==="berry"?"树果":"普通卡牌";
+      return (card.name||card.id)+"（"+label+" · "+card.id+"）";
+    };
+    const picker=(heading,options,stockLimited)=>{
+      const section=node("section","pc-stat");section.style.margin="12px 0";section.append(node("h4","",heading));
+      const row=node("div","pc-search"),sf=node("div","field"),sel=node("select"),qf=node("div","field"),qty=node("input"),add=node("button","primary","加入清单");
+      sel.add(new Option("选择物品",""));options.forEach(card=>{
+        const stock=stockLimited?owned.find(x=>x.card_id===card.id)?.quantity||0:null;
+        sel.add(new Option(describe(card)+(stockLimited?" · 持有 "+stock:""),card.id));
+      });
+      sf.append(node("label","","物品"),sel);qty.type="number";qty.min="1";qty.max="999";qty.step="1";qty.value="1";qf.append(node("label","","数量"),qty);
+      add.type="button";row.append(sf,qf,add);section.append(row);
+      const list=node("div","pc-stat");list.style.marginTop="10px";section.append(list);const chosen=new Map();
+      function render(){list.replaceChildren();if(!chosen.size){list.append(node("p","pc-muted","尚未添加物品。"));return;}
+        chosen.forEach((n,id)=>{const line=node("div","pc-row"),remove=node("button","","移除");remove.type="button";line.append(node("span","",describe(byId.get(id))+" × "+n),remove);remove.addEventListener("click",()=>{chosen.delete(id);render();});list.append(line);});
+      }
+      add.addEventListener("click",()=>{const id=sel.value,n=Math.floor(Number(qty.value));if(!id||!Number.isInteger(n)||n<1||n>999){setStatus("请选择有效物品和数量。",true);return;}
+        if(stockLimited&&(n+(chosen.get(id)||0)>(owned.find(x=>x.card_id===id)?.quantity||0))){setStatus("加入数量超过当前库存。",true);return;}
+        chosen.set(id,(chosen.get(id)||0)+n);render();
+      });render();return {section,chosen};
+    };
+    const recipient=node("section","pc-stat"),recipientInput=node("input");recipientInput.placeholder="玩家中文 ID 或玩家编号（如 P013）";recipientInput.maxLength=40;
+    recipient.append(node("h4","","交易对象"),node("label","","输入玩家 ID"),recipientInput);
+    const give=picker("你提供的物品",owned.map(x=>byId.get(x.card_id)).filter(Boolean),true);
+    const want=picker("你希望获得的物品（接收方确认时核对库存）",tradable,false);
+    const form=node("section","pc-stat");form.style.margin="12px 0";
+    const submit=node("button","primary","提交交易请求"),feedback=node("p","pc-muted","");
+    submit.type="button";form.append(recipient,give.section,want.section,submit,feedback);
+    submit.addEventListener("click",async()=>{
+      if(!recipientInput.value.trim()||!give.chosen.size||!want.chosen.size){feedback.textContent="请填写交易对象，并分别添加双方物品。";return;}
+      submit.disabled=true;feedback.textContent="正在提交……";
+      try{
+        const serialize=m=>[...m.entries()].map(([card_id,quantity])=>({card_id,quantity}));
+        const {data,error}=await client.rpc("trade_create_offer",{p_recipient_public_id:recipientInput.value.trim(),p_give_items:serialize(give.chosen),p_want_items:serialize(want.chosen)});
+        if(error)throw error;feedback.textContent="交易请求已发送，等待对方确认。";await loadTrading();
+      }catch(error){feedback.textContent="提交失败："+error.message;submit.disabled=false;}
+    });
+    const history=node("section","pc-stat");history.style.marginTop="18px";contentEl.append(title,note,form,history);
+    const {data:offers,error}=await client.rpc("trade_list_my_offers");if(error)throw error;
+    const names={pending:"等待对方确认",accepted:"交易完成",rejected:"对方已拒绝",cancelled:"已取消"};
+    const showItems=items=>(items||[]).map(x=>describe(byId.get(x.card_id)||{id:x.card_id,name:x.card_id})+" × "+x.quantity).join("、");
+    history.append(node("h4","","交易记录"));
+    if(!offers?.length)history.append(node("p","pc-muted","暂时没有交易记录。"));
+    (offers||[]).forEach(offer=>{
+      const incoming=offer.recipient_id===currentUser.id,article=node("article","pc-stat");article.style.margin="10px 0";
+      article.append(node("strong","",incoming?"来自 "+offer.sender_name:"发给 "+offer.recipient_name),
+        node("p","pc-muted","状态："+(names[offer.status]||offer.status)+" · "+new Date(offer.created_at).toLocaleString("zh-CN")),
+        node("p","","对方提供："+showItems(incoming?offer.give_items:offer.want_items)),
+        node("p","","你将提供："+showItems(incoming?offer.want_items:offer.give_items)));
+      if(offer.status==="pending"){
+        const actions=node("div","pc-search");
+        if(incoming){
+          const accept=node("button","primary","确认并完成交易"),reject=node("button","","拒绝");accept.type=reject.type="button";
+          accept.addEventListener("click",async()=>{if(!confirm("确认交易？服务器会重新检查双方库存并一次性转移物品，此操作不可撤销。"))return;accept.disabled=reject.disabled=true;
+            try{const {error}=await client.rpc("trade_respond_offer",{p_offer_id:offer.id,p_accept:true});if(error)throw error;await loadTrading();}
+            catch(error){setStatus("交易未完成："+error.message,true);accept.disabled=reject.disabled=false;}});
+          reject.addEventListener("click",async()=>{if(!confirm("确定拒绝这笔交易吗？"))return;accept.disabled=reject.disabled=true;
+            try{const {error}=await client.rpc("trade_respond_offer",{p_offer_id:offer.id,p_accept:false});if(error)throw error;await loadTrading();}
+            catch(error){setStatus("操作失败："+error.message,true);accept.disabled=reject.disabled=false;}});
+          actions.append(accept,reject);
+        }else{
+          const cancel=node("button","","取消交易");cancel.type="button";cancel.addEventListener("click",async()=>{if(!confirm("确定取消交易？"))return;cancel.disabled=true;
+            try{const {error}=await client.rpc("trade_cancel_offer",{p_offer_id:offer.id});if(error)throw error;await loadTrading();}
+            catch(error){setStatus("取消失败："+error.message,true);cancel.disabled=false;}});actions.append(cancel);
+        }article.append(actions);
+      }history.append(article);
+    });
+  }
+
+const BADGE_THEMES=[{glyph:"⚔",light:"#ffe1a3",main:"#d98b35",dark:"#82431f"},{glyph:"🏆",light:"#d8f0ff",main:"#4c9fc2",dark:"#20516f"},{glyph:"✦",light:"#fff0b0",main:"#d7a638",dark:"#80531e"},{glyph:"♛",light:"#f6d6ff",main:"#9c69c8",dark:"#533778"},{glyph:"◆",light:"#c7f4e7",main:"#299b8a",dark:"#14594f"},{glyph:"♜",light:"#ffd4d9",main:"#d85c78",dark:"#762b4a"}];
   function badgeTheme(item,index=0){const key=String(item?.id||item?.name||"");if(/win|match|battle|game|胜|战|连胜/i.test(key))return BADGE_THEMES[0];if(/draw|collection|card|抽|收集|收藏/i.test(key))return BADGE_THEMES[2];if(/rate|season|rank|率|赛季|段位/i.test(key))return BADGE_THEMES[3];if(/streak|first|初|首|连续/i.test(key))return BADGE_THEMES[4];return BADGE_THEMES[index%BADGE_THEMES.length];}
   function createBadgeSeal(item,index=0){const theme=badgeTheme(item,index),seal=node("span","pc-badge-seal");seal.style.setProperty("--badge-light",theme.light);seal.style.setProperty("--badge-main",theme.main);seal.style.setProperty("--badge-dark",theme.dark);seal.appendChild(node("span","pc-badge-glyph",theme.glyph));return seal;}
   function renderBadgeShelf(host,badgeIds,achievementRows){const shelf=node("div","pc-badge-shelf"),byId=Object.fromEntries((achievementRows||[]).map(item=>[item.id,item]));(badgeIds||[]).slice(0,3).forEach((id,index)=>{const item=byId[id]||{id,name:id,description:"已获得的成就徽章"},card=node("div","pc-badge-card");card.append(createBadgeSeal(item,index));const copy=node("div","pc-badge-copy");copy.append(node("strong","",item.name||id),node("small","",item.description||"成就纪念徽章"));card.appendChild(copy);shelf.appendChild(card);});if(!shelf.children.length)shelf.appendChild(node("div","pc-empty","尚未选择主页徽章。解锁成就后，可以在主页展示设置中选择。"));host.appendChild(shelf);}
@@ -813,8 +894,8 @@
     const otherGrid=makePoolGrid(otherPools);
     const config=node("div","adl-config"),configInfo=node("div"),configTitle=node("h3","",selectedPool?.pack_name||"暂无开放卡池"),configDesc=node("p","","每包 5 张卡 · 经典卡池");
     forceStyle(config,{display:"flex",position:"relative",width:"100%",height:"auto",minHeight:"0",maxHeight:"none",flex:"0 0 auto",flexDirection:"row",flexWrap:"nowrap",alignSelf:"auto",gridColumn:"1 / -1",gridRow:"auto",alignItems:"center",justifyContent:"space-between",gap:"16px",margin:"30px 0 0",padding:"17px 18px",overflow:"visible",background:"linear-gradient(100deg,#141e2d,#0e1521)",border:"1px solid #283449",borderRadius:"7px",boxShadow:"none",color:"#edf2fa",boxSizing:"border-box"});
-    configInfo.append(configTitle,configDesc);const actions=node("div","adl-actions"),single=node("button","adl-btn primary","开启 1 包 · 5 张"),ten=node("button","adl-btn","开启 10 包 · 50 张");
-    single.type=ten.type="button";actions.append(single,ten);config.append(configInfo,actions);
+    configInfo.append(configTitle,configDesc);const actions=node("div","adl-actions"),single=node("button","adl-btn primary","开启 1 包 · 5 张"),five=node("button","adl-btn","开启 5 包 · 25 张"),ten=node("button","adl-btn","开启 10 包 · 50 张");
+    single.type=five.type=ten.type="button";actions.append(single,five,ten);config.append(configInfo,actions);
     const rates=node("div","adl-rates"),status=node("div","adl-status","");
      forceStyle(rates,{height:"auto",minHeight:"0",maxHeight:"none",flex:"0 0 auto",gridColumn:"1 / -1"});
      forceStyle(status,{height:"auto",minHeight:"18px",maxHeight:"none",flex:"0 0 auto",gridColumn:"1 / -1"});
@@ -863,7 +944,7 @@
         status.style.color="#ff9b9b";return;
       }
       status.textContent="正在连接抽卡系统……";status.style.color="";
-      single.disabled=ten.disabled=true;
+      single.disabled=five.disabled=ten.disabled=true;
       try{
         const result=await performDraw(selectedPool,count);
         if(result){
@@ -873,9 +954,9 @@
           status.textContent="抽卡完成，本次消耗 "+Number(result.charged_tokens||0)+" 代币。";
           try{await refreshHistory();}catch(historyError){console.warn("刷新抽卡记录失败：",historyError);}
         }
-      }finally{single.disabled=ten.disabled=false;}
+      }finally{single.disabled=five.disabled=ten.disabled=false;}
     };
-    single.addEventListener("click",()=>launch(1));ten.addEventListener("click",()=>launch(10));
+    single.addEventListener("click",()=>launch(1));five.addEventListener("click",()=>launch(5));ten.addEventListener("click",()=>launch(10));
     main.append(eyebrow,hero,section);
     if(normalPools.length){main.append(normalHeading,normalGrid);}
     if(battleItemPools.length||berryPools.length||otherPools.length){
@@ -913,17 +994,18 @@
   }
   function showTenPackOpening(pool,result) {
     const cards=result.cards.slice().sort((a,b)=>a.draw_index-b.draw_index);
-    const packs=Array.from({length:10},(_,i)=>cards.slice(i*5,(i+1)*5));
+    const packs=Array.from({length:cards.length/5},(_,i)=>cards.slice(i*5,(i+1)*5));
     const rarityOf=card=>pool.draw_mode==="battle_item"?(card.item_class==="important"?"r5":"r3"):card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
-    const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*10)+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
+    const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*(cards.length/5))+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
     const close=node("button","acg-td-close","关闭 ×");close.type="button";close.addEventListener("click",()=>overlay.remove());overlay.append(top,close);
     const main=node("div","acg-td-main"),title=node("div","acg-td-title");
-    title.innerHTML='<small>MASTER DUEL INSPIRED · TEN PACK OPENING</small><h2>十连抽卡</h2><p>十个卡包同时登场 · 共 50 张卡牌 · 结果已由服务器确定</p>';
+    title.innerHTML='<small>MASTER DUEL INSPIRED · MULTI PACK OPENING</small><h2>'+packs.length+' 包抽卡</h2><p>'+packs.length+' 个卡包同时登场 · 共 '+cards.length+' 张卡牌 · 结果已由服务器确定</p>';
     const stage=node("section","acg-td-stage"),head=node("div","acg-td-stagehead");
     const headTitle=node("b","","TEN PACK OPENING"),sub=node("p","","十个卡包已准备就绪，点击 OPEN 开启");
     head.append(headTitle,sub);
+    headTitle.textContent=packs.length+" PACK OPENING";sub.textContent=packs.length+" 个卡包已准备就绪，点击 OPEN 开启";
     const packGrid=node("div","acg-td-packs");
     packs.forEach((pack,i)=>{
       const grades=pack.map(rarityOf),rank=grades.includes("alt")?"alt":grades.includes("r5")?"r5":grades.includes("r4")?"r4":"r3";
@@ -946,15 +1028,15 @@
       const pack=packs[current],count={alt:0,r5:0,r4:0,r3:0};pack.forEach(c=>count[rarityOf(c)]++);
       summary.innerHTML=pool.draw_mode==="battle_item"?"普通道具 <b>"+count.r3+"</b>　贵重道具 <b>"+count.r5+"</b>":"异画 <b>"+count.alt+"</b>　五星 <b>"+count.r5+"</b>　四星 <b>"+count.r4+"</b>　三星 <b>"+count.r3+"</b>";
       const grade=rarityOf(pack[index]);if(grade==="alt")sub.textContent="✦ 异画卡降临！";else if(grade==="r5")sub.textContent="★★★★★ 五星卡牌登场！";
-      if(flipped===5){nextBtn.textContent=current===9?"查看完整结果":"OPEN · 开启下一包";allBtn.disabled=true;}
+      if(flipped===5){nextBtn.textContent=current===packs.length-1?"查看完整结果":"OPEN · 开启下一包";allBtn.disabled=true;}
     }
     function revealAllCurrent(){for(let i=0;i<5;i++)setTimeout(()=>revealOne(i),i*95)}
     function openPackage(){
       if(current>=0&&flipped<5){sub.textContent="请先揭晓当前卡包的 5 张卡，或使用 SKIP。";return;}
       if(current>=0)packGrid.children[current].classList.add("opened");
       current++;
-      if(current>=10){showComplete();return;}
-      flipped=0;sub.textContent="正在开启第 "+(current+1)+" / 10 包";
+      if(current>=packs.length){showComplete();return;}
+      flipped=0;sub.textContent="正在开启第 "+(current+1)+" / "+packs.length+" 包";
       rtitle.textContent="第 "+(current+1)+" 包 · 卡牌揭晓";progress.textContent="0 / 5 已揭晓";
       summary.textContent="点击卡牌翻开";cardGrid.replaceChildren();reveal.classList.add("show");
       packs[current].forEach((card,i)=>{
@@ -969,10 +1051,10 @@
     function showComplete(){
       if(finished)return;finished=true;packs.forEach((_,i)=>packGrid.children[i].classList.add("opened"));
       openBtn.disabled=true;skipBtn.disabled=true;nextBtn.disabled=true;allBtn.disabled=true;
-      headTitle.textContent="TEN PACKS COMPLETE";sub.textContent="十连完成 · 服务器已保存全部 50 张卡牌";
-      rtitle.textContent="十连抽卡结果";progress.textContent="正在整理 50 张结果卡牌……";
+      headTitle.textContent=packs.length+" PACKS COMPLETE";sub.textContent=packs.length+" 包抽卡完成 · 服务器已保存全部 "+cards.length+" 张卡牌";
+      rtitle.textContent=packs.length+" 包抽卡结果";progress.textContent="正在整理 "+cards.length+" 张结果卡牌……";
       cardGrid.replaceChildren();const counts={alt:0,r5:0,r4:0,r3:0};cards.forEach(card=>counts[rarityOf(card)]++);
-      summary.innerHTML=pool.draw_mode==="battle_item"?"十连结果：普通道具 <b>"+counts.r3+"</b>　贵重道具 <b>"+counts.r5+"</b>":"十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
+      summary.innerHTML=pool.draw_mode==="battle_item"?"本次结果：普通道具 <b>"+counts.r3+"</b>　贵重道具 <b>"+counts.r5+"</b>":"本次结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
       revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回抽卡大厅");done.type="button";done.disabled=true;done.addEventListener("click",()=>overlay.remove());revealActions.appendChild(done);
       let index=0;
       function renderResultChunk(){
@@ -1006,11 +1088,11 @@
       // The RPC confirms the transaction. Keep the lobby mounted under the reveal
       // screen so returning is instant and the selected pack remains selected.
       clearDrawRequestId(pool.pack_id,packCount);
-      if(packCount===10)showTenPackOpening(pool,result);
+      if(packCount>=5)showTenPackOpening(pool,result);
       else showSinglePackOpening(pool,result);
       return result;
     }catch(error){loading.textContent="抽卡失败："+error.message;loading.style.color="#ff9b9b";return null;}
-    finally{drawBusy=false;}
+    finally{drawBusy=false;if(loading.textContent.startsWith("正在抽取"))loading.remove();}
   }
   function showSinglePackOpening(pool,result,returnPage="draw"){
     const overlay=node("div");overlay.id="acg-ten-draw";
@@ -1076,7 +1158,7 @@
       const row=node("div","pc-inventory-card");
       if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";row.appendChild(img);}
       const meta=node("div","pc-card-info");
-      meta.append(node("strong","",info.name),node("small","",isBattle?"对战道具 · "+(itemClass==="important"?"贵重":"普通")+" · 分解返还 "+reward+" 代币/件":"库存 "+item.quantity+" 张 · "+(alt?"异画":info.star+"星")+" · 分解返还 "+reward+" 代币/张"));
+      meta.append(node("strong","",info.name),node("small","",isBattle?"库存 "+item.quantity+" 件 · 对战道具 · "+(itemClass==="important"?"贵重":"普通")+" · 分解返还 "+reward+" 代币/件":"库存 "+item.quantity+" 张 · "+(alt?"异画":info.star+"星")+" · 分解返还 "+reward+" 代币/张"));
       const controls=node("div","pc-quantity-controls"),input=node("input");input.type="number";input.min="0";input.max=String(item.quantity);input.step="1";input.value="0";input.style.width="76px";
       input.addEventListener("input",()=>{const q=Math.max(0,Math.min(item.quantity,Math.floor(Number(input.value)||0)));if(q)selected.set(item.card_id,q);else selected.delete(item.card_id);input.value=String(q);updateEstimate();});
       controls.append(input,node("span","pc-muted","分解数量"));meta.appendChild(controls);row.appendChild(meta);
@@ -1195,6 +1277,7 @@
       else if(page==="seasons")await loadMySeasons();
       else if(page==="tokens")await loadTokens();
       else if(page==="inventory")await loadInventory();
+      else if(page==="trade")await loadTrading();
       else if(page==="draw")await withTimeout(loadDraw(),25000,"抽卡大厅初始化超时，请检查网络后重试。");
       else if(page==="dismantle")await loadDismantle();
       else if(page==="achievements")await loadAchievements();
