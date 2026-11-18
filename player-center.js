@@ -385,8 +385,10 @@
   let myWarehouseQuery = "";
   let myWarehousePack = "";
   let myWarehouseCategory = "cards";
+  let myWarehouseItemClass = "";
   const warehouseCategories = [
     {id:"cards",label:"卡牌",description:"普通卡牌、特殊攻击卡及可用于构筑的卡牌"},
+    {id:"battle-items",label:"对战道具",description:"从对战道具卡包获得的普通与贵重对战道具"},
     {id:"key-items",label:"重要道具",description:"长期持有的重要物品"},
     {id:"consumables",label:"消耗品",description:"使用后会消耗数量的物品"},
     {id:"berries",label:"树果",description:"树果及相关收集品"}
@@ -399,6 +401,8 @@
       button.setAttribute("aria-pressed",String(myWarehouseCategory===category.id));
       button.addEventListener("click",()=>{
         myWarehouseCategory=category.id;
+        myWarehousePack="";
+        myWarehouseItemClass="";
         pcListPages["my-inventory"]=1;
         renderMyWarehouse();
       });
@@ -414,6 +418,18 @@
     if(!host||!summary||!tabsHost)return;
     tabsHost.replaceChildren();
     renderWarehouseCategoryTabs(tabsHost);
+    const packSelect=contentEl.querySelector("#pc-warehouse-pack-filter");
+    if(packSelect){
+      const selectedPack=myWarehousePack;
+      packSelect.replaceChildren(new Option("全部卡包",""));
+      [...new Set(Object.values(cardsById).filter(card=>{
+        const packType=packCatalog.find(item=>item.id===card.pack_id)?.category;
+        return myWarehouseCategory==="battle-items"?packType==="battle_item":myWarehouseCategory==="berries"?packType==="berry":packType!=="battle_item"&&packType!=="berry";
+      }).map(card=>card.pack_id).filter(Boolean))].sort().forEach(id=>packSelect.add(new Option(packCatalog.find(item=>item.id===id)?.name||id,id)));
+      packSelect.value=selectedPack;
+    }
+    const classWrap=contentEl.querySelector("#pc-warehouse-item-class-wrap");
+    if(classWrap)classWrap.hidden=myWarehouseCategory!=="battle-items";
     const category=warehouseCategories.find(x=>x.id===myWarehouseCategory)||warehouseCategories[0];
     description.textContent=category.description;
     host.replaceChildren();
@@ -455,14 +471,15 @@
       });
       return;
     }
-    const isBerryCard=card=>{
-      const pack=packCatalog.find(item=>item.id===card?.pack_id);
-      return pack?.category==="berry";
-    };
+    const packCategory=card=>packCatalog.find(item=>item.id===card?.pack_id)?.category;
     const filtered=myWarehouseRows.filter(row=>{
       const card=cardsById[row.card_id]||{id:row.card_id,name:row.card_id,pack_id:""};
-      const belongsHere=myWarehouseCategory==="berries"?isBerryCard(card):!isBerryCard(card);
-      return belongsHere&&(!myWarehouseQuery||String(card.name).toLowerCase().includes(myWarehouseQuery)||String(card.id).toLowerCase().includes(myWarehouseQuery))&&(!myWarehousePack||card.pack_id===myWarehousePack);
+      const category=packCategory(card);
+      const belongsHere=myWarehouseCategory==="berries"?category==="berry":
+        myWarehouseCategory==="battle-items"?category==="battle_item":category!=="berry"&&category!=="battle_item";
+      const itemClass=card.battle_item_class||card.item_class||"normal";
+      const classMatches=myWarehouseCategory!=="battle-items"||!myWarehouseItemClass||itemClass===myWarehouseItemClass;
+      return belongsHere&&classMatches&&(!myWarehouseQuery||String(card.name).toLowerCase().includes(myWarehouseQuery)||String(card.id).toLowerCase().includes(myWarehouseQuery))&&(!myWarehousePack||card.pack_id===myWarehousePack);
     }).sort((a,b)=>compareCardsByStar(cardsById[a.card_id]||{name:a.card_id,star:0},cardsById[b.card_id]||{name:b.card_id,star:0}));
     const total=filtered.reduce((sum,row)=>sum+Number(row.quantity||0),0);
     summary.textContent=category.label+"：拥有 "+filtered.length+" 种，共 "+total+" 张";
@@ -604,22 +621,25 @@
     await loadCardNames();
     contentEl.replaceChildren();
     const heading=node("div","pc-warehouse-heading");
-    heading.append(node("h3","","我的玩家仓库"),node("p","pc-muted","仓库分为卡牌、重要道具、消耗品和树果四个分类。对战道具等消耗品将在对应库存接入后显示。"));
+    heading.append(node("h3","","我的玩家仓库"),node("p","pc-muted","可按卡牌、对战道具、重要道具、消耗品和树果分类查看，并通过名称、编号及卡包筛选库存。"));
     const tabsHost=node("div");tabsHost.id="pc-warehouse-tabs-host";
     const description=node("p","pc-muted");description.id="pc-warehouse-category-description";
     const filters=node("div","pc-search");
     const searchWrap=node("div","field"),searchLabel=node("label","","搜索"+(myWarehouseCategory==="berries"?"树果":"卡牌")),search=node("input");
     search.placeholder="输入名称或编号";search.value=myWarehouseQuery;searchLabel.appendChild(search);searchWrap.append(searchLabel);
-    const packWrap=node("div","field"),packLabel=node("label","","卡包筛选"),pack=node("select");
+    const packWrap=node("div","field"),packLabel=node("label","","卡包筛选"),pack=node("select");pack.id="pc-warehouse-pack-filter";
     pack.add(new Option("全部卡包",""));
-    [...new Set(Object.values(cardsById).map(card=>card.pack_id).filter(Boolean))].sort().forEach(id=>pack.add(new Option(id,id)));
     pack.value=myWarehousePack;packLabel.appendChild(pack);packWrap.append(packLabel);
-    filters.append(searchWrap,packWrap);
+    const classWrap=node("div","field"),classLabel=node("label","","道具类别"),classSelect=node("select");classWrap.id="pc-warehouse-item-class-wrap";classWrap.hidden=myWarehouseCategory!=="battle-items";
+    classSelect.add(new Option("全部对战道具",""));classSelect.add(new Option("普通对战道具","normal"));classSelect.add(new Option("贵重对战道具","important"));
+    classSelect.value=myWarehouseItemClass;classLabel.appendChild(classSelect);classWrap.append(classLabel);
+    filters.append(searchWrap,packWrap,classWrap);
     const summary=node("p","pc-muted");summary.id="pc-warehouse-summary";
     const host=node("div","pc-inventory-grid");host.id="pc-warehouse-cards";
     contentEl.append(heading,tabsHost,description,filters,summary,host);
     search.addEventListener("input",()=>{myWarehouseQuery=search.value.trim().toLowerCase();pcListPages["my-inventory"]=1;renderMyWarehouse();});
     pack.addEventListener("change",()=>{myWarehousePack=pack.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
+    classSelect.addEventListener("change",()=>{myWarehouseItemClass=classSelect.value;pcListPages["my-inventory"]=1;renderMyWarehouse();});
     host.appendChild(node("div","pc-empty","正在读取你的仓库……"));
     const [{data:inventory,error},{data:itemCatalog,error:itemError}]=await Promise.all([
       client.from("card_inventory").select("card_id,quantity").eq("user_id",currentUser.id).gt("quantity",0).order("card_id"),
@@ -1004,9 +1024,9 @@
     ]);
     if(ie)throw ie;if(se)throw se;if(autoError)throw autoError;
     contentEl.replaceChildren(node("div","pc-stat","当前代币："+(stats?.tokens??0)),
-      node("p","pc-muted","选择不需要的卡牌并填写分解数量。分解后卡牌会从收藏中扣除，代币立即到账。"),
-      node("p","pc-muted","三星 10 · 四星 15 · 五星 20 · 异画 30 代币 / 张"));
-    const autoPanel=node("section","pc-stat pc-auto-dismantle-panel"),autoTitle=node("strong","pc-auto-dismantle-title","自动分解设置"),autoHint=node("p","pc-muted","开启后，只处理勾选星级中同名卡超过 3 张的部分；开启保存时也会立即检查现有库存。未勾选星级和前 3 张不会被分解。");
+      node("p","pc-muted","选择不需要的卡牌或对战道具并填写分解数量。分解后库存会扣除，代币立即到账。"),
+      node("p","pc-muted","卡牌：三星 10 · 四星 15 · 五星 20 · 异画 30 代币/张；对战道具：普通 10 · 贵重 20 代币/件。"));
+    const autoPanel=node("section","pc-stat pc-auto-dismantle-panel"),autoTitle=node("strong","pc-auto-dismantle-title","自动分解设置"),autoHint=node("p","pc-muted","自动分解仅作用于普通卡牌：只处理勾选星级中同名卡超过 3 张的部分；不会自动分解对战道具。");
     autoPanel.style.cssText="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;padding:18px 20px!important;margin:14px 0 20px!important;width:100%;box-sizing:border-box";
     const autoHeader=node("div","pc-auto-dismantle-header");
     autoHeader.style.cssText="display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important;flex-wrap:wrap!important;width:100%";
@@ -1014,8 +1034,7 @@
     const autoToggle=node("input");autoToggle.type="checkbox";autoToggle.checked=Boolean(autoSettings?.enabled);autoToggle.id="pc-auto-dismantle-enabled";
     autoToggle.style.cssText="width:18px!important;min-width:18px!important;height:18px!important;margin:0!important;flex:0 0 18px!important";
     const toggleLabel=node("label","","启用自动分解");toggleLabel.htmlFor=autoToggle.id;toggleLabel.style.cssText="display:inline-flex!important;align-items:center!important;gap:8px!important;margin:0!important;font-weight:800!important;white-space:nowrap!important;cursor:pointer";
-    toggleLabel.prepend(autoToggle);autoHeader.append(autoTitle,toggleLabel);
-    autoHint.style.cssText="margin:0!important;line-height:1.65!important";
+    toggleLabel.prepend(autoToggle);autoHeader.append(autoTitle,toggleLabel);autoHint.style.cssText="margin:0!important;line-height:1.65!important";
     const rarityOptions=node("div","pc-auto-dismantle-rarities");rarityOptions.style.cssText="display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:22px!important;flex-wrap:wrap!important;margin:2px 0!important";
     const rarityChecks=[3,4,5].map(star=>{const input=node("input");input.type="checkbox";input.value=String(star);input.checked=(autoSettings?.rarities||[3,4,5]).includes(star);input.id="pc-auto-dismantle-"+star;input.style.cssText="width:17px!important;min-width:17px!important;height:17px!important;margin:0!important";const label=node("label","",""+star+" 星");label.htmlFor=input.id;label.style.cssText="display:inline-flex!important;align-items:center!important;gap:7px!important;margin:0!important;white-space:nowrap!important;cursor:pointer;font-weight:700";label.prepend(input);rarityOptions.appendChild(label);return input;});
     const autoSave=node("button","primary","保存自动分解设置");autoSave.type="button";autoSave.style.cssText="align-self:flex-start!important;margin:2px 0 0!important;min-width:160px";
@@ -1024,44 +1043,53 @@
       const selectedStars=rarityChecks.filter(input=>input.checked).map(input=>Number(input.value));
       const {data,error}=await client.rpc("player_set_auto_dismantle_settings",{p_enabled:autoToggle.checked,p_rarities:selectedStars});if(error)throw error;
       const processed=data?.processed||{};autoStatus.textContent=(autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。";
-      await loadDismantle();
-      setStatus((autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。",false);
+      await loadDismantle();setStatus((autoToggle.checked?"自动分解已开启。":"自动分解已关闭。")+" 本次处理 "+(processed.dismantled_cards||0)+" 张，返还 "+(processed.reward_tokens||0)+" 代币。",false);
     }catch(error){autoStatus.textContent="保存失败："+error.message;autoSave.disabled=false;}});
-    autoPanel.append(autoHeader,autoHint,rarityOptions,autoSave,autoStatus);
-    contentEl.appendChild(autoPanel);
-    const selected=new Map(),rows=[];
-    (inventory||[]).forEach(item=>{
-      const info=cardsById[item.card_id]||{name:item.card_id,star:3};const alt=/异画/.test(info.name||"");
-      const reward=alt?30:(Number(info.star)===5?20:Number(info.star)===4?15:10);const row=node("div","pc-inventory-card");
+    autoPanel.append(autoHeader,autoHint,rarityOptions,autoSave,autoStatus);contentEl.appendChild(autoPanel);
+
+    const allRows=(inventory||[]).map(item=>{
+      const info=cardsById[item.card_id]||{id:item.card_id,name:item.card_id,star:3};
+      const isBattle=packCatalog.find(pack=>pack.id===info.pack_id)?.category==="battle_item";
+      const itemClass=info.battle_item_class||info.item_class||"normal";
+      const alt=/异画/.test(info.name||"");
+      const reward=isBattle?(itemClass==="important"?20:10):(alt?30:(Number(info.star)===5?20:Number(info.star)===4?15:10));
+      const category=isBattle?(itemClass==="important"?"battle-important":"battle-normal"):"cards";
+      const row=node("div","pc-inventory-card");
       if(info.image){const img=node("img");img.src=info.image;img.alt=info.name;img.loading="lazy";row.appendChild(img);}
-      const meta=node("div","pc-card-info");meta.append(node("strong","",info.name),
-        node("small","", "库存 "+item.quantity+" 张 · "+(alt?"异画":info.star+"星")+" · 分解返还 "+reward+" 代币/张"));
+      const meta=node("div","pc-card-info");
+      meta.append(node("strong","",info.name),node("small","",isBattle?"对战道具 · "+(itemClass==="important"?"贵重":"普通")+" · 分解返还 "+reward+" 代币/件":"库存 "+item.quantity+" 张 · "+(alt?"异画":info.star+"星")+" · 分解返还 "+reward+" 代币/张"));
       const controls=node("div","pc-quantity-controls"),input=node("input");input.type="number";input.min="0";input.max=String(item.quantity);input.step="1";input.value="0";input.style.width="76px";
-      input.addEventListener("input",()=>{
-        const q=Math.max(0,Math.min(item.quantity,Math.floor(Number(input.value)||0)));
-        if(q)selected.set(item.card_id,q);else selected.delete(item.card_id);input.value=String(q);updateEstimate();
-      });
+      input.addEventListener("input",()=>{const q=Math.max(0,Math.min(item.quantity,Math.floor(Number(input.value)||0)));if(q)selected.set(item.card_id,q);else selected.delete(item.card_id);input.value=String(q);updateEstimate();});
       controls.append(input,node("span","pc-muted","分解数量"));meta.appendChild(controls);row.appendChild(meta);
-      rows.push({id:item.card_id,input,quantity:item.quantity,reward,row});
+      return {id:item.card_id,input,quantity:Number(item.quantity),reward,row,category,name:info.name||item.card_id};
     });
-    if(!rows.length){contentEl.appendChild(node("div","pc-empty","当前没有可分解的卡牌。"));return;}
+    const selected=new Map(),searchWrap=node("div","pc-search");
+    const searchField=node("div","field"),searchLabel=node("label","","搜索名称或编号"),search=node("input");search.type="search";search.placeholder="输入道具/卡牌名称或编号";searchLabel.appendChild(search);searchField.append(searchLabel);
+    const categoryField=node("div","field"),categoryLabel=node("label","","分解类别"),category=node("select");
+    [["all","全部"],["cards","普通卡牌"],["battle-normal","普通对战道具"],["battle-important","贵重对战道具"]].forEach(([value,label])=>category.add(new Option(label,value)));
+    categoryLabel.appendChild(category);categoryField.append(categoryLabel);searchWrap.append(searchField,categoryField);contentEl.appendChild(searchWrap);
     const listContainer=node("div");contentEl.appendChild(listContainer);
-    function renderDismantlePage(){
-      listContainer.replaceChildren();
-      const page=renderPcPagination(listContainer,"dismantle",rows.length,renderDismantlePage);
-      rows.slice(page.start,page.end).forEach(item=>listContainer.appendChild(item.row));
-      const pager=listContainer.querySelector(".pc-pagination");if(pager)listContainer.appendChild(pager);
-    }
-    renderDismantlePage();
     const summary=node("div","pc-stat","预计返还：0 代币");contentEl.appendChild(summary);
     function updateEstimate(){
-      const total=[...selected.entries()].reduce((sum,[id,q])=>sum+q*(rows.find(r=>r.id===id)?.reward||0),0);
-      summary.textContent="已选择 "+[...selected.values()].reduce((a,b)=>a+b,0)+" 张 · 预计返还："+total+" 代币";
+      const total=[...selected.entries()].reduce((sum,[id,q])=>sum+q*(allRows.find(r=>r.id===id)?.reward||0),0);
+      summary.textContent="已选择 "+[...selected.values()].reduce((a,b)=>a+b,0)+" 件 · 预计返还："+total+" 代币";
     }
-    const button=node("button","primary","确认分解所选卡牌");button.type="button";
+    function renderDismantlePage(){
+      listContainer.replaceChildren();
+      const q=search.value.trim().toLowerCase(),kind=category.value;
+      const filtered=allRows.filter(item=>(kind==="all"||item.category===kind)&&(!q||item.name.toLowerCase().includes(q)||item.id.toLowerCase().includes(q)));
+      if(!filtered.length){listContainer.appendChild(node("div","pc-empty",allRows.length?"没有符合筛选条件的物品。":"当前没有可分解的卡牌或对战道具。"));return;}
+      const page=renderPcPagination(listContainer,"dismantle",filtered.length,renderDismantlePage);
+      filtered.slice(page.start,page.end).forEach(item=>listContainer.appendChild(item.row));
+      const pager=listContainer.querySelector(".pc-pagination");if(pager)listContainer.appendChild(pager);
+    }
+    search.addEventListener("input",()=>{pcListPages.dismantle=1;renderDismantlePage();});
+    category.addEventListener("change",()=>{pcListPages.dismantle=1;renderDismantlePage();});
+    renderDismantlePage();updateEstimate();
+    const button=node("button","primary","确认分解所选物品");button.type="button";
     button.addEventListener("click",async()=>{
-      if(!selected.size){summary.textContent="请先选择要分解的卡牌。";return;}
-      if(!confirm("确定分解所选 "+[...selected.values()].reduce((a,b)=>a+b,0)+" 张卡牌吗？此操作不可撤销。"))return;
+      if(!selected.size){summary.textContent="请先选择要分解的物品。";return;}
+      if(!confirm("确定分解所选 "+[...selected.values()].reduce((a,b)=>a+b,0)+" 件物品吗？此操作不可撤销。"))return;
       button.disabled=true;
       try{
         const key="acg-pending-dismantle:"+currentUser.id;let requestId;
@@ -1078,6 +1106,7 @@
     });
     contentEl.appendChild(button);
   }
+
   async function loadAchievements() {
     const [{data:all,error:ae},{data:owned,error:oe}]=await Promise.all([
       client.from("achievements").select("id,name,description,is_active").order("id"),
