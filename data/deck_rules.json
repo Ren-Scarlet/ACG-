@@ -15,5 +15,7 @@
     "maxCopiesPerName": 3
   },
   "battleItemType": "对战道具",
+  "battleItemDeck": { "maxTotal": 3, "maxImportant": 1 },
+  "berryDeck": { "maxTotal": 1 },
   "note": "测试阶段规则。修改本文件中的数字即可调整构筑数量限制。"
 }
