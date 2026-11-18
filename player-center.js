@@ -236,18 +236,21 @@
     input.title=hasAlt?"当前卡包包含异画卡，可以设置异画概率。":"当前卡包没有异画卡，异画概率固定为 0%。";
   }
   function syncPoolModeControls(packId){
-    const isUniform=packCatalog.find(item=>item.id===packId)?.category==="berry";
+    const packCategory=packCatalog.find(item=>item.id===packId)?.category;
+    const isUniform=packCategory==="berry";
+    const isBattleItem=packCategory==="battle_item";
+    const isSpecial=isUniform||isBattleItem;
     ["#pc-pool-alt","#pc-pool-r5","#pc-pool-r4","#pc-pool-r3"].forEach(selector=>{
       const input=view.querySelector(selector);
       if(!input)return;
       const field=input.closest(".field");
-      if(field)field.hidden=isUniform;
-      input.required=!isUniform;
+      if(field)field.hidden=isSpecial;
+      input.required=!isSpecial;
     });
     const priceLabel=view.querySelector('label[for="pc-pool-price"]');
     if(priceLabel)priceLabel.textContent=isUniform?"树果包价格（代币）":"单包价格（代币）";
     const submit=view.querySelector('#pc-pool-form button[type="submit"]');
-    if(submit)submit.textContent=isUniform?"保存价格并开放树果包":"保存并开放卡池";
+    if(submit)submit.textContent=isUniform?"保存价格并开放树果包":isBattleItem?"保存价格并开放对战道具包":"保存并开放卡池";
   }
   function fillPoolCoverOptions(packId,selectedId=""){
     const select=view.querySelector("#pc-pool-cover");
