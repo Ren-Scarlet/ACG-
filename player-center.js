@@ -998,7 +998,7 @@ const BADGE_THEMES=[{glyph:"⚔",light:"#ffe1a3",main:"#d98b35",dark:"#82431f"},
     const rarityOf=card=>pool.draw_mode==="battle_item"?(card.item_class==="important"?"r5":"r3"):card.is_alt?"alt":Number(card.rarity||cardsById[card.card_id]?.star||3)>=5?"r5":Number(card.rarity||cardsById[card.card_id]?.star||3)>=4?"r4":"r3";
     const overlay=node("div");overlay.id="acg-ten-draw";
     const top=node("div","acg-td-top"),brand=node("div","acg-td-brand");brand.innerHTML='ACG <b>PACK OPENING</b>';
-    const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*10)+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
+    const balance=node("div","acg-td-balance","本次消耗 "+(result.charged_tokens??pool.price_tokens*(cards.length/5))+" 代币 · 剩余 "+result.remaining_tokens+" 代币");top.append(brand,balance);
     const close=node("button","acg-td-close","关闭 ×");close.type="button";close.addEventListener("click",()=>overlay.remove());overlay.append(top,close);
     const main=node("div","acg-td-main"),title=node("div","acg-td-title");
     title.innerHTML='<small>MASTER DUEL INSPIRED · MULTI PACK OPENING</small><h2>'+packs.length+' 包抽卡</h2><p>'+packs.length+' 个卡包同时登场 · 共 '+cards.length+' 张卡牌 · 结果已由服务器确定</p>';
@@ -1054,7 +1054,7 @@ const BADGE_THEMES=[{glyph:"⚔",light:"#ffe1a3",main:"#d98b35",dark:"#82431f"},
       headTitle.textContent=packs.length+" PACKS COMPLETE";sub.textContent=packs.length+" 包抽卡完成 · 服务器已保存全部 "+cards.length+" 张卡牌";
       rtitle.textContent=packs.length+" 包抽卡结果";progress.textContent="正在整理 "+cards.length+" 张结果卡牌……";
       cardGrid.replaceChildren();const counts={alt:0,r5:0,r4:0,r3:0};cards.forEach(card=>counts[rarityOf(card)]++);
-      summary.innerHTML=pool.draw_mode==="battle_item"?"十连结果：普通道具 <b>"+counts.r3+"</b>　贵重道具 <b>"+counts.r5+"</b>":"十连结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
+      summary.innerHTML=pool.draw_mode==="battle_item"?"本次结果：普通道具 <b>"+counts.r3+"</b>　贵重道具 <b>"+counts.r5+"</b>":"本次结果：异画 <b>"+counts.alt+"</b>　五星 <b>"+counts.r5+"</b>　四星 <b>"+counts.r4+"</b>　三星 <b>"+counts.r3+"</b>";
       revealActions.replaceChildren();const done=node("button","acg-td-btn primary","完成 · 返回抽卡大厅");done.type="button";done.disabled=true;done.addEventListener("click",()=>overlay.remove());revealActions.appendChild(done);
       let index=0;
       function renderResultChunk(){
