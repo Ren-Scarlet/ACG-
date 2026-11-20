@@ -1526,36 +1526,39 @@
     "name": "熔岩蜗牛",
     "star": 3,
     "type": "能力卡",
+    "battle_item_class": null,
     "tags": [],
     "pack_id": "pack_003",
-    "effect": "①消除冰冻状态。\n②你可以随机选择一名目标，该效果最多执行3次。对被选择的目标造成执行次数的效果伤害。\n③此卡视为等级3 火属性攻击卡。",
-    "image": "./images/card_137.jpg"
+    "effect": "①消除冰冻状态。\n②此卡视为等级3 火属性攻击卡。\n③你可以随机选择一名你以外的目标，这个效果最多执行3次。之后，对被选择的目标造成执行次数的效果伤害。",
+    "image": "./images/card_137.jpg?v=b32e04381bf41f39dddc9de06cbe1aa63e177438"
   },
   {
     "id": "card_138",
     "name": "小火马",
     "star": 3,
     "type": "攻击卡",
+    "battle_item_class": null,
     "tags": [
       "物理",
       "近战"
     ],
     "pack_id": "pack_003",
-    "effect": "等级3 火属性\n前进1-2格，对0-1格内一名目标造成3点火属性伤害。\n①你可以将场上的此卡弃除发动，前进1-2格。",
-    "image": "./images/card_138.jpg"
+    "effect": "等级3 火属性\n前进1-2格，对0-1格内一名目标造成3点火属性伤害。\n永续\n①你可以将场上的此卡弃除发动，前进1-2格。",
+    "image": "./images/card_138.jpg?v=09e5c6ee30879f2f99270760351602b025ed9aef"
   },
   {
     "id": "card_139",
     "name": "夜盗火蜥",
     "star": 3,
     "type": "攻击卡",
+    "battle_item_class": null,
     "tags": [
       "物理",
       "近战"
     ],
     "pack_id": "pack_003",
-    "effect": "等级3 火属性\n贯穿，前进1-2格，对0-1格内一名目标造成3点伤害命中时赋予目标2层中毒。\n①此卡赋予的中毒不会被无效，或减少层数。",
-    "image": "./images/card_139.jpg"
+    "effect": "等级3 火属性\n贯穿，前进1-2格，对0-1格内一名目标造成3点伤害命中时赋予目标2层中毒。\n①此卡赋予的中毒不会因效果无效，或减少层数。",
+    "image": "./images/card_139.jpg?v=8f8ac8709c2784323903aa5e32b35aa638d07d1c"
   },
   {
     "id": "card_140",
