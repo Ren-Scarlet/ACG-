@@ -400,21 +400,29 @@
     "id": "card_038",
     "name": "大嘴鸥",
     "star": 3,
-    "type": "能力卡",
-    "tags": [],
+    "type": "攻击卡",
+    "battle_item_class": null,
+    "tags": [
+      "魔法",
+      "远程"
+    ],
     "pack_id": "pack_004",
-    "effect": "①使你打出的一张攻击卡改为水属性。\n②此卡法懂事，将当前场地替换为「下雨」",
-    "image": "./images/card_038.jpg"
+    "effect": "贯穿，对0-4格内一名目标造成3点风属性伤害，造成伤害时，弃除目标一张手牌。\n①此卡打出时将当前场地替换为「下雨」。\n②若场地为「下雨」此卡的造成伤害效果改为命中效果。",
+    "image": "./images/card_038.jpg?v=52d9ebeb96ffb585ca6bd2f458f7213c48e4dbfa"
   },
   {
     "id": "card_039",
     "name": "大嘴鸥（异画）",
     "star": 3,
-    "type": "能力卡",
-    "tags": [],
+    "type": "攻击卡",
+    "battle_item_class": null,
+    "tags": [
+      "魔法",
+      "远程"
+    ],
     "pack_id": "pack_004",
-    "effect": "①使你打出的一张攻击卡改为水属性。\n②此卡法懂事，将当前场地替换为「下雨」",
-    "image": "./images/card_039.jpg"
+    "effect": "贯穿，对0-4格内一名目标造成3点风属性伤害，造成伤害时，弃除目标一张手牌。\n①此卡打出时将当前场地替换为「下雨」。\n②若场地为「下雨」此卡的造成伤害效果改为命中效果。",
+    "image": "./images/card_039.jpg?v=ca23952bfc238594a39edba236fdc70298e5645f"
   },
   {
     "id": "card_040",
