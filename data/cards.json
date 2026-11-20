@@ -2031,5 +2031,29 @@
     "pack_id": "pack_011",
     "effect": "贵重\n若你场上有「火焰鸡」\n你可以将其替换为「超级火焰鸡」",
     "image": "./images/card_179.jpg?v=df9d0311ab3163ade9d003d9b06434a409588ba2"
+  },
+  {
+    "id": "card_180",
+    "name": "西狮海壬",
+    "star": 4,
+    "type": "攻击卡",
+    "battle_item_class": null,
+    "tags": [
+      "魔法·远程"
+    ],
+    "pack_id": "pack_004",
+    "effect": "等级4 水属性\n瞄准，对0-4格内一名目标造成4点妖精属性伤害，命中时目标魔法攻击降低（2次）。\n①此卡结算后，翻开你礼装牌库顶一张牌，若其是水属性攻击卡，将那张卡加入手牌，再此卡回到礼装牌库。",
+    "image": "./images/card_180.jpg?v=7316d22d4f73eff367d142e54f562daab1df31b3"
+  },
+  {
+    "id": "card_181",
+    "name": "泡影的咏叹调",
+    "star": 4,
+    "type": "能力卡",
+    "battle_item_class": null,
+    "tags": [],
+    "pack_id": "pack_004",
+    "effect": "瞄准，对0-4格内一名目标造成4点水属性伤害，命中时消除目标烧伤。\n结算后，使一名友方目标恢复2点生命值。\n①你场上有「西狮海壬」的场合，可以将此卡从牌库加入手牌。\n②这张卡无法被「灵击」。",
+    "image": "./images/card_181.jpg?v=57c91bdbced7831cff249f4ab682f883815d13c7"
   }
 ]
