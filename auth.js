@@ -48,6 +48,8 @@
   const signupForm = document.getElementById("account-signup-form");
   const loginForm = document.getElementById("account-login-form");
   const logoutButton = document.getElementById("account-logout");
+  const forgotPasswordLink = document.getElementById("forgot-password-link");
+  const recoveryForm = document.getElementById("account-recovery-form");
 
   if (!createClient) {
     statusEl.textContent = "账号模块加载失败，请刷新网页后重试。";
@@ -180,6 +182,36 @@
       } else {
         showStatus("登录失败：" + message, "bad");
       }
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  forgotPasswordLink?.addEventListener("click", event => {
+    event.preventDefault();
+    recoveryForm?.classList.toggle("hidden");
+    const emailInput = document.getElementById("login-email");
+    const recoveryEmail = document.getElementById("recovery-email");
+    if (emailInput?.value && recoveryEmail && !recoveryEmail.value) {
+      recoveryEmail.value = emailInput.value.trim();
+    }
+    recoveryForm?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+
+  recoveryForm?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const email = document.getElementById("recovery-email").value.trim();
+    const button = recoveryForm.querySelector('button[type="submit"]');
+    button.disabled = true;
+    showStatus("正在发送密码重置邮件……", "");
+    try {
+      const redirectTo = new URL("./reset-password.html", window.location.href).href;
+      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+      if (error) throw error;
+      showStatus("如果该邮箱已注册，请查收密码重置邮件。邮件可能需要几分钟送达，也请检查垃圾邮件文件夹。", "good");
+      recoveryForm.reset();
+    } catch (error) {
+      showStatus("暂时无法发送重置邮件：" + (error?.message || String(error)), "bad");
     } finally {
       button.disabled = false;
     }
