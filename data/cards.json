@@ -34,10 +34,11 @@
     "name": "防御轮",
     "star": 3,
     "type": "能力卡",
+    "battle_item_class": null,
     "tags": [],
     "pack_id": "pack_001",
-    "effect": "使你受到的非攻击伤害变为0。",
-    "image": "./images/card_004.jpg"
+    "effect": "使你受到的效果伤害变为0。",
+    "image": "./images/card_004.jpg?v=c479a7b1fc0048ac7c73381921b5e2159bb9583b"
   },
   {
     "id": "card_005",
@@ -902,10 +903,11 @@
     "name": "大胆无敌",
     "star": 4,
     "type": "能力卡",
+    "battle_item_class": null,
     "tags": [],
     "pack_id": "pack_009",
-    "effect": "永续\n①每当敌方目标对你打出攻击卡时，你恢复1点生命值。每回合最多4次。\n②当你的生命值为30以上时，你获得手牌保护。",
-    "image": "./images/card_081.jpg"
+    "effect": "永续\n①每当敌方目标主动对你打出攻击卡时，你恢复1点生命值。\n每回合最多恢复4点。\n\n②当你的生命值为30以上时，你获得手牌保护。",
+    "image": "./images/card_081.jpg?v=b3c2086775a0dac0635b8cdbfd6b3ee4dfd2f2a7"
   },
   {
     "id": "card_082",
@@ -982,10 +984,11 @@
     "name": "鹰身女妖的羽毛扫",
     "star": 5,
     "type": "能力卡",
+    "battle_item_class": null,
     "tags": [],
     "pack_id": "pack_009",
-    "effect": "使敌方目标场上暗置的礼装卡全部弃除。",
-    "image": "./images/card_089.jpg"
+    "effect": "使一名敌方目标场上能力·陷阱礼装卡全部弃除。",
+    "image": "./images/card_089.jpg?v=33d3a7ab0e17e6d8155803d42d13a6bfd1ad60ea"
   },
   {
     "id": "card_090",
